@@ -4,6 +4,8 @@ pub use indexed_name::indexed_name;
 mod macro_result;
 pub use macro_result::MacroResult;
 
+pub use macros2::context_internal;
+
 #[macro_export]
 ///Original Syn macro doesn't return Ok(TokenStream) on error, but instead returns TokenStream
 macro_rules! parse_macro_input {
@@ -25,5 +27,25 @@ macro_rules! parse_macro_input {
     };
     ($tokenstream:ident) => {
         $crate::parse_macro_input!($tokenstream as _)
+    };
+}
+#[macro_export]
+
+/// Same syntax as format! macro (from std)
+///
+/// Makes .with_context() from anyhow more convenient
+///
+/// Returns a closure
+///
+/// Add current file and line number to context
+macro_rules! context {
+    ($($arg:tt)*) => {
+        ||{
+            //Adds syntax checking from format! macro
+            let _= ||{
+                let _ = format!($($arg)*);
+            };
+            context_internal!($($arg)*);
+        }
     };
 }

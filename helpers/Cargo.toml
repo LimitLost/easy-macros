@@ -7,3 +7,5 @@ edition = "2024"
 syn = "2.0"
 quote = "1.0"
 proc-macro2 = "1.0"
+
+macros2 = { path = "../macros2" }

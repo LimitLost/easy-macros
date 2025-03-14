@@ -11,7 +11,9 @@ proc-macro = true
 syn = {version="2.0",features = ["full"]}
 quote = "1.0"
 proc-macro2 = "1.0"
+
 anyhow = "1"
+lazy_static = "*"
 
 macros2={path = "../macros2"}
 helpers={path = "../helpers"}
