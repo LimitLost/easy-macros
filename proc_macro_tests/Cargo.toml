@@ -1,0 +1,17 @@
+[package]
+name = "proc_macro_tests"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# Hover and click on the version number to see their documentation
+syn = {version="2.0",features = ["full","extra-traits"]}
+quote = "1.0"
+proc-macro2 = "1.0"
+
+macros = { path = "../macros" }
+macros2 = { path = "../macros2" }
+helpers = { path = "../helpers" }

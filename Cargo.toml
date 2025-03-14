@@ -1,0 +1,17 @@
+[package]
+name = "easy-macros"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Hover and click on the version number to see their documentation
+
+macros={path = "./macros"}
+macros2={path = "./macros2"}
+helpers={path = "./helpers"}
+
+proc_macro_tests = { path = "./proc_macro_tests" }
+
+syn = "2.0"
+quote = "1.0"
+proc-macro2 = "1.0"
