@@ -29,8 +29,8 @@ macro_rules! parse_macro_input {
         $crate::parse_macro_input!($tokenstream as _)
     };
 }
-#[macro_export]
 
+#[macro_export]
 /// Same syntax as format! macro (from std)
 ///
 /// Makes .with_context() from anyhow more convenient
@@ -45,7 +45,7 @@ macro_rules! context {
             let _= ||{
                 let _ = format!($($arg)*);
             };
-            context_internal!($($arg)*);
+            $crate::context_internal!($($arg)*);
         }
     };
 }

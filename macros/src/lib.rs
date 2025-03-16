@@ -228,7 +228,7 @@ impl AttrWithUnknown {
 
 // fn find_unknown(attr_template:&syn::Attribute,attr:syn::)
 
-//TODO Allow for only one unknown inside of attribute
+//Allow for only one unknown inside of attribute
 // __unknown__ - unknown mark
 //Example: #[attribute__unknown__]
 //Example: #[attri__unknown__bute]

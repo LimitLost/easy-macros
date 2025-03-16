@@ -66,6 +66,7 @@ fn always_context_found(expr:&mut syn::ExprTry, no_context: &Option<NoContext>) 
             //No context, don't do anything
         },
         Some(NoContext::NoFuncInput) => {
+            //TODO Use https://crates.io/crates/replace_with
             //Don't put function names and inputs in `context!(...)``
             expr.expr=Box::new(syn::Expr::MethodCall( syn::ExprMethodCall{
                 attrs: vec![],
