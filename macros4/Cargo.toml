@@ -1,5 +1,5 @@
 [package]
-name = "macros2"
+name = "macros4"
 version = "0.1.0"
 edition = "2024"
 
@@ -11,7 +11,3 @@ proc-macro = true
 syn = {version="2.0",features = ["full"]}
 quote = "1.0"
 proc-macro2 = "1.0"
-
-replace_with = "0.1.7"
-
-macros3 = { path = "../macros3" }
