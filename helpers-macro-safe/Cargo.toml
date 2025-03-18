@@ -1,19 +1,11 @@
 [package]
-name = "macros"
+name = "helpers-macro-safe"
+description = "Using this library inside of procedural macros should not cause any dependency loops, since this crate does not depend on any procedural macros."
 version = "0.1.0"
 edition = "2024"
-
-[lib]
-proc-macro = true
 
 [dependencies]
 # Hover and click on the version number to see their documentation
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
-
-anyhow = "1"
-lazy_static = "*"
-
-always-context = { path = "../always-context" }
-helpers-macro-safe = { path = "../helpers-macro-safe" }

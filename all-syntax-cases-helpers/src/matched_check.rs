@@ -35,6 +35,8 @@ impl syn::parse::Parse for Input {
 ///Macro used by all_syntax_cases
 ///
 /// Format: `matched_check!(match_path(struct_path{fields}))`
+///
+/// Uses `result_matches`, `default_functions`, `system_functions` and `special_functions`, without requesting them in macro input
 pub fn matched_check(item: TokenStream) -> TokenStream {
     let Input {
         match_path,
@@ -61,7 +63,6 @@ pub fn matched_check(item: TokenStream) -> TokenStream {
     let struct_call_name = quote::format_ident!("a");
 
     // Supports only one match argument for now
-    // Uses result_matches default_functions special_functions
     let result = quote! {
         {
             //check if fields are valid
@@ -75,7 +76,7 @@ pub fn matched_check(item: TokenStream) -> TokenStream {
 
             //Handle fields from macro input (only struct)
             let fields1: Vec<syn::Field> = vec![syn::parse_quote!{
-                #struct_call_name:#struct_path
+                #struct_call_name:&mut #struct_path
             }];
             //Handle fields from macro input (inside of struct)
             let fields2: Vec<syn::Field> = vec![#(syn::parse_quote!{
@@ -85,34 +86,46 @@ pub fn matched_check(item: TokenStream) -> TokenStream {
             let mut special_call = None;
             //Find matching special function, if any
             for func in special_functions.iter_mut(){
-                if let Some(call) = func.all_inputs_check(&fields1, None, (&additional_input_name, additional_input_ty)){
+                if let Some(call) = func.all_inputs_check(&fields1, None, (additional_input_name, additional_input_ty)){
                     special_call = Some(call);
                     break;
                 }
-                if let Some(call) = func.all_inputs_check(&fields2, Some(&struct_call), (&additional_input_name, additional_input_ty)){
+                if let Some(call) = func.all_inputs_check(&fields2, Some(&struct_call), (additional_input_name, additional_input_ty)){
                     special_call = Some(call);
                     break;
                 }
             }
 
+            //Resulting match arm
+            result_matches.extend(quote! {
+                #match_path(#struct_call_name)=>
+            });
+
+            //Resulting match block
             //Find matching default functions, if no special function was found
             if let Some(call) = special_call{
                 //Workaround since we can't create #example without spaces between tokens (added by compiler)
                 let call_braced = crate::helpers::braced(call.into_token_stream());
 
-                //Resulting match arm
-                result_matches.extend(quote! {
-                    #match_path(#struct_call_name)=>
-                });
+
                 result_matches.extend(call_braced);
             }else{
                 let mut default_calls= Vec::new();
-
+                //Functions provided by user
                 for func in default_functions.iter_mut(){
-                    if let Some(call) = func.all_inputs_check(&fields1, None, (&additional_input_name, additional_input_ty)){
+                    if let Some(call) = func.all_inputs_check(&fields1, None, (additional_input_name, additional_input_ty)){
                         default_calls.push(call);
                     }
-                    if let Some(call) = func.all_inputs_check(&fields2, Some(&struct_call), (&additional_input_name, additional_input_ty)){
+                    if let Some(call) = func.all_inputs_check(&fields2, Some(&struct_call), (additional_input_name, additional_input_ty)){
+                        default_calls.push(call);
+                    }
+                }
+                //Functions used by the macro, for example for search
+                for func in system_functions.iter_mut(){
+                    if let Some(call) = func.all_inputs_check(&fields1, None, (additional_input_name, additional_input_ty)){
+                        default_calls.push(call);
+                    }
+                    if let Some(call) = func.all_inputs_check(&fields2, Some(&struct_call), (additional_input_name, additional_input_ty)){
                         default_calls.push(call);
                     }
                 }
@@ -120,10 +133,6 @@ pub fn matched_check(item: TokenStream) -> TokenStream {
                 // Workaround since we can't create #example without spaces between tokens (added by compiler)
                 let default_calls_braced = crate::helpers::braced(crate::helpers::iter_token_stream(default_calls.into_iter()));
 
-                // Resulting match arm
-                result_matches.extend(quote! {
-                    #match_path(#struct_call_name) =>
-                });
                 result_matches.extend(default_calls_braced);
             }
         }

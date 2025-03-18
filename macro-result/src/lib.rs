@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 use quote::ToTokens;
 
+#[proc_macro_attribute]
 /// Allows for macros with `anyhow::Result<TokenStream>` return type
 ///
 ///Creates a wrapper for passed in function, passed in function is placed inside of wrapper

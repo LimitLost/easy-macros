@@ -4,8 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-syn = "2.0"
-quote = "1.0"
-proc-macro2 = "1.0"
-
-macros2 = { path = "../macros2" }
+helpers-context = { path = "../helpers-context" }
+helpers-macro-safe = { path = "../helpers-macro-safe" }

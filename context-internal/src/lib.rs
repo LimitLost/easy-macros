@@ -30,7 +30,7 @@ impl syn::parse::Parse for ContextInternalMaybeInput {
         Ok(ContextInternalMaybeInput::Yes(input.parse()?))
     }
 }
-
+#[proc_macro]
 ///Use context! macro from helpers crate instead
 pub fn context_internal(item: TokenStream) -> TokenStream {
     let parsed = syn::parse_macro_input!(item as ContextInternalMaybeInput);

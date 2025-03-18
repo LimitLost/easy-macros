@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use anyhow::Context;
-use helpers::{MacroResult, indexed_name};
+use helpers_macro_safe::{MacroResult,indexed_name};
 use lazy_static::lazy_static;
 use macros2::macro_result;
 use proc_macro::TokenStream;

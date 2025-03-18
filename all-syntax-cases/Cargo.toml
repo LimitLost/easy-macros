@@ -1,5 +1,5 @@
 [package]
-name = "macros3"
+name = "all-syntax-cases"
 version = "0.1.0"
 edition = "2024"
 
@@ -12,4 +12,4 @@ syn = {version="2.0",features = ["full"]}
 quote = "1.0"
 proc-macro2 = "1.0"
 
-macros4 = { path = "../macros4" }
+all-syntax-cases-helpers = { path = "../all-syntax-cases-helpers" }

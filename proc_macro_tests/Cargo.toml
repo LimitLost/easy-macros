@@ -8,10 +8,15 @@ proc-macro = true
 
 [dependencies]
 # Hover and click on the version number to see their documentation
-syn = {version="2.0",features = ["full","extra-traits"]}
+syn = { version = "2.0", features = ["full", "extra-traits"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 
 macros = { path = "../macros" }
-macros2 = { path = "../macros2" }
+
+context-internal = { path = "../context-internal" }
+always-context = { path = "../always-context" }
+macro-result = { path = "../macro-result" }
+
+
 helpers = { path = "../helpers" }

@@ -6,9 +6,11 @@ edition = "2024"
 [dependencies]
 # Hover and click on the version number to see their documentation
 
-macros={path = "./macros"}
-macros2={path = "./macros2"}
-helpers={path = "./helpers"}
+macros = { path = "./macros" }
+always-context = { path = "./always-context" }
+macro-result = { path = "./macro-result" }
+context-internal = { path = "./context-internal" }
+helpers = { path = "./helpers" }
 
 proc_macro_tests = { path = "./proc_macro_tests" }
 
