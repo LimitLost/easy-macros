@@ -6,7 +6,7 @@ use syn::{Token, punctuated::Punctuated};
 struct Input {
     match_path: syn::Path,
     _paren: syn::token::Paren,
-    struct_paths: Punctuated<syn::Path, Token![,]>,
+    struct_paths: Punctuated<syn::Type, Token![,]>,
 }
 
 impl syn::parse::Parse for Input {

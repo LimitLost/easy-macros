@@ -3,18 +3,60 @@
 version = 4
 
 [[package]]
+name = "all-syntax-cases"
+version = "0.1.0"
+dependencies = [
+ "all-syntax-cases-helpers",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "all-syntax-cases-helpers"
+version = "0.1.0"
+dependencies = [
+ "helpers-macro-safe",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "always-context"
+version = "0.1.0"
+dependencies = [
+ "all-syntax-cases",
+ "proc-macro2",
+ "quote",
+ "replace_with",
+ "syn",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
+name = "context-internal"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "easy-macros"
 version = "0.1.0"
 dependencies = [
+ "always-context",
+ "context-internal",
  "helpers",
+ "macro-result",
  "macros",
- "macros2",
  "proc-macro2",
  "proc_macro_tests",
  "quote",
@@ -23,6 +65,36 @@ dependencies = [
 
 [[package]]
 name = "helpers"
+version = "0.1.0"
+dependencies = [
+ "helpers-context",
+ "helpers-macro-safe",
+]
+
+[[package]]
+name = "helpers-context"
+version = "0.1.0"
+dependencies = [
+ "context-internal",
+]
+
+[[package]]
+name = "helpers-macro-safe"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "lazy_static"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+
+[[package]]
+name = "macro-result"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -34,18 +106,10 @@ dependencies = [
 name = "macros"
 version = "0.1.0"
 dependencies = [
+ "always-context",
  "anyhow",
- "helpers",
- "macros2",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "macros2"
-version = "0.1.0"
-dependencies = [
+ "helpers-macro-safe",
+ "lazy_static",
  "proc-macro2",
  "quote",
  "syn",
@@ -64,9 +128,11 @@ dependencies = [
 name = "proc_macro_tests"
 version = "0.1.0"
 dependencies = [
+ "always-context",
+ "context-internal",
  "helpers",
+ "macro-result",
  "macros",
- "macros2",
  "proc-macro2",
  "quote",
  "syn",
@@ -80,6 +146,12 @@ checksum = "1885c039570dc00dcb4ff087a89e185fd56bae234ddc7f056a945bf36467248d"
 dependencies = [
  "proc-macro2",
 ]
+
+[[package]]
+name = "replace_with"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a8614ee435691de62bcffcf4a66d91b3594bf1428a5722e79103249a095690"
 
 [[package]]
 name = "syn"
