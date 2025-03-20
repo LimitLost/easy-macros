@@ -17,7 +17,6 @@ use syn::{
 pub fn item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -201,7 +200,6 @@ pub fn item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -514,7 +512,6 @@ pub fn expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn option_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -541,7 +538,6 @@ pub fn option_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 pub fn block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -568,7 +564,6 @@ pub fn block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn stmt_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -613,7 +608,6 @@ pub fn stmt_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -645,7 +639,6 @@ pub fn bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
 pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -672,7 +665,6 @@ pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2:
 pub fn type_param_bound_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -730,7 +722,6 @@ pub fn type_param_bound_search(macro_data: &mut MacroData) -> proc_macro2::Token
 pub fn generic_param_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -786,7 +777,6 @@ pub fn generic_param_search(macro_data: &mut MacroData) -> proc_macro2::TokenStr
 pub fn where_predicate_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -833,7 +823,6 @@ pub fn where_predicate_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
 pub fn where_clause_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -864,7 +853,6 @@ pub fn where_clause_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -892,7 +880,6 @@ pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::To
 pub fn generics_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -924,7 +911,6 @@ pub fn generics_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn impl_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -997,7 +983,6 @@ pub fn impl_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
 pub fn signature_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1036,7 +1021,6 @@ pub fn signature_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
 pub fn fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1081,7 +1065,6 @@ pub fn fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn variadic_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1108,7 +1091,6 @@ pub fn variadic_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 pub fn variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1140,7 +1122,6 @@ pub fn variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1167,7 +1148,6 @@ pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
 pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1196,7 +1176,6 @@ pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::Token
 pub fn fields_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1239,7 +1218,6 @@ pub fn fields_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn field_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1282,7 +1260,6 @@ pub fn field_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn trait_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1351,7 +1328,6 @@ pub fn trait_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
 pub fn option_block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1379,7 +1355,6 @@ pub fn option_block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 pub fn option_eq_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1407,7 +1382,6 @@ pub fn option_eq_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
 pub fn fields_named_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1437,7 +1411,6 @@ pub fn fields_named_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 pub fn option_box_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1465,7 +1438,6 @@ pub fn option_box_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
 pub fn pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1589,7 +1561,6 @@ pub fn pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn field_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1620,7 +1591,6 @@ pub fn field_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
 pub fn option_at_pat(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1648,7 +1618,6 @@ pub fn option_at_pat(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn option_else_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1676,7 +1645,6 @@ pub fn option_else_expr_search(macro_data: &mut MacroData) -> proc_macro2::Token
 pub fn arm_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1710,7 +1678,6 @@ pub fn arm_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn arm_guard_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1740,7 +1707,6 @@ pub fn angle_bracketed_generic_arguments_search(
 ) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1775,7 +1741,6 @@ pub fn option_angle_bracketed_generic_arguments_search(
 ) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1803,7 +1768,6 @@ pub fn option_angle_bracketed_generic_arguments_search(
 pub fn generic_argument_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1859,7 +1823,6 @@ pub fn generic_argument_search(macro_data: &mut MacroData) -> proc_macro2::Token
 pub fn type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -1962,7 +1925,6 @@ pub fn type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn option_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -1990,7 +1952,6 @@ pub fn option_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 pub fn bare_fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2021,7 +1982,6 @@ pub fn bare_fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 pub fn return_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2055,7 +2015,6 @@ pub fn return_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 pub fn variant_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2094,7 +2053,6 @@ pub fn variant_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn foreign_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2166,7 +2124,6 @@ pub fn foreign_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 pub fn qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2200,7 +2157,6 @@ pub fn qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 pub fn option_eq_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -2228,7 +2184,6 @@ pub fn option_eq_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
 pub fn field_value_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2265,7 +2220,6 @@ pub fn field_value_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 pub fn local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions,
         special_functions,
@@ -2296,7 +2250,6 @@ pub fn local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
 pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
-        generated_fn_prefix: _,
         additional_input_ty,
         default_functions: _,
         special_functions: _,
@@ -2318,4 +2271,58 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
             }
         }
     }
+}
+
+pub fn search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
+    let mut result = proc_macro2::TokenStream::new();
+
+    result.extend(item_search(macro_data));
+    result.extend(expr_search(macro_data));
+    result.extend(option_expr_search(macro_data));
+    result.extend(block_search(macro_data));
+    result.extend(stmt_search(macro_data));
+    result.extend(bound_lifetimes_search(macro_data));
+    result.extend(option_bound_lifetimes_search(macro_data));
+    result.extend(type_param_bound_search(macro_data));
+    result.extend(generic_param_search(macro_data));
+    result.extend(where_predicate_search(macro_data));
+    result.extend(where_clause_search(macro_data));
+    result.extend(option_where_clause_search(macro_data));
+    result.extend(generics_search(macro_data));
+    result.extend(impl_item_search(macro_data));
+    result.extend(signature_search(macro_data));
+    result.extend(fn_arg_search(macro_data));
+    result.extend(variadic_pat_search(macro_data));
+    result.extend(variadic_search(macro_data));
+    result.extend(option_variadic_search(macro_data));
+    result.extend(item_mod_content_search(macro_data));
+    result.extend(fields_search(macro_data));
+    result.extend(field_search(macro_data));
+    result.extend(trait_item_search(macro_data));
+    result.extend(option_block_search(macro_data));
+    result.extend(option_eq_expr_search(macro_data));
+    result.extend(fields_named_search(macro_data));
+    result.extend(option_box_expr_search(macro_data));
+    result.extend(pat_search(macro_data));
+    result.extend(field_pat_search(macro_data));
+    result.extend(option_at_pat(macro_data));
+    result.extend(option_else_expr_search(macro_data));
+    result.extend(arm_search(macro_data));
+    result.extend(arm_guard_search(macro_data));
+    result.extend(angle_bracketed_generic_arguments_search(macro_data));
+    result.extend(option_angle_bracketed_generic_arguments_search(macro_data));
+    result.extend(generic_argument_search(macro_data));
+    result.extend(type_search(macro_data));
+    result.extend(option_type_search(macro_data));
+    result.extend(bare_fn_arg_search(macro_data));
+    result.extend(return_type_search(macro_data));
+    result.extend(variant_search(macro_data));
+    result.extend(foreign_item_search(macro_data));
+    result.extend(qself_search(macro_data));
+    result.extend(option_eq_type_search(macro_data));
+    result.extend(field_value_search(macro_data));
+    result.extend(local_init_search(macro_data));
+    result.extend(option_local_init_search(macro_data));
+
+    result
 }

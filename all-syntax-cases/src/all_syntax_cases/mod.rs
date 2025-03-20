@@ -3,7 +3,6 @@
 // Only Token![] calls are supported, calling by specific Token Type is not
 all_syntax_cases!{
     setup => {
-        entry_ty: syn::Item,
         fn_name_prefix: "example_",
         additional_input_ty: Option<NoContext>,
     }
@@ -22,14 +21,19 @@ all_syntax_cases!{
 mod data;
 mod search;
 
+use data::MacroData;
 use proc_macro::TokenStream;
 
 //TODO Create a list of every type found that can be used in default or special case (while computing this macro) (maybe?)
-//TODO If passed in default or special function are never called show an error
 
 ///Creates a function covering all cases of provided type
 /// additional_input is passed in deeper as a copy, not a mutable reference
 /// Every item in for example block has it's own copy of additional_input
 pub fn all_syntax_cases(item: TokenStream) -> TokenStream {
-    todo!()
+    let parsed = syn::parse_macro_input!(item as data::Input);
+
+    let mut macro_data = MacroData::new(parsed);
+
+    let result = search::search(&mut macro_data);
+    result.into()
 }
