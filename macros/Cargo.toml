@@ -15,5 +15,6 @@ proc-macro2 = "1.0"
 anyhow = "1"
 lazy_static = "*"
 
+macro-result = { path = "../macro-result" }
 always-context = { path = "../always-context" }
 helpers-macro-safe = { path = "../helpers-macro-safe" }

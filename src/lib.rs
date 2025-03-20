@@ -5,5 +5,5 @@ pub mod macros {
 
 pub use helpers;
 
-#[cfg(test)]
+// #[cfg(test)]
 mod macro_tests;

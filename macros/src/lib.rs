@@ -1,9 +1,9 @@
 use std::ops::Range;
 
 use anyhow::Context;
-use helpers_macro_safe::{MacroResult,indexed_name};
+use helpers_macro_safe::{MacroResult, indexed_name, parse_macro_input};
 use lazy_static::lazy_static;
-use macros2::macro_result;
+use macro_result::macro_result;
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
 use quote::{ToTokens, quote};
@@ -37,7 +37,7 @@ impl syn::parse::Parse for HandleAttributesInput {
 #[macro_result]
 ///Returns true if the passed in item has all passed in attributes (one or more)
 pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
-    let parsed = helpers::parse_macro_input!(item as HandleAttributesInput);
+    let parsed = parse_macro_input!(item as HandleAttributesInput);
 
     let operate_on = parsed.operate_on;
     let attributes = parsed.attributes;
@@ -89,11 +89,11 @@ struct AttrWithUnknown {
     //Unknown coordinates
     ///Inside of final group/global
     unknown_coordinate: usize,
-    unknown_group_coordinates:Vec<usize>,
+    unknown_group_coordinates: Vec<usize>,
     ///Used when unknown is inside of ident (and doesn't span entire literal) or literal
-    partial_unknown_cords:Option<Range<usize>>,
+    partial_unknown_cords: Option<Range<usize>>,
     ///In the same group as the unknown
-    /// 
+    ///
     /// In reverse order (right to left)
     tokens_after_unknown: Vec<proc_macro2::TokenTree>,
     before_unknown: String,
@@ -102,7 +102,6 @@ struct AttrWithUnknown {
 
 impl AttrWithUnknown {
     fn new(attr: &syn::Attribute) -> anyhow::Result<Option<AttrWithUnknown>> {
-
         let stream = attr.to_token_stream();
         let string = stream.to_string();
         if let Some(pos) = string.find(*UNKNOWN) {
@@ -114,95 +113,98 @@ impl AttrWithUnknown {
             let mut unknown_group_coordinates = vec![];
             let mut after_unknown = vec![];
 
-            struct DataRecursiveResult{
-                partial_unknown_cords:Option<Range<usize>>,
-                tokens_after:Option<Vec<proc_macro2::TokenTree>>,
+            struct DataRecursiveResult {
+                partial_unknown_cords: Option<Range<usize>>,
+                tokens_after: Option<Vec<proc_macro2::TokenTree>>,
             }
-            
+
             ///# Return
             /// Tokens after unknown (in the same group) (not reversed)
-            fn unknown_data_recursive(token_stream:proc_macro2::TokenStream,unknown_group_coordinates:&mut Vec<usize>)->DataRecursiveResult{
-                
-                let mut tokens_after: Option<Vec<TokenTree>>= None;
-                let mut partial_unknown_cords= None;
+            fn unknown_data_recursive(
+                token_stream: proc_macro2::TokenStream,
+                unknown_group_coordinates: &mut Vec<usize>,
+            ) -> DataRecursiveResult {
+                let mut tokens_after: Option<Vec<TokenTree>> = None;
+                let mut partial_unknown_cords = None;
 
-                for (index,token) in token_stream.into_iter().enumerate(){
-                    if let Some(tokens_after)=&mut tokens_after{
+                for (index, token) in token_stream.into_iter().enumerate() {
+                    if let Some(tokens_after) = &mut tokens_after {
                         //Unknown was found
                         tokens_after.push(token);
-                    }else{
+                    } else {
                         //Unknown not found yet
-                        match token{
+                        match token {
                             TokenTree::Group(group) => {
                                 unknown_group_coordinates.push(index);
-                                let result = unknown_data_recursive(group.stream(), unknown_group_coordinates);
+                                let result = unknown_data_recursive(
+                                    group.stream(),
+                                    unknown_group_coordinates,
+                                );
                                 if result.tokens_after.is_some() {
                                     return result;
-                                }else{
+                                } else {
                                     unknown_group_coordinates.pop();
                                 }
-                            },
+                            }
                             TokenTree::Ident(ident) => {
-                                let ident_str=ident.to_string();
-                                let unknown_pos=ident_str.find(*UNKNOWN);
-        
-                                if let Some(u_pos) = unknown_pos{
+                                let ident_str = ident.to_string();
+                                let unknown_pos = ident_str.find(*UNKNOWN);
+
+                                if let Some(u_pos) = unknown_pos {
                                     //Unknown found!
-                                    tokens_after= Some(vec![]);
+                                    tokens_after = Some(vec![]);
                                     unknown_group_coordinates.push(index);
-                                    partial_unknown_cords= Some(Range{
-                                        start:u_pos,
-                                        end:u_pos+UNKNOWN.len(),
+                                    partial_unknown_cords = Some(Range {
+                                        start: u_pos,
+                                        end: u_pos + UNKNOWN.len(),
                                     });
                                 }
-        
-                            },
-                            TokenTree::Punct(_) => {},
+                            }
+                            TokenTree::Punct(_) => {}
                             TokenTree::Literal(literal) => {
-                                let literal_str=literal.to_string();
-                                let unknown_pos=literal_str.find(*UNKNOWN);
-        
-                                if let Some(u_pos) = unknown_pos{
+                                let literal_str = literal.to_string();
+                                let unknown_pos = literal_str.find(*UNKNOWN);
+
+                                if let Some(u_pos) = unknown_pos {
                                     //Unknown found!
-                                    tokens_after= Some(vec![]);
+                                    tokens_after = Some(vec![]);
                                     unknown_group_coordinates.push(index);
-                                    partial_unknown_cords= Some(Range{
-                                        start:u_pos,
-                                        end:u_pos+UNKNOWN.len(),
+                                    partial_unknown_cords = Some(Range {
+                                        start: u_pos,
+                                        end: u_pos + UNKNOWN.len(),
                                     });
                                 }
-                            },
+                            }
                         }
                     }
-                    
                 }
 
-                DataRecursiveResult{
+                DataRecursiveResult {
                     partial_unknown_cords,
                     tokens_after,
                 }
-
-                
-
             }
 
-            let DataRecursiveResult{
+            let DataRecursiveResult {
                 partial_unknown_cords,
                 tokens_after,
-            }=unknown_data_recursive(stream,&mut unknown_group_coordinates);
-            
-            if let Some(tokens_after)=result.tokens_after{
+            } = unknown_data_recursive(stream, &mut unknown_group_coordinates);
+
+            if let Some(tokens_after) = result.tokens_after {
                 //Reverse the tokens after unknown
                 tokens_after.reverse();
                 //Remove the last token (which is the unknown cord inside of last group)
-                let unknown_coordinate= unknown_group_coordinates.pop().with_context(context!("No unknown coordinates, but tokens after are not None! | tokens_after: {:?}",tokens_after));
-
-            }else{
-                anyhow::bail!("Unknown not found in the attribute! Recursive call failed, but it shouldn't");
+                let unknown_coordinate = unknown_group_coordinates.pop().with_context(context!(
+                    "No unknown coordinates, but tokens after are not None! | tokens_after: {:?}",
+                    tokens_after
+                ));
+            } else {
+                anyhow::bail!(
+                    "Unknown not found in the attribute! Recursive call failed, but it shouldn't"
+                );
             }
 
             return Ok(Some(AttrWithUnknown {
-                tokens,
                 before_unknown,
                 after_unknown,
             }));
@@ -219,7 +221,8 @@ impl AttrWithUnknown {
             return None;
         }
 
-        for token in self.
+        // for token in self.
+        todo!()
 
         //TODO If yes go through the tokens and find replacers for the unknown
         //TODO Remove last tokens after unknown
@@ -239,7 +242,7 @@ impl AttrWithUnknown {
 #[proc_macro]
 #[macro_result]
 pub fn get_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
-    let parsed = helpers::parse_macro_input!(item as HandleAttributesInput);
+    let parsed = parse_macro_input!(item as HandleAttributesInput);
     //The easiest way would be just turning attributes into a string and then parsing it
     //We would have to parse some parts into string anyway and this isn't performance critical
 
