@@ -6,11 +6,14 @@ struct TestStruct {
     field: i32,
 }
 //Tests if all default functions are used and alright (no error making mistakes inside of them)
-struct Nothing;
+struct Nothing {
+    x: i32,
+}
 all_syntax_cases! {
     setup => {
         generated_fn_prefix: "example",
         additional_input_type: Nothing,
+        //Used for debugging
         system_functions_test: true
     }
     default_cases => {}
