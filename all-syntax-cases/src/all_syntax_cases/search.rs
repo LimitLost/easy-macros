@@ -2319,5 +2319,3 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
         }
     }
 }
-
-// TODO Write tests for EssentialFnData

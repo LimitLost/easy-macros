@@ -247,9 +247,7 @@ fn type_equals(ty1: &syn::Type, ty2: &syn::Type) -> bool {
             {
                 type_equals(&type_path_qself.ty, &type_path2_qself.ty)
             } else {
-                unreachable!(
-                    "TypePath paths are equal, generics are none, but somehow both types are not equal?"
-                )
+                true
             }
         }
         (syn::Type::Ptr(type_ptr), syn::Type::Ptr(type_ptr2)) => {
@@ -534,99 +532,166 @@ impl EssentialFnData {
                 input_types_len == 1
             };
 
-            if !multiple_calls_allowed {
-                //Check if there are more than one potential arguments per index
-                for (_, arg) in result_args_vec.iter() {
-                    if arg.len() > 1 {
-                        //Too many potential arguments (we don't have any strategy to handle this)
-                        //TODO Maybe in the future allow macro user to select how to handle this?
+            let fn_ident = &self.ident;
+            let mut result_call_arguments: Vec<Vec<proc_macro2::TokenStream>> = Vec::new();
+
+            let mut list_calls_tokens = quote! {};
+
+            if multiple_calls_allowed {
+                let mut result_list_iterators: Vec<proc_macro2::TokenStream> = Vec::new();
+                let mut additional_data_pos = 0;
+                let mut additional_data_argument = None;
+
+                for (real_pos, potential_args) in result_args_vec.into_iter() {
+                    for (index, arg) in potential_args.into_iter().enumerate() {
+                        let arg_ident = arg.ident;
+                        let mut before_dot = before_dot.clone();
+                        let mut clone = quote! {};
+                        if arg.additional_ty {
+                            before_dot = Default::default();
+                            if arg.reference_ty.is_none() {
+                                clone = quote! { .clone() };
+                            }
+                        }
+                        if arg.list {
+                            let iter = match arg.reference_ty {
+                                Some(ReferenceType::Mutable) => quote! { .iter_mut() },
+                                Some(ReferenceType::Immutable) => quote! { .iter() },
+                                None => unreachable!(
+                                    "all_syntax_cases Macro: List argument should have reference type (Unreachable)"
+                                ),
+                            };
+
+                            result_list_iterators.push(quote! {
+                                #before_dot #arg_ident #iter
+                            });
+
+                            continue;
+                        }
+                        let tokens = match arg.reference_ty {
+                            Some(ReferenceType::Mutable) => {
+                                quote! { &mut #before_dot #arg_ident #clone }
+                            }
+                            Some(ReferenceType::Immutable) => {
+                                quote! { &#before_dot #arg_ident #clone }
+                            }
+                            None => quote! { #before_dot #arg_ident #clone },
+                        };
+                        if arg.additional_ty {
+                            additional_data_pos = real_pos;
+                            additional_data_argument = Some(tokens);
+                        } else {
+                            if let Some(v) = result_call_arguments.get_mut(index) {
+                                v.push(tokens);
+                            } else {
+                                result_call_arguments.push(vec![tokens]);
+                            }
+                        }
+                    }
+                }
+
+                //Add additional data into every call
+                if let Some(additional_data_argument) = additional_data_argument.clone() {
+                    for v in result_call_arguments.iter_mut() {
+                        v.insert(additional_data_pos, additional_data_argument.clone());
+                    }
+                }
+
+                //Handle list calls
+                let list_calls_iter = result_list_iterators.iter().map(|iter| {
+                    if let Some(additional_arg) = additional_data_argument.clone() {
+                        //More than one required args are not allowed yet
+                        if additional_data_pos == 0 {
+                            quote! {
+                                for ____x in #iter{
+                                    #fn_ident(#additional_arg, ____x);
+                                }
+                            }
+                        } else {
+                            quote! {
+                                for ____x in #iter{
+                                    #fn_ident(____x, #additional_arg);
+                                }
+                            }
+                        }
+                    } else {
+                        quote! {
+                            for ____x in #iter{
+                                #fn_ident(____x);
+                            }
+                        }
+                    }
+                });
+
+                list_calls_tokens = quote! {
+                    #(#list_calls_iter)*
+                };
+            } else {
+                let mut result_single_call_arguments = Vec::new();
+                let mut idents_already_used: Vec<syn::Ident> = Vec::new();
+
+                for (_, potential_args) in result_args_vec.iter() {
+                    let mut valid_potential_arg_found = false;
+
+                    for arg in potential_args.iter() {
+                        if arg.list {
+                            //List arguments are not supported if multiple_calls_allowed is false
+                            continue;
+                        }
+                        let arg_ident = arg.ident;
+                        if idents_already_used.contains(arg_ident) {
+                            continue;
+                        } else {
+                            idents_already_used.push(arg_ident.clone());
+                            valid_potential_arg_found = true;
+                        }
+                        let mut before_dot = before_dot.clone();
+                        let mut clone = quote! {};
+                        if arg.additional_ty {
+                            before_dot = Default::default();
+                            if arg.reference_ty.is_none() {
+                                clone = quote! { .clone() };
+                            }
+                        }
+
+                        let tokens = match arg.reference_ty {
+                            Some(ReferenceType::Mutable) => {
+                                quote! { &mut #before_dot #arg_ident #clone }
+                            }
+                            Some(ReferenceType::Immutable) => {
+                                quote! { &#before_dot #arg_ident #clone }
+                            }
+                            None => quote! { #before_dot #arg_ident #clone },
+                        };
+                        result_single_call_arguments.push(tokens);
+                        break;
+                    }
+
+                    if !valid_potential_arg_found {
+                        //There were not enough arguments passed in
                         return None;
                     }
                 }
-            }
-            let mut result_list_iterators: Vec<proc_macro2::TokenStream> = Vec::new();
-            let mut result_call_arguments: Vec<Vec<proc_macro2::TokenStream>> = Vec::new();
-            let mut additional_data_pos = 0;
-            let mut additional_data_argument = None;
 
-            for (real_pos, potential_args) in result_args_vec.into_iter() {
-                for (index, arg) in potential_args.into_iter().enumerate() {
-                    let arg_ident = arg.ident;
-                    let mut before_dot = before_dot.clone();
-                    let mut clone = quote! {};
-                    if arg.additional_ty {
-                        before_dot = Default::default();
-                        clone = quote! { .clone() };
-                    }
-                    if arg.list {
-                        let iter = match arg.reference_ty {
-                            Some(ReferenceType::Mutable) => quote! { .iter_mut() },
-                            Some(ReferenceType::Immutable) => quote! { .iter() },
-                            None => unreachable!(
-                                "all_syntax_cases Macro: List argument should have reference type (Unreachable)"
-                            ),
-                        };
-
-                        result_list_iterators.push(quote! {
-                            #before_dot #arg_ident #iter
-                        });
-
-                        continue;
-                    }
-                    let tokens = match arg.reference_ty {
-                        Some(ReferenceType::Mutable) => {
-                            quote! { &mut #before_dot #arg_ident #clone }
+                //Check if more than one call can be done (no multiple (potential) calls allowed)
+                for (_, potential_args) in result_args_vec.iter() {
+                    for arg in potential_args.iter() {
+                        if arg.list {
+                            //List arguments are not supported if multiple_calls_allowed is false
+                            continue;
                         }
-                        Some(ReferenceType::Immutable) => quote! { &#before_dot #arg_ident #clone },
-                        None => quote! { #before_dot #arg_ident #clone },
-                    };
-                    if arg.additional_ty {
-                        additional_data_pos = real_pos;
-                        additional_data_argument = Some(tokens);
-                    } else {
-                        if let Some(v) = result_call_arguments.get_mut(index) {
-                            v.push(tokens);
-                        } else {
-                            result_call_arguments.push(vec![tokens]);
+                        let arg_ident = arg.ident;
+                        if !idents_already_used.contains(arg_ident) {
+                            //no multiple (potential) calls allowed
+                            return None;
                         }
                     }
                 }
+
+                result_call_arguments.push(result_single_call_arguments);
             }
 
-            //Add additional data into every call
-            if let Some(additional_data_argument) = additional_data_argument.clone() {
-                for v in result_call_arguments.iter_mut() {
-                    v.insert(additional_data_pos, additional_data_argument.clone());
-                }
-            }
             //Create function calls
-            let fn_ident = &self.ident;
-
-            //Handle list calls
-            let list_calls_iter = result_list_iterators.iter().map(|iter| {
-                if let Some(additional_arg) = additional_data_argument.clone() {
-                    //More than one required args are not allowed yet
-                    if additional_data_pos == 0 {
-                        quote! {
-                            for ____x in #iter{
-                                #fn_ident(#additional_arg, ____x);
-                            }
-                        }
-                    } else {
-                        quote! {
-                            for ____x in #iter{
-                                #fn_ident(____x, #additional_arg);
-                            }
-                        }
-                    }
-                } else {
-                    quote! {
-                        for ____x in #iter{
-                            #fn_ident(____x);
-                        }
-                    }
-                }
-            });
 
             let calls_iter = result_call_arguments.iter().map(|args| {
                 quote! {
@@ -636,7 +701,7 @@ impl EssentialFnData {
 
             Some(quote! {
                 #(#calls_iter)*
-                #(#list_calls_iter)*
+                #list_calls_tokens
             })
         } else {
             None
@@ -1064,11 +1129,247 @@ impl MacroData {
     }
 }
 #[test]
-fn type_equals_test() {}
+fn type_equals_path_test() {
+    let path1: syn::Path = syn::parse_quote!(Path);
+    let path2: syn::Path = syn::parse_quote!(syn::Path);
+    let path3: syn::Path = syn::parse_quote!(proc_macro2::Path);
+    let path4: syn::Path = syn::parse_quote!(Path<syn::V>);
+    let path5: syn::Path = syn::parse_quote!(syn::Path<V>);
+    let path6: syn::Path = syn::parse_quote!(Path<V>);
+    let path7: syn::Path = syn::parse_quote!(Vec<V>);
+    let path8: syn::Path = syn::parse_quote!(std::Vec<whatever::lalala::V>);
+
+    //Everything before last segment should be ignored
+    assert!(type_equals_path_check(&path1, &path2));
+    assert!(type_equals_path_check(&path2, &path3));
+    assert!(type_equals_path_check(&path1, &path3));
+    //Reverse order check
+    assert!(type_equals_path_check(&path2, &path1));
+    assert!(type_equals_path_check(&path3, &path2));
+    assert!(type_equals_path_check(&path3, &path1));
+    //Generics check
+    //Shouldn't return true if other type doesn't have generics
+    assert!(!type_equals_path_check(&path4, &path1));
+    assert!(!type_equals_path_check(&path4, &path2));
+    assert!(!type_equals_path_check(&path4, &path3));
+    //Everything before last segment should be ignored
+    assert!(type_equals_path_check(&path4, &path5));
+    assert!(type_equals_path_check(&path4, &path6));
+    assert!(type_equals_path_check(&path5, &path6));
+    //Reverse order check
+    assert!(!type_equals_path_check(&path1, &path4));
+    assert!(!type_equals_path_check(&path2, &path4));
+    assert!(!type_equals_path_check(&path3, &path4));
+    assert!(type_equals_path_check(&path5, &path4));
+    assert!(type_equals_path_check(&path6, &path4));
+    assert!(type_equals_path_check(&path6, &path5));
+
+    //Not matching last segment
+    assert!(!type_equals_path_check(&path7, &path1));
+    assert!(!type_equals_path_check(&path7, &path2));
+    assert!(!type_equals_path_check(&path7, &path3));
+    assert!(!type_equals_path_check(&path7, &path4));
+    assert!(!type_equals_path_check(&path7, &path5));
+    assert!(!type_equals_path_check(&path7, &path6));
+    assert!(!type_equals_path_check(&path8, &path1));
+    assert!(!type_equals_path_check(&path8, &path2));
+    assert!(!type_equals_path_check(&path8, &path3));
+    assert!(!type_equals_path_check(&path8, &path4));
+    assert!(!type_equals_path_check(&path8, &path5));
+    assert!(!type_equals_path_check(&path8, &path6));
+    //Reverse order check
+    assert!(!type_equals_path_check(&path1, &path7));
+    assert!(!type_equals_path_check(&path2, &path7));
+    assert!(!type_equals_path_check(&path3, &path7));
+    assert!(!type_equals_path_check(&path4, &path7));
+    assert!(!type_equals_path_check(&path5, &path7));
+    assert!(!type_equals_path_check(&path6, &path7));
+    assert!(!type_equals_path_check(&path1, &path8));
+    assert!(!type_equals_path_check(&path2, &path8));
+    assert!(!type_equals_path_check(&path3, &path8));
+    assert!(!type_equals_path_check(&path4, &path8));
+    assert!(!type_equals_path_check(&path5, &path8));
+    assert!(!type_equals_path_check(&path6, &path8));
+
+    //Matching generics (last segment) and last segment
+    assert!(type_equals_path_check(&path7, &path8));
+    //Reverse order check
+    assert!(type_equals_path_check(&path8, &path7));
+}
+
+#[cfg(test)]
+fn test_vec_eq(vec1: &[syn::Type], vec2: &[syn::Type], expected: bool) {
+    for item1 in vec1.iter() {
+        for item2 in vec2.iter() {
+            assert_eq!(
+                type_equals(item1, item2),
+                expected,
+                "type_equals({}, {}) should be {}",
+                item1.to_token_stream(),
+                item2.to_token_stream(),
+                expected
+            );
+        }
+    }
+}
 
 #[test]
-fn essential_fn_checks_test() {
-    struct AdditionalInput;
+fn type_equals_test() {
+    let mut all_vectors = Vec::new();
+
+    let vec_item: Vec<syn::Type> = vec![
+        syn::parse_quote!(Vec<syn::Item>),
+        syn::parse_quote!(Vec<Item>),
+        syn::parse_quote!(std::Vec<Item>),
+    ];
+    test_vec_eq(&vec_item, &vec_item, true);
+    all_vectors.push(vec_item);
+
+    let expr: Vec<syn::Type> = vec![syn::parse_quote!(Expr), syn::parse_quote!(syn::Expr)];
+    test_vec_eq(&expr, &expr, true);
+    all_vectors.push(expr);
+
+    let option_expr: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<Expr>),
+        syn::parse_quote!(Option<syn::Expr>),
+    ];
+    test_vec_eq(&option_expr, &option_expr, true);
+    all_vectors.push(option_expr);
+
+    let where_predicate: Vec<syn::Type> = vec![
+        syn::parse_quote!(WherePredicate),
+        syn::parse_quote!(syn::WherePredicate),
+    ];
+    test_vec_eq(&where_predicate, &where_predicate, true);
+    all_vectors.push(where_predicate);
+
+    let where_clause: Vec<syn::Type> = vec![
+        syn::parse_quote!(WhereClause),
+        syn::parse_quote!(syn::WhereClause),
+    ];
+    test_vec_eq(&where_clause, &where_clause, true);
+    all_vectors.push(where_clause);
+
+    let option_pat: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Box<Pat>, Token![:])>),
+        syn::parse_quote!(Option<(Box<syn::Pat>, Token![:])>),
+        syn::parse_quote!(Option<(Box<Pat>, syn::Token![:])>),
+    ];
+    test_vec_eq(&option_pat, &option_pat, true);
+    all_vectors.push(option_pat);
+
+    let variadic: Vec<syn::Type> = vec![
+        syn::parse_quote!(Variadic),
+        syn::parse_quote!(syn::Variadic),
+    ];
+    test_vec_eq(&variadic, &variadic, true);
+    all_vectors.push(variadic);
+
+    let option_variadic: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<Variadic>),
+        syn::parse_quote!(Option<syn::Variadic>),
+    ];
+    test_vec_eq(&option_variadic, &option_variadic, true);
+    all_vectors.push(option_variadic);
+
+    let option_fields: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(token::Brace, Vec<Item>)>),
+        syn::parse_quote!(Option<(syn::token::Brace, Vec<Item>)>),
+        syn::parse_quote!(Option<(Brace, Vec<syn::Item>)>),
+    ];
+    test_vec_eq(&option_fields, &option_fields, true);
+    all_vectors.push(option_fields);
+
+    let option_fields_reversed: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Vec<Item>, token::Brace)>),
+        syn::parse_quote!(Option<(Vec<Item>, syn::token::Brace)>),
+        syn::parse_quote!(Option<(Vec<syn::Item>, Brace)>),
+        syn::parse_quote!(Option<(Vec<syn::Item>, token::Brace)>),
+        syn::parse_quote!(Option<(Vec<syn::Item>, syn::token::Brace)>),
+    ];
+    test_vec_eq(&option_fields_reversed, &option_fields_reversed, true);
+    all_vectors.push(option_fields_reversed);
+
+    let fields: Vec<syn::Type> = vec![syn::parse_quote!(Fields), syn::parse_quote!(syn::Fields)];
+    test_vec_eq(&fields, &fields, true);
+    all_vectors.push(fields);
+
+    let field: Vec<syn::Type> = vec![syn::parse_quote!(Field), syn::parse_quote!(syn::Field)];
+    test_vec_eq(&field, &field, true);
+    all_vectors.push(field);
+
+    let field_pat: Vec<syn::Type> = vec![
+        syn::parse_quote!(FieldPat),
+        syn::parse_quote!(syn::FieldPat),
+    ];
+    test_vec_eq(&field_pat, &field_pat, true);
+    all_vectors.push(field_pat);
+
+    let option_expr_eq: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Token![=], Expr)>),
+        syn::parse_quote!(Option<(syn::Token![=], Expr)>),
+        syn::parse_quote!(Option<(Token![=], syn::Expr)>),
+    ];
+    test_vec_eq(&option_expr_eq, &option_expr_eq, true);
+    all_vectors.push(option_expr_eq);
+
+    let option_box_expr: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<Box<Expr>>),
+        syn::parse_quote!(Option<Box<syn::Expr>>),
+    ];
+    test_vec_eq(&option_box_expr, &option_box_expr, true);
+    all_vectors.push(option_box_expr);
+
+    let option_at_pat: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Token![@], Box<Pat>)>),
+        syn::parse_quote!(Option<(Token![@], Box<syn::Pat>)>),
+        syn::parse_quote!(Option<(syn::Token![@], Box<Pat>)>),
+        syn::parse_quote!(Option<(syn::Token![@], Box<syn::Pat>)>),
+    ];
+    test_vec_eq(&option_at_pat, &option_at_pat, true);
+    all_vectors.push(option_at_pat);
+
+    let option_at_pat_fake: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Token![!], Box<Pat>)>),
+        syn::parse_quote!(Option<(Token![!], Box<syn::Pat>)>),
+        syn::parse_quote!(Option<(syn::Token![!], Box<Pat>)>),
+        syn::parse_quote!(Option<(syn::Token![!], Box<syn::Pat>)>),
+    ];
+    test_vec_eq(&option_at_pat_fake, &option_at_pat_fake, true);
+    all_vectors.push(option_at_pat_fake);
+
+    let option_else_expr: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Token![else], Box<Expr>)>),
+        syn::parse_quote!(Option<(syn::Token![else], Box<Expr>)>),
+        syn::parse_quote!(Option<(Token![else], Box<syn::Expr>)>),
+        syn::parse_quote!(Option<(syn::Token![else], Box<syn::Expr>)>),
+    ];
+    test_vec_eq(&option_else_expr, &option_else_expr, true);
+    all_vectors.push(option_else_expr);
+
+    let option_if_expr: Vec<syn::Type> = vec![
+        syn::parse_quote!(Option<(Token![if], Box<Expr>)>),
+        syn::parse_quote!(Option<(syn::Token![if], Box<Expr>)>),
+        syn::parse_quote!(Option<(Token![if], Box<syn::Expr>)>),
+        syn::parse_quote!(Option<(syn::Token![if], Box<syn::Expr>)>),
+    ];
+    test_vec_eq(&option_if_expr, &option_if_expr, true);
+    all_vectors.push(option_if_expr);
+
+    //Different Vectors (representing different equal values) should never have equal values (between different vectors)
+    for v in all_vectors.iter() {
+        for v2 in all_vectors.iter() {
+            if v == v2 {
+                continue;
+            }
+            test_vec_eq(v, v2, false);
+        }
+    }
+}
+
+#[test]
+fn essential_fn_checks_1_arg_test() {
+    // struct AdditionalInput;
 
     let additional_input_base: (syn::Ident, syn::Type) = (
         quote::format_ident!("__additional_input"),
@@ -1090,6 +1391,17 @@ fn essential_fn_checks_test() {
 
         input_fields.named.into_iter().collect::<Vec<_>>()
     };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields1, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(x);
+            }
+            .to_string()
+        )
+    );
 
     let input_fields2 = {
         let input_fields: syn::FieldsNamed = syn::parse_quote! {
@@ -1101,12 +1413,163 @@ fn essential_fn_checks_test() {
 
         input_fields.named.into_iter().collect::<Vec<_>>()
     };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields2, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x);
+            }
+            .to_string()
+        )
+    );
 
     let input_fields3 = {
         let input_fields: syn::FieldsNamed = syn::parse_quote! {
             {
                 x: Box<syn::Item>,
                 b: Box<syn::Expr>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields3, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x);
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields4 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                b: Box<syn::Expr>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields4, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+
+    let input_fields5 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Item>,
+                b: Box<syn::Expr>,
+                c: Box<syn::Item>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields5, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x);
+                example_fn1(&mut c);
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields6 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Item>,
+                b: Box<syn::Expr>,
+                list: Vec<syn::Item>,
+                c: Box<syn::Item>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields6, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x);
+                example_fn1(&mut c);
+                for ____x in list.iter_mut(){
+                    example_fn1(____x);
+                }
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields7 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Item>,
+                list0: syn::Punctuated<syn::Item, Token![,]>,
+                b: Box<syn::Expr>,
+                list: Vec<syn::Item>,
+                c: Box<syn::Item>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields7, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x);
+                example_fn1(&mut c);
+                for ____x in list0.iter_mut(){
+                    example_fn1(____x);
+                }
+                for ____x in list.iter_mut(){
+                    example_fn1(____x);
+                }
+            }
+            .to_string()
+        )
+    );
+}
+
+#[test]
+fn essential_fn_checks_2_args_test() {
+    // struct AdditionalInput;
+
+    let additional_input_base: (syn::Ident, syn::Type) = (
+        quote::format_ident!("__additional_input"),
+        syn::parse_quote! {AdditionalInput},
+    );
+    let additional_input = (&additional_input_base.0, &additional_input_base.1);
+
+    let mut fn_data1 = EssentialFnData::new(syn::parse_quote! {
+        fn example_fn1(a: &mut syn::Expr, __additional_input: &mut AdditionalInput)
+    });
+    let mut fn_data2 = EssentialFnData::new(syn::parse_quote! {
+        fn example_fn2(a: &mut syn::Expr, __additional_input: AdditionalInput)
+    });
+
+    let input_fields1 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: &mut syn::Expr,
+                b: &mut syn::Stmt,
             }
         };
 
@@ -1119,31 +1582,340 @@ fn essential_fn_checks_test() {
             .map(|x| x.to_string()),
         Some(
             quote! {
-                example_fn1(x);
+                example_fn1(x, &mut __additional_input);
             }
             .to_string()
         )
     );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields1, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(x, __additional_input.clone());
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields2 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: syn::Expr,
+                b: syn::Stmt,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
     assert_eq!(
         fn_data1
             .all_inputs_check(&input_fields2, None, additional_input)
             .map(|x| x.to_string()),
         Some(
             quote! {
-                example_fn1(&mut x);
+                example_fn1(&mut x, &mut __additional_input);
             }
             .to_string()
         )
     );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields2, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, __additional_input.clone());
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields3 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Expr>,
+                b: Box<syn::Stmt>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
     assert_eq!(
         fn_data1
             .all_inputs_check(&input_fields3, None, additional_input)
             .map(|x| x.to_string()),
         Some(
             quote! {
-                example_fn1(&mut x);
+                example_fn1(&mut x, &mut __additional_input);
             }
             .to_string()
         )
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields3, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, __additional_input.clone());
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields4 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                b: Box<syn::Stmt>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields4, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields4, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+
+    let input_fields5 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Expr>,
+                b: Box<syn::Stmt>,
+                c: Box<syn::Expr>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields5, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x, &mut __additional_input);
+                example_fn1(&mut c, &mut __additional_input);
+            }
+            .to_string()
+        )
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields5, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, __additional_input.clone());
+                example_fn2(&mut c, __additional_input.clone());
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields6 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Expr>,
+                b: Box<syn::Stmt>,
+                list: Vec<syn::Expr>,
+                c: Box<syn::Expr>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields6, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x, &mut __additional_input);
+                example_fn1(&mut c, &mut __additional_input);
+                for ____x in list.iter_mut(){
+                    example_fn1(____x, &mut __additional_input);
+                }
+            }
+            .to_string()
+        )
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields6, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, __additional_input.clone());
+                example_fn2(&mut c, __additional_input.clone());
+                for ____x in list.iter_mut(){
+                    example_fn2(____x, __additional_input.clone());
+                }
+            }
+            .to_string()
+        )
+    );
+    let input_fields7 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: Box<syn::Expr>,
+                list0: syn::Punctuated<syn::Expr, Token![,]>,
+                b: Box<syn::Stmt>,
+                list: Vec<syn::Expr>,
+                c: Box<syn::Expr>,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields7, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(&mut x, &mut __additional_input);
+                example_fn1(&mut c, &mut __additional_input);
+                for ____x in list0.iter_mut(){
+                    example_fn1(____x, &mut __additional_input);
+                }
+                for ____x in list.iter_mut(){
+                    example_fn1(____x, &mut __additional_input);
+                }
+            }
+            .to_string()
+        )
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields7, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, __additional_input.clone());
+                example_fn2(&mut c, __additional_input.clone());
+                for ____x in list0.iter_mut(){
+                    example_fn2(____x, __additional_input.clone());
+                }
+                for ____x in list.iter_mut(){
+                    example_fn2(____x, __additional_input.clone());
+                }
+            }
+            .to_string()
+        )
+    );
+}
+
+#[test]
+fn essential_fn_checks_3_args_test() {
+    // struct AdditionalInput;
+
+    let additional_input_base: (syn::Ident, syn::Type) = (
+        quote::format_ident!("__additional_input"),
+        syn::parse_quote! {AdditionalInput},
+    );
+    let additional_input = (&additional_input_base.0, &additional_input_base.1);
+
+    let mut fn_data1 = EssentialFnData::new(syn::parse_quote! {
+        fn example_fn1(a: &mut syn::Expr, b: &mut syn::Item, __additional_input: &mut AdditionalInput)
+    });
+    let mut fn_data2 = EssentialFnData::new(syn::parse_quote! {
+        fn example_fn2(a: &mut syn::Expr, b: &mut syn::Expr, __additional_input: &mut AdditionalInput)
+    });
+
+    let input_fields1 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: &mut syn::Expr,
+                b: &mut syn::Item,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields1, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn1(x, b, &mut __additional_input);
+            }
+            .to_string()
+        )
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields1, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+
+    let input_fields2 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: syn::Expr,
+                b: syn::Expr,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields2, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields2, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, &mut b, &mut __additional_input);
+            }
+            .to_string()
+        )
+    );
+
+    let input_fields3 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                x: syn::Expr,
+                b: syn::Expr,
+                a: syn::Item,
+                a2: syn::Item,
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields3, None, additional_input)
+            .map(|x| x.to_string()),
+        None
+    );
+    assert_eq!(
+        fn_data2
+            .all_inputs_check(&input_fields3, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_fn2(&mut x, &mut b, &mut __additional_input);
+            }
+            .to_string()
+        ),
     );
 }
