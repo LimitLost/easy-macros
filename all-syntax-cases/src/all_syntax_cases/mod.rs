@@ -35,5 +35,19 @@ pub fn all_syntax_cases(item: TokenStream) -> TokenStream {
     let mut macro_data = MacroData::new(parsed);
 
     let result = search::search(&mut macro_data);
+
+    //Check if all functions were used
+    for f in macro_data.default_functions.iter() {
+        f.used_check();
+    }
+    for f in macro_data.special_functions.iter() {
+        f.used_check();
+    }
+    for f in macro_data.system_functions.iter() {
+        f.used_check();
+    }
+
+    // panic!("{}", result);
+
     result.into()
 }

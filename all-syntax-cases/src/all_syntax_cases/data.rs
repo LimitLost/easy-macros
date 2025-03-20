@@ -93,7 +93,7 @@ impl syn::parse::Parse for Input {
             }
         }
 
-        let setup = setup.expect("setup was not provided! Usage: setup => { <starting_point_type, generated_fn_prefix, additional_input_type> }");
+        let setup = setup.expect("setup was not provided! Usage: setup => { <generated_fn_prefix, additional_input_type> }");
         let default_cases = default_cases.expect(
             "default_cases was not provided! Usage: default_cases => { <function signatures> }",
         );
@@ -700,6 +700,24 @@ impl EssentialFnData {
             None
         }
     }
+
+    pub fn used_check(&self) {
+        if !self.used_at_least_once {
+            panic!(
+                "Function {} was not used while genereting all_syntax_cases macro output",
+                self.ident
+            );
+        }
+    }
+
+    pub fn name_equals(&self, name: &syn::Ident) -> bool {
+        &self.ident == name
+    }
+
+    ///When used outside of search context
+    pub fn used(&mut self) {
+        self.used_at_least_once = true;
+    }
 }
 
 pub struct MacroFnNames {
@@ -750,6 +768,7 @@ pub struct MacroFnNames {
     pub variant: syn::Ident,
     pub foreign_item: syn::Ident,
     pub qself: syn::Ident,
+    pub option_qself: syn::Ident,
     pub option_eq_type: syn::Ident,
 
     pub additional_input_name: syn::Ident,
@@ -813,6 +832,7 @@ impl MacroFnNames {
         let foreign_item = quote::format_ident!("{}_foreign_item_handle", fn_name_prefix);
         let qself = quote::format_ident!("{}_qself_handle", fn_name_prefix);
         let option_eq_type = quote::format_ident!("{}_option_eq_type_handle", fn_name_prefix);
+        let option_qself = quote::format_ident!("{}_option_qself_handle", fn_name_prefix);
 
         let additional_input_name = quote::format_ident!("__additional_input");
 
@@ -865,6 +885,7 @@ impl MacroFnNames {
             foreign_item,
             qself,
             option_eq_type,
+            option_qself,
 
             additional_input_name,
         }
@@ -962,6 +983,7 @@ impl MacroData {
             variant,
             foreign_item,
             qself,
+            option_qself,
             option_eq_type,
         } = &fn_names;
         system_functions.push(system_new_fn.0(syn::parse_quote! {
@@ -1073,7 +1095,7 @@ impl MacroData {
             fn #field_pat(field_pat: &mut FieldPat, #additional_input_name: #additional_input_ty)
         }));
         system_functions.push(system_new_fn.0(syn::parse_quote! {
-            fn #option_at_pat(option_at_pat: &mut Option<(Token![@], Pat)>, #additional_input_name: #additional_input_ty)
+            fn #option_at_pat(option_at_pat: &mut Option<(Token![@], Box<Pat>)>, #additional_input_name: #additional_input_ty)
         }));
         system_functions.push(system_new_fn.0(syn::parse_quote! {
             fn #arm_guard(arm_guard: &mut Option<(Token![if], Box<Expr>)>, #additional_input_name: #additional_input_ty)
@@ -1108,6 +1130,9 @@ impl MacroData {
         system_functions.push(system_new_fn.0(syn::parse_quote! {
             fn #option_eq_type(option_eq_type: &mut Option<(Token![=], Type)>, #additional_input_name: #additional_input_ty)
         }));
+        system_functions.push(system_new_fn.0(syn::parse_quote! {
+            fn #option_qself(option_qself: &mut Option<QSelf>, #additional_input_name: #additional_input_ty)
+        }));
 
         Self {
             fn_names,
@@ -1116,6 +1141,16 @@ impl MacroData {
             special_functions,
             system_functions,
         }
+    }
+
+    pub fn system_fn_used(&mut self, name_fn: fn(&MacroFnNames) -> &syn::Ident) {
+        let name = name_fn(&self.fn_names);
+
+        self.system_functions
+            .iter_mut()
+            .find(|e| e.name_equals(name))
+            .unwrap()
+            .used();
     }
 }
 #[test]

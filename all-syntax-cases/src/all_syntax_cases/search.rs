@@ -539,24 +539,29 @@ pub fn block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     let MacroData {
         fn_names,
         additional_input_ty,
-        default_functions: _,
-        special_functions: _,
-        system_functions: _,
+        default_functions,
+        special_functions,
+        system_functions,
     } = macro_data;
 
     let fn_name = &fn_names.block;
-    let stmt_fn_name = &fn_names.stmt;
 
     let additional_input_name = &fn_names.additional_input_name;
+
+    let mut result = proc_macro2::TokenStream::new();
+
+    struct_check!(syn::Block{
+        pub brace_token: syn::token::Brace,
+        /// Statements in a block
+        pub stmts: Vec<syn::Stmt>,
+    });
 
     quote! {
         fn #fn_name(
             block: &mut syn::Block,
             #additional_input_name: #additional_input_ty,
         ) {
-            for stmt in &mut block.stmts.iter_mut(){
-                #stmt_fn_name(stmt, #additional_input_name.clone());
-            }
+            #result
         }
     }
 }
@@ -649,7 +654,7 @@ pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2:
     let bound_lifetimes_fn_name = &fn_names.bound_lifetimes;
     let additional_input_name = &fn_names.additional_input_name;
 
-    quote! {
+    let final_result = quote! {
         fn #fn_name(
             bound_lifetimes: &mut Option<syn::BoundLifetimes>,
             #additional_input_name: #additional_input_ty,
@@ -659,7 +664,12 @@ pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2:
                 #bound_lifetimes_fn_name(bl, #additional_input_name);
             }
         }
-    }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.bound_lifetimes);
+
+    final_result
 }
 // TypeParamBound
 pub fn type_param_bound_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
@@ -814,6 +824,9 @@ pub fn where_predicate_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
         ) {
             match where_predicate {
                 #result_matches
+                i=>{
+                    panic!("syn::WherePredicate not supported yet by all_syntax_cases macro | WherePredicate: {}", i.to_token_stream())
+                }
             }
         }
     }
@@ -863,7 +876,7 @@ pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::To
     let where_clause_fn_name = &fn_names.where_clause;
     let additional_input_name = &fn_names.additional_input_name;
 
-    quote! {
+    let final_result = quote! {
         fn #fn_name(
             where_clause: &mut Option<syn::WhereClause>,
             #additional_input_name: #additional_input_ty,
@@ -873,7 +886,12 @@ pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::To
                 #where_clause_fn_name(wc, #additional_input_name);
             }
         }
-    }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.where_clause);
+
+    final_result
 }
 
 // Generics
@@ -965,6 +983,9 @@ pub fn impl_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
     result_matches.extend(quote! {
         syn::ImplItem::Verbatim(token_stream) => {
             todo!("syn::ImplItem::Verbatim is unsupported by all_syntax_cases macro")
+        }
+        i=>{
+            todo!("syn::ImplItem not supported yet by all_syntax_cases macro | ImplItem: {}", i.to_token_stream())
         }
     });
 
@@ -1132,7 +1153,7 @@ pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
     let variadic_fn_name = &fn_names.variadic;
     let additional_input_name = &fn_names.additional_input_name;
 
-    quote! {
+    let final_result = quote! {
         fn #fn_name(
             search_item: &mut Option<syn::Variadic>,
             #additional_input_name: #additional_input_ty,
@@ -1142,7 +1163,12 @@ pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
                 #variadic_fn_name(search_item, #additional_input_name);
             }
         }
-    }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.variadic);
+
+    final_result
 }
 // item_mod_content: Option<(syn::token::Brace, Vec<Item>)>,
 pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
@@ -1309,6 +1335,9 @@ pub fn trait_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
     result_matches.extend(quote! {
         syn::TraitItem::Verbatim(_) => {
             todo!("syn::TraitItem::Verbatim is unsupported by all_syntax_cases macro")
+        }
+        i=>{
+            todo!("syn::TraitItem not supported yet by all_syntax_cases macro | TraitItem: {}", i.to_token_stream())
         }
     });
 
@@ -1543,6 +1572,9 @@ pub fn pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         syn::Pat::Verbatim(_) => {
             todo!("syn::Pat::Verbatim is unsupported by all_syntax_cases macro")
         }
+        i=>{
+            todo!("syn::Pat not supported yet by all_syntax_cases macro | Pat: {}", i.to_token_stream())
+        }
     });
 
     quote! {
@@ -1751,7 +1783,7 @@ pub fn option_angle_bracketed_generic_arguments_search(
     let angle_bracketed_generic_arguments_fn_name = &fn_names.angle_bracketed_generic_arguments;
     let additional_input_name = &fn_names.additional_input_name;
 
-    quote! {
+    let final_result = quote! {
         fn #fn_name(
             search_item: &mut Option<syn::AngleBracketedGenericArguments>,
             #additional_input_name: #additional_input_ty,
@@ -1761,7 +1793,12 @@ pub fn option_angle_bracketed_generic_arguments_search(
                 #angle_bracketed_generic_arguments_fn_name(search_item, #additional_input_name);
             }
         }
-    }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.angle_bracketed_generic_arguments);
+
+    final_result
 }
 
 // GenericArgument
@@ -1814,6 +1851,9 @@ pub fn generic_argument_search(macro_data: &mut MacroData) -> proc_macro2::Token
         ) {
             match search_item{
                 #result_matches
+                i=>{
+                    todo!("syn::GenericArgument not supported yet by all_syntax_cases macro | GenericArgument: {}", i.to_token_stream())
+                }
             }
         }
     }
@@ -1906,6 +1946,9 @@ pub fn type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     result_matches.extend(quote! {
         syn::Type::Verbatim(token_stream) => {
             todo!("syn::Type::Verbatim is unsupported by all_syntax_cases macro")
+        }
+        i=>{
+            todo!("syn::Type not supported yet by all_syntax_cases macro | Type: {}", i.to_token_stream())
         }
     });
 
@@ -2106,6 +2149,9 @@ pub fn foreign_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         syn::ForeignItem::Verbatim(_) => {
             todo!("syn::ForeignItem::Verbatim is unsupported by all_syntax_cases macro")
         }
+        i=>{
+            todo!("syn::ForeignItem not supported yet by all_syntax_cases macro | ForeignItem: {}", i.to_token_stream())
+        }
     });
 
     quote! {
@@ -2151,6 +2197,38 @@ pub fn qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
             #result
         }
     }
+}
+
+// Option<QSelf>
+pub fn option_qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
+    let MacroData {
+        fn_names,
+        additional_input_ty,
+        default_functions: _,
+        special_functions: _,
+        system_functions: _,
+    } = macro_data;
+
+    let fn_name = &fn_names.option_qself;
+    let qself_fn_name = &fn_names.qself;
+    let additional_input_name = &fn_names.additional_input_name;
+
+    let final_result = quote! {
+        fn #fn_name(
+            option_qself: &mut Option<syn::QSelf>,
+            #additional_input_name: #additional_input_ty,
+        ) {
+            if let Some(qself) = option_qself{
+                //No need to clone additional since we don't use additional_input multiple times
+                #qself_fn_name(qself, #additional_input_name);
+            }
+        }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.qself);
+
+    final_result
 }
 
 // Option<(Token![=], Type)>
@@ -2238,7 +2316,7 @@ pub fn local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
 
     quote! {
         fn #fn_name(
-            local_init: &mut syn::LocalInit,
+            search_item: &mut syn::LocalInit,
             #additional_input_name: #additional_input_ty,
         ) {
             #result
@@ -2260,7 +2338,7 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
     let local_init_fn_name = &fn_names.local_init;
     let additional_input_name = &fn_names.additional_input_name;
 
-    quote! {
+    let final_result = quote! {
         fn #fn_name(
             option_local_init: &mut Option<syn::LocalInit>,
             #additional_input_name: #additional_input_ty,
@@ -2270,7 +2348,12 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
                 #local_init_fn_name(local_init, #additional_input_name);
             }
         }
-    }
+    };
+
+    //Function is not used outside of this
+    macro_data.system_fn_used(|fn_names| &fn_names.local_init);
+
+    final_result
 }
 
 pub fn search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
@@ -2323,6 +2406,7 @@ pub fn search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     result.extend(field_value_search(macro_data));
     result.extend(local_init_search(macro_data));
     result.extend(option_local_init_search(macro_data));
+    result.extend(option_qself_search(macro_data));
 
     result
 }

@@ -10,6 +10,7 @@ macros = { path = "./macros" }
 always-context = { path = "./always-context" }
 macro-result = { path = "./macro-result" }
 context-internal = { path = "./context-internal" }
+all-syntax-cases = { path = "./all-syntax-cases" }
 helpers = { path = "./helpers" }
 
 proc_macro_tests = { path = "./proc_macro_tests" }
