@@ -393,70 +393,127 @@ impl EssentialFnData {
                     });
 
                     return true;
-                } else if let syn::Type::Path(ty_path) = maybe_ty {
-                    fn handle_generic_ty<'a>(
-                        args: &syn::PathArguments,
-                        list: bool,
+                } else {
+                    fn handle_path<'a>(
+                        maybe_ty: &syn::Type,
                         type_reference: &TypeReference,
                         result_args: &mut HashMap<usize, Vec<ResultArgData<'a>>>,
                         real_index: &usize,
                         maybe_ident: &'a syn::Ident,
                         additional_ty: bool,
+                        current_reference_ty: Option<Option<ReferenceType>>,
                     ) -> bool {
-                        //Get Type inside of <>
-                        match args {
-                            syn::PathArguments::None => {}
-                            syn::PathArguments::AngleBracketed(
-                                angle_bracketed_generic_arguments,
-                            ) => {
-                                if let Some(syn::GenericArgument::Type(ty)) =
-                                    angle_bracketed_generic_arguments.args.first()
-                                {
-                                    if type_equals(&type_reference.elem, ty) {
-                                        let reference_ty = if type_reference.mutability.is_some() {
-                                            Some(ReferenceType::Mutable)
-                                        } else {
-                                            Some(ReferenceType::Immutable)
-                                        };
+                        if let syn::Type::Path(ty_path) = maybe_ty {
+                            #[allow(clippy::too_many_arguments)]
+                            fn handle_generic_ty<'a>(
+                                args: &syn::PathArguments,
+                                list: bool,
+                                type_reference: &TypeReference,
+                                result_args: &mut HashMap<usize, Vec<ResultArgData<'a>>>,
+                                real_index: &usize,
+                                maybe_ident: &'a syn::Ident,
+                                additional_ty: bool,
+                                current_reference_ty: Option<Option<ReferenceType>>,
+                            ) -> bool {
+                                //Get Type inside of <>
+                                match args {
+                                    syn::PathArguments::None => {}
+                                    syn::PathArguments::AngleBracketed(
+                                        angle_bracketed_generic_arguments,
+                                    ) => {
+                                        if let Some(syn::GenericArgument::Type(ty)) =
+                                            angle_bracketed_generic_arguments.args.first()
+                                        {
+                                            if type_equals(&type_reference.elem, ty) {
+                                                let reference_ty =
+                                                    if let Some(current_reference_ty) =
+                                                        current_reference_ty
+                                                    {
+                                                        current_reference_ty
+                                                    } else if type_reference.mutability.is_some() {
+                                                        Some(ReferenceType::Mutable)
+                                                    } else {
+                                                        Some(ReferenceType::Immutable)
+                                                    };
 
-                                        let arg_data = result_args.entry(*real_index).or_default();
-                                        arg_data.push(ResultArgData {
-                                            ident: maybe_ident,
-                                            reference_ty,
-                                            additional_ty,
-                                            list,
-                                        });
+                                                let arg_data =
+                                                    result_args.entry(*real_index).or_default();
+                                                arg_data.push(ResultArgData {
+                                                    ident: maybe_ident,
+                                                    reference_ty,
+                                                    additional_ty,
+                                                    list,
+                                                });
 
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                    a => panic!(
+                                        "all_syntax_cases Macro: Unsupported path arguments: {}",
+                                        a.to_token_stream()
+                                    ),
+                                }
+                                false
+                            }
+
+                            let name_segment=ty_path.path.segments.last().expect("How the fuck this type doesn't have a single segment?! (should be unreachable)");
+                            let ident_str = name_segment.ident.to_string();
+
+                            let list = matches!(ident_str.as_str(), "Vec" | "Punctuated");
+                            //Handle Boxes, Vectors, Punctuated
+                            match ident_str.as_str() {
+                                "Vec" | "Box" | "Punctuated" => {
+                                    if handle_generic_ty(
+                                        &name_segment.arguments,
+                                        list,
+                                        type_reference,
+                                        result_args,
+                                        real_index,
+                                        maybe_ident,
+                                        additional_ty,
+                                        current_reference_ty,
+                                    ) {
                                         return true;
                                     }
                                 }
+                                _ => {}
                             }
-                            a => panic!(
-                                "all_syntax_cases Macro: Unsupported path arguments: {}",
-                                a.to_token_stream()
-                            ),
                         }
                         false
                     }
 
-                    let name_segment=ty_path.path.segments.last().expect("How the fuck this type doesn't have a single segment?! (should be unreachable)");
-                    let ident_str = name_segment.ident.to_string();
+                    if let syn::Type::Reference(type_ref_potential) = maybe_ty {
+                        let reference_ty =
+                            match (type_reference.mutability, type_ref_potential.mutability) {
+                                (None, None) => Some(None),
+                                (None, Some(_)) => Some(None),
+                                //We expect mutable reference, potential_type is not mutable
+                                (Some(_), None) => return false,
+                                (Some(_), Some(_)) => Some(None),
+                            };
 
-                    let list = matches!(ident_str.as_str(), "Vec" | "Punctuated");
-                    //Handle Boxes, Vectors, Punctuated
-                    match ident_str.as_str() {
-                        "Vec" | "Box" | "Punctuated" => {
-                            handle_generic_ty(
-                                &name_segment.arguments,
-                                list,
-                                type_reference,
-                                result_args,
-                                real_index,
-                                maybe_ident,
-                                additional_ty,
-                            );
+                        if handle_path(
+                            &type_ref_potential.elem,
+                            type_reference,
+                            result_args,
+                            real_index,
+                            maybe_ident,
+                            additional_ty,
+                            reference_ty,
+                        ) {
+                            return true;
                         }
-                        _ => {}
+                    } else if handle_path(
+                        maybe_ty,
+                        type_reference,
+                        result_args,
+                        real_index,
+                        maybe_ident,
+                        additional_ty,
+                        None,
+                    ) {
+                        return true;
                     }
                 }
             }
@@ -742,7 +799,6 @@ pub struct MacroFnNames {
     pub option_else_expr: syn::Ident,
     pub arm: syn::Ident,
     pub angle_bracketed_generic_arguments: syn::Ident,
-    pub range_limits: syn::Ident,
     pub field_value: syn::Ident,
     pub local_init: syn::Ident,
     pub option_local_init: syn::Ident,
@@ -801,7 +857,6 @@ impl MacroFnNames {
             "{}_angle_bracketed_generic_arguments_handle",
             fn_name_prefix
         );
-        let range_limits = quote::format_ident!("{}_range_limits_handle", fn_name_prefix);
         let field_value = quote::format_ident!("{}_field_value_handle", fn_name_prefix);
         let local_init = quote::format_ident!("{}_local_init_handle", fn_name_prefix);
         let option_local_init = quote::format_ident!("{}_option_local_init_handle", fn_name_prefix);
@@ -858,7 +913,6 @@ impl MacroFnNames {
             option_else_expr,
             arm,
             angle_bracketed_generic_arguments,
-            range_limits,
             field_value,
             local_init,
             option_local_init,
@@ -956,7 +1010,6 @@ impl MacroData {
             option_else_expr,
             arm,
             angle_bracketed_generic_arguments,
-            range_limits,
             field_value,
             local_init,
             option_local_init,
@@ -1048,9 +1101,6 @@ impl MacroData {
         }));
         system_functions.push(system_new_fn.0(syn::parse_quote! {
             fn #angle_bracketed_generic_arguments(angle_bracketed_generic_arguments: &mut AngleBracketedGenericArguments, #additional_input_name: #additional_input_ty)
-        }));
-        system_functions.push(system_new_fn.0(syn::parse_quote! {
-            fn #range_limits(range_limits: &mut RangeLimits, #additional_input_name: #additional_input_ty)
         }));
         system_functions.push(system_new_fn.0(syn::parse_quote! {
             fn #field_value(field_value: &mut FieldValue, #additional_input_name: #additional_input_ty)
@@ -1942,5 +1992,40 @@ fn essential_fn_checks_3_args_test() {
             }
             .to_string()
         ),
+    );
+}
+
+#[test]
+fn essential_fn_checks_return_type_debug_test() {
+    let additional_input_base: (syn::Ident, syn::Type) = (
+        quote::format_ident!("__additional_input"),
+        syn::parse_quote! {AdditionalInput},
+    );
+    let additional_input = (&additional_input_base.0, &additional_input_base.1);
+
+    //Debug issues with ReturnType (because of &mut Box<Type>)
+    let mut fn_data1 = EssentialFnData::new(syn::parse_quote! {
+        fn example_ty_handle(ty: &mut Type, __additional_input: AdditionalInput)
+    });
+
+    let input_fields1 = {
+        let input_fields: syn::FieldsNamed = syn::parse_quote! {
+            {
+                arg1: &mut Token![->], arg2: &mut Box<Type>
+            }
+        };
+
+        input_fields.named.into_iter().collect::<Vec<_>>()
+    };
+    assert_eq!(
+        fn_data1
+            .all_inputs_check(&input_fields1, None, additional_input)
+            .map(|x| x.to_string()),
+        Some(
+            quote! {
+                example_ty_handle(arg2, __additional_input.clone());
+            }
+            .to_string()
+        )
     );
 }

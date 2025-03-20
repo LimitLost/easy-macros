@@ -188,7 +188,7 @@ pub fn item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             item: &mut syn::Item,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match item {
                 #result_matches
@@ -500,7 +500,7 @@ pub fn expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             expr: &mut syn::Expr,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match expr {
                 #result_matches
@@ -525,7 +525,7 @@ pub fn option_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
     quote! {
         fn #fn_name(
             expr: &mut Option<syn::Expr>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(ex) = expr{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -558,8 +558,8 @@ pub fn block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 
     quote! {
         fn #fn_name(
-            block: &mut syn::Block,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut syn::Block,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -601,7 +601,7 @@ pub fn stmt_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             stmt: &mut syn::Stmt,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match stmt {
                 #result_matches
@@ -633,8 +633,8 @@ pub fn bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
 
     quote! {
         fn #fn_name(
-            bound_lifetimes: &mut syn::BoundLifetimes,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut syn::BoundLifetimes,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -657,7 +657,7 @@ pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2:
     let final_result = quote! {
         fn #fn_name(
             bound_lifetimes: &mut Option<syn::BoundLifetimes>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(bl) = bound_lifetimes{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -720,7 +720,7 @@ pub fn type_param_bound_search(macro_data: &mut MacroData) -> proc_macro2::Token
     quote! {
         fn #fn_name(
             type_param_bound: &mut syn::TypeParamBound,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match type_param_bound {
                 #result_matches
@@ -738,7 +738,7 @@ pub fn generic_param_search(macro_data: &mut MacroData) -> proc_macro2::TokenStr
         system_functions,
     } = macro_data;
 
-    let fn_name = &fn_names.stmt;
+    let fn_name = &fn_names.generic_param;
     let additional_input_name = &fn_names.additional_input_name;
 
     let mut result_matches = proc_macro2::TokenStream::new();
@@ -775,7 +775,7 @@ pub fn generic_param_search(macro_data: &mut MacroData) -> proc_macro2::TokenStr
     quote! {
         fn #fn_name(
             generic_param: &mut syn::GenericParam,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match generic_param {
                 #result_matches
@@ -820,7 +820,7 @@ pub fn where_predicate_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
     quote! {
         fn #fn_name(
             where_predicate: &mut syn::WherePredicate,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match where_predicate {
                 #result_matches
@@ -855,7 +855,7 @@ pub fn where_clause_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
     quote! {
         fn #fn_name(
             search_item: &mut syn::WhereClause,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -879,7 +879,7 @@ pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::To
     let final_result = quote! {
         fn #fn_name(
             where_clause: &mut Option<syn::WhereClause>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(wc) = where_clause{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -919,7 +919,7 @@ pub fn generics_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Generics,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -992,7 +992,7 @@ pub fn impl_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
     quote! {
         fn #fn_name(
             impl_item: &mut syn::ImplItem,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match impl_item {
                 #result_matches
@@ -1032,7 +1032,7 @@ pub fn signature_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
     quote! {
         fn #fn_name(
             search_item: &mut syn::Signature,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1074,7 +1074,7 @@ pub fn fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::FnArg,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 #result_matches
@@ -1098,8 +1098,8 @@ pub fn variadic_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
 
     quote! {
         fn #fn_name(
-            search_item: &mut Option<(Box<syn::Pat>, Token![:])>,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut Option<(Box<syn::Pat>, syn::Token![:])>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(search_item) = search_item {
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1133,7 +1133,7 @@ pub fn variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Variadic,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1156,7 +1156,7 @@ pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
     let final_result = quote! {
         fn #fn_name(
             search_item: &mut Option<syn::Variadic>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(search_item) = search_item {
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1186,8 +1186,8 @@ pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::Token
 
     quote! {
         fn #fn_name(
-            search_item: &mut Option<(syn::token::Brace, Vec<Item>)>,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut Option<(syn::token::Brace, Vec<syn::Item>)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, items)) = search_item {
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1229,7 +1229,7 @@ pub fn fields_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Fields,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 syn::Fields::Unit => {
@@ -1275,7 +1275,7 @@ pub fn field_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Field,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1344,7 +1344,7 @@ pub fn trait_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
     quote! {
         fn #fn_name(
             search_item: &mut syn::TraitItem,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 #result_matches
@@ -1370,7 +1370,7 @@ pub fn option_block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
     quote! {
         fn #fn_name(
             option_block: &mut Option<syn::Block>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(block) = option_block{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1396,8 +1396,8 @@ pub fn option_eq_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
 
     quote! {
         fn #fn_name(
-            option_eq_expr: &mut Option<(Token![=], Box<syn::Expr>)>,
-            #additional_input_name: #additional_input_ty,
+            option_eq_expr: &mut Option<(syn::Token![=], syn::Expr)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, box_expr)) = option_eq_expr{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1429,7 +1429,7 @@ pub fn fields_named_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
     quote! {
         fn #fn_name(
             search_item: &mut syn::FieldsNamed,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1453,7 +1453,7 @@ pub fn option_box_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
     quote! {
         fn #fn_name(
             option_box_expr: &mut Option<Box<syn::Expr>>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(box_expr) = option_box_expr{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1580,7 +1580,7 @@ pub fn pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Pat,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item {
                 #result_matches
@@ -1612,7 +1612,7 @@ pub fn field_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
     quote! {
         fn #fn_name(
             search_item: &mut syn::FieldPat,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1635,8 +1635,8 @@ pub fn option_at_pat(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 
     quote! {
         fn #fn_name(
-            search_item: &mut Option<(Token![@], Box<syn::Pat>)>,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut Option<(syn::Token![@], Box<syn::Pat>)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, box_pat)) = search_item {
                 // No need to clone additional since we don't use additional_input multiple times
@@ -1662,8 +1662,8 @@ pub fn option_else_expr_search(macro_data: &mut MacroData) -> proc_macro2::Token
 
     quote! {
         fn #fn_name(
-            option_else_expr: &mut Option<(Token![else], Box<syn::Expr>)>,
-            #additional_input_name: #additional_input_ty,
+            option_else_expr: &mut Option<(syn::Token![else], Box<syn::Expr>)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, box_expr)) = option_else_expr{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1699,7 +1699,7 @@ pub fn arm_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Arm,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1722,8 +1722,8 @@ pub fn arm_guard_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
 
     quote! {
         fn #fn_name(
-            search_item: &mut Option<(Token![if], Box<syn::Expr>)>,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut Option<(syn::Token![if], Box<syn::Expr>)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, ex)) = search_item{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1760,7 +1760,7 @@ pub fn angle_bracketed_generic_arguments_search(
     quote! {
         fn #fn_name(
             search_item: &mut syn::AngleBracketedGenericArguments,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -1786,7 +1786,7 @@ pub fn option_angle_bracketed_generic_arguments_search(
     let final_result = quote! {
         fn #fn_name(
             search_item: &mut Option<syn::AngleBracketedGenericArguments>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(search_item) = search_item{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -1847,7 +1847,7 @@ pub fn generic_argument_search(macro_data: &mut MacroData) -> proc_macro2::Token
     quote! {
         fn #fn_name(
             search_item: &mut syn::GenericArgument,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 #result_matches
@@ -1955,7 +1955,7 @@ pub fn type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Type,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 #result_matches
@@ -1981,7 +1981,7 @@ pub fn option_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
     quote! {
         fn #fn_name(
             search_item: &mut Option<syn::Type>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(search_item) = search_item{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -2014,7 +2014,7 @@ pub fn bare_fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
     quote! {
         fn #fn_name(
             search_item: &mut syn::BareFnArg,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -2038,13 +2038,61 @@ pub fn return_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 
     //Matches generated by matched_check!
     {
+        /* {
+            let fields1: Vec<syn::Field> = vec![
+                syn::parse_quote! { struct_call0 : & mut Token! [->] },
+                syn::parse_quote! { struct_call1 : & mut Box < Type > },
+            ];
+            let mut special_call = None;
+            for func in special_functions.iter_mut() {
+                if let Some(call) = func.all_inputs_check(
+                    &fields1,
+                    None,
+                    (additional_input_name, additional_input_ty),
+                ) {
+                    special_call = Some(call);
+                    break;
+                }
+            }
+            result_matches
+                .extend(quote! { syn :: ReturnType :: Type(struct_call0, struct_call1) => });
+            if let Some(call) = special_call {
+                let call_braced = crate::helpers::braced(call.into_token_stream());
+                result_matches.extend(call_braced);
+            } else {
+                let mut default_calls = Vec::new();
+                for func in default_functions.iter_mut() {
+                    if let Some(call) = func.all_inputs_check(
+                        &fields1,
+                        None,
+                        (additional_input_name, additional_input_ty),
+                    ) {
+                        default_calls.push(call);
+                    }
+                }
+                for func in system_functions.iter_mut() {
+                    if let Some(call) = func.all_inputs_check(
+                        &fields1,
+                        None,
+                        (additional_input_name, additional_input_ty),
+                    ) {
+                        default_calls.push(call);
+                    }
+                }
+                let default_calls_braced = crate::helpers::braced(
+                    crate::helpers::iter_token_stream(default_calls.into_iter()),
+                );
+                result_matches.extend(default_calls_braced);
+            }
+        } */
+
         matched_check_no_fields!(syn::ReturnType::Type(Token![->], Box<Type>));
     }
 
     quote! {
         fn #fn_name(
             search_item: &mut syn::ReturnType,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 syn::ReturnType::Default=>{}
@@ -2085,7 +2133,7 @@ pub fn variant_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
     quote! {
         fn #fn_name(
             search_item: &mut syn::Variant,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -2157,7 +2205,7 @@ pub fn foreign_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
     quote! {
         fn #fn_name(
             search_item: &mut syn::ForeignItem,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             match search_item{
                 #result_matches
@@ -2191,8 +2239,8 @@ pub fn qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
 
     quote! {
         fn #fn_name(
-            qself: &mut syn::QSelf,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut syn::QSelf,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -2216,7 +2264,7 @@ pub fn option_qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
     let final_result = quote! {
         fn #fn_name(
             option_qself: &mut Option<syn::QSelf>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(qself) = option_qself{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -2247,8 +2295,8 @@ pub fn option_eq_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
 
     quote! {
         fn #fn_name(
-            option_eq_type: &mut Option<(Token![=], Box<syn::Type>)>,
-            #additional_input_name: #additional_input_ty,
+            option_eq_type: &mut Option<(syn::Token![=], syn::Type)>,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some((_, box_ty)) = option_eq_type{
                 //No need to clone additional since we don't use additional_input multiple times
@@ -2286,8 +2334,8 @@ pub fn field_value_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
 
     quote! {
         fn #fn_name(
-            item_search: &mut syn::FieldValue,
-            #additional_input_name: #additional_input_ty,
+            search_item: &mut syn::FieldValue,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -2317,7 +2365,7 @@ pub fn local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
     quote! {
         fn #fn_name(
             search_item: &mut syn::LocalInit,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             #result
         }
@@ -2341,7 +2389,7 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
     let final_result = quote! {
         fn #fn_name(
             option_local_init: &mut Option<syn::LocalInit>,
-            #additional_input_name: #additional_input_ty,
+            mut #additional_input_name: #additional_input_ty,
         ) {
             if let Some(local_init) = option_local_init{
                 //No need to clone additional since we don't use additional_input multiple times
