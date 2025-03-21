@@ -9,13 +9,18 @@ pub use context_internal::context_internal;
 ///
 /// Add current file and line number to context
 macro_rules! context {
+    ()=>{
+        ||{
+            $crate::context_internal!()
+        }
+    };
     ($($arg:tt)*) => {
         ||{
             //Adds syntax checking from format! macro
             let _= ||{
                 let _ = format!($($arg)*);
             };
-            $crate::context_internal!($($arg)*);
+            $crate::context_internal!($($arg)*)
         }
     };
 }
