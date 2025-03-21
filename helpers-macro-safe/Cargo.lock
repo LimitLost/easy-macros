@@ -3,26 +3,6 @@
 version = 4
 
 [[package]]
-name = "all-syntax-cases"
-version = "0.1.0"
-dependencies = [
- "all-syntax-cases-helpers",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "all-syntax-cases-helpers"
-version = "0.1.0"
-dependencies = [
- "helpers-macro-safe",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "helpers-macro-safe"
 version = "0.1.0"
 dependencies = [

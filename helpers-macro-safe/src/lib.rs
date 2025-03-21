@@ -6,6 +6,12 @@ pub use indexed_name::indexed_name;
 mod macro_result;
 pub use macro_result::MacroResult;
 
+mod expr_error_wrap;
+pub use expr_error_wrap::{ErrorData, expr_error_wrap};
+
+mod readable_token_stream;
+pub use readable_token_stream::readable_token_stream;
+
 #[macro_export]
 ///Original Syn macro doesn't return Ok(TokenStream) on error, but instead returns TokenStream
 macro_rules! parse_macro_input {
