@@ -65,30 +65,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "easy-macros"
-version = "0.1.0"
-dependencies = [
- "all-syntax-cases",
- "always-context",
- "attributes",
- "context-internal",
- "helpers",
- "macro-result",
- "proc-macro2",
- "proc_macro_tests",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "helpers"
-version = "0.1.0"
-dependencies = [
- "helpers-context",
- "helpers-macro-safe",
-]
-
-[[package]]
 name = "helpers-context"
 version = "0.1.0"
 dependencies = [
@@ -127,20 +103,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "proc_macro_tests"
-version = "0.1.0"
-dependencies = [
- "always-context",
- "attributes",
- "context-internal",
- "helpers",
- "macro-result",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]

@@ -1,6 +1,8 @@
 use std::ops::Range;
 
+use always_context::always_context;
 use anyhow::Context;
+use helpers_context::context;
 use helpers_macro_safe::{MacroResult, indexed_name, parse_macro_input};
 use lazy_static::lazy_static;
 use macro_result::macro_result;
@@ -41,7 +43,7 @@ pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
     let operate_on = parsed.operate_on;
     let attributes = parsed.attributes;
-    let mut result = MacroResult::new();
+    let mut result = MacroResult::default();
 
     let attributes_len = attributes.len();
 
@@ -84,7 +86,7 @@ pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
     Ok(result.finalize().into())
 }
-
+#[derive(Debug)]
 struct AttrWithUnknown {
     //Unknown coordinates
     ///Inside of final group/global
@@ -100,6 +102,7 @@ struct AttrWithUnknown {
     after_unknown: String,
 }
 
+#[always_context]
 impl AttrWithUnknown {
     fn new(attr: &syn::Attribute) -> anyhow::Result<Option<AttrWithUnknown>> {
         let stream = attr.to_token_stream();
@@ -111,7 +114,6 @@ impl AttrWithUnknown {
             //Get all tokens, coordinates, and tokens after unknown
             //later remove last coordinate and use it as `unknown_coordinate`
             let mut unknown_group_coordinates = vec![];
-            let mut after_unknown = vec![];
 
             struct DataRecursiveResult {
                 partial_unknown_cords: Option<Range<usize>>,
@@ -190,42 +192,70 @@ impl AttrWithUnknown {
                 tokens_after,
             } = unknown_data_recursive(stream, &mut unknown_group_coordinates);
 
-            if let Some(tokens_after) = result.tokens_after {
+            let (token_after, unknown_coordinate) = if let Some(mut tokens_after) = tokens_after {
                 //Reverse the tokens after unknown
                 tokens_after.reverse();
                 //Remove the last token (which is the unknown cord inside of last group)
                 let unknown_coordinate = unknown_group_coordinates.pop().with_context(context!(
                     "No unknown coordinates, but tokens after are not None! | tokens_after: {:?}",
                     tokens_after
-                ));
+                ))?;
+                (tokens_after, unknown_coordinate)
             } else {
                 anyhow::bail!(
                     "Unknown not found in the attribute! Recursive call failed, but it shouldn't"
                 );
-            }
+            };
 
             return Ok(Some(AttrWithUnknown {
                 before_unknown,
                 after_unknown,
+                unknown_coordinate,
+                tokens_after_unknown: token_after,
+                unknown_group_coordinates,
+                partial_unknown_cords,
             }));
         }
         Ok(None)
     }
 
-    fn get_unknown(&self, attr: &syn::Attribute) -> Option<TokenStream> {
+    fn get_unknown(&self, attr: &syn::Attribute) -> Option<proc_macro2::TokenStream> {
         //Check if start and end aligns with before and after unknown
         let attr_tokens = attr.to_token_stream();
         let attr_str = attr_tokens.to_string();
+
+        //Speed up the process, check if the string starts and ends with tokens before and after the unknown
         if !(attr_str.starts_with(&self.before_unknown) && attr_str.ends_with(&self.after_unknown))
         {
             return None;
         }
 
-        // for token in self.
-        todo!()
+        let mut current_tokens = attr_tokens;
 
-        //TODO If yes go through the tokens and find replacers for the unknown
-        //TODO Remove last tokens after unknown
+        for group_index in self.unknown_group_coordinates.iter() {
+            match current_tokens.into_iter().skip(*group_index).next() {
+                Some(TokenTree::Group(group)) => {
+                    current_tokens = group.stream();
+                }
+                i => {
+                    panic!("Bad group index! Expected Group, got {i:?} | self: {self:?}");
+                }
+            }
+        }
+
+        //Get tokens at the unknown (and after)
+        let mut unknown_tokens = current_tokens
+            .into_iter()
+            .skip(self.unknown_coordinate)
+            .collect::<Vec<TokenTree>>();
+        let unknown_tokens_len = unknown_tokens.len();
+
+        //Remove last tokens after unknown
+        if !self.tokens_after_unknown.is_empty() {
+            unknown_tokens.drain(unknown_tokens_len - self.tokens_after_unknown.len()..);
+        }
+
+        Some(proc_macro2::TokenStream::from_iter(unknown_tokens))
     }
 }
 

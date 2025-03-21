@@ -1,5 +1,5 @@
 [package]
-name = "macros"
+name = "attributes"
 version = "0.1.0"
 edition = "2024"
 
@@ -18,3 +18,4 @@ lazy_static = "*"
 macro-result = { path = "../macro-result" }
 always-context = { path = "../always-context" }
 helpers-macro-safe = { path = "../helpers-macro-safe" }
+helpers-context = { path = "../helpers-context" }

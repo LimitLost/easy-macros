@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 # Hover and click on the version number to see their documentation
 
-macros = { path = "./macros" }
+attributes = { path = "./attributes" }
 always-context = { path = "./always-context" }
 macro-result = { path = "./macro-result" }
 context-internal = { path = "./context-internal" }
