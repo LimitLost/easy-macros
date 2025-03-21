@@ -58,9 +58,33 @@ impl syn::parse::Parse for InputSetup {
     }
 }
 
+pub struct AttrsSignature {
+    attrs: Vec<syn::Attribute>,
+    sig: syn::Signature,
+}
+
+impl syn::parse::Parse for AttrsSignature {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let attrs = input.call(syn::Attribute::parse_outer)?;
+        let sig: syn::Signature = input.parse()?;
+        Ok(AttrsSignature { attrs, sig })
+    }
+}
+
+impl AttrsSignature {
+    fn after_system(&self) -> bool {
+        for attr in self.attrs.iter() {
+            if attr.path().is_ident("after_system") {
+                return true;
+            }
+        }
+        false
+    }
+}
+
 pub struct Input {
     setup: InputSetup,
-    default_cases: Punctuated<Signature, Token![;]>,
+    default_cases: Punctuated<AttrsSignature, Token![;]>,
     special_cases: Punctuated<Signature, Token![;]>,
 }
 
@@ -114,6 +138,13 @@ pub enum ReferenceType {
     Immutable,
     // ///Aka Dereference
     // Unbox,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum AdditionalType {
+    Reference,
+    ///Should add .clone() to the argument
+    NoReference,
 }
 
 pub struct EssentialFnData {
@@ -288,6 +319,26 @@ fn type_equals(ty1: &syn::Type, ty2: &syn::Type) -> bool {
     }
 }
 
+pub fn additional_type(active: bool, ty: &syn::Type) -> Option<AdditionalType> {
+    if active {
+        if let syn::Type::Reference(_) = ty {
+            Some(AdditionalType::Reference)
+        } else {
+            Some(AdditionalType::NoReference)
+        }
+    } else {
+        None
+    }
+}
+
+fn additional_type_no_ref(active: bool) -> Option<AdditionalType> {
+    if active {
+        Some(AdditionalType::NoReference)
+    } else {
+        None
+    }
+}
+
 impl EssentialFnData {
     pub fn new(sig: Signature) -> Self {
         let mut input_types = Vec::new();
@@ -351,8 +402,7 @@ impl EssentialFnData {
             reference_ty: Option<ReferenceType>,
             ///From the `fields` argument side
             list: bool,
-            ///Should add .clone() to the argument
-            additional_ty: bool,
+            additional_ty: Option<AdditionalType>,
         }
         // key - real_index
         let mut result_args = HashMap::new();
@@ -372,7 +422,7 @@ impl EssentialFnData {
                 arg_data.push(ResultArgData {
                     ident: maybe_ident,
                     reference_ty: None,
-                    additional_ty,
+                    additional_ty: additional_type(additional_ty, maybe_ty),
                     list: false,
                 });
 
@@ -388,7 +438,7 @@ impl EssentialFnData {
                     arg_data.push(ResultArgData {
                         ident: maybe_ident,
                         reference_ty,
-                        additional_ty,
+                        additional_ty: additional_type(additional_ty, maybe_ty),
                         list: false,
                     });
 
@@ -441,7 +491,9 @@ impl EssentialFnData {
                                                 arg_data.push(ResultArgData {
                                                     ident: maybe_ident,
                                                     reference_ty,
-                                                    additional_ty,
+                                                    additional_ty: additional_type_no_ref(
+                                                        additional_ty,
+                                                    ),
                                                     list,
                                                 });
 
@@ -599,9 +651,11 @@ impl EssentialFnData {
                         let arg_ident = arg.ident;
                         let mut before_dot = before_dot.clone();
                         let mut clone = quote! {};
-                        if arg.additional_ty {
+                        if let Some(additional_ty) = &arg.additional_ty {
                             before_dot = Default::default();
-                            if arg.reference_ty.is_none() {
+                            if arg.reference_ty.is_none()
+                                && additional_ty == &AdditionalType::NoReference
+                            {
                                 clone = quote! { .clone() };
                             }
                         }
@@ -629,7 +683,7 @@ impl EssentialFnData {
                             }
                             None => quote! { #before_dot #arg_ident #clone },
                         };
-                        if arg.additional_ty {
+                        if arg.additional_ty.is_some() {
                             additional_data_pos = real_pos;
                             additional_data_argument = Some(tokens);
                         } else if let Some(v) = result_call_arguments.get_mut(index) {
@@ -697,9 +751,11 @@ impl EssentialFnData {
                         }
                         let mut before_dot = before_dot.clone();
                         let mut clone = quote! {};
-                        if arg.additional_ty {
+                        if let Some(additional_ty) = &arg.additional_ty {
                             before_dot = Default::default();
-                            if arg.reference_ty.is_none() {
+                            if arg.reference_ty.is_none()
+                                && additional_ty == &AdditionalType::NoReference
+                            {
                                 clone = quote! { .clone() };
                             }
                         }
@@ -950,6 +1006,7 @@ pub struct MacroData {
     pub fn_names: MacroFnNames,
     pub additional_input_ty: syn::Type,
     pub default_functions: Vec<EssentialFnData>,
+    pub default_functions_after_system: Vec<EssentialFnData>,
     pub special_functions: Vec<EssentialFnData>,
     ///Special calls should happen after the default calls
     pub system_functions: Vec<EssentialFnData>,
@@ -968,8 +1025,13 @@ impl MacroData {
 
         //Create function data
         let mut default_functions = Vec::new();
-        for sig in default_cases.iter() {
-            default_functions.push(EssentialFnData::new(sig.clone()));
+        let mut default_functions_after_system = Vec::new();
+        for sig in default_cases.into_iter() {
+            if sig.after_system() {
+                default_functions_after_system.push(EssentialFnData::new(sig.sig));
+            } else {
+                default_functions.push(EssentialFnData::new(sig.sig));
+            }
         }
 
         let mut special_functions = Vec::new();
@@ -1188,6 +1250,7 @@ impl MacroData {
             fn_names,
             additional_input_ty,
             default_functions,
+            default_functions_after_system,
             special_functions,
             system_functions,
         }

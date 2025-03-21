@@ -1,3 +1,5 @@
+use crate::all_syntax_cases::data::{AdditionalType, additional_type};
+
 use super::data::MacroData;
 use all_syntax_cases_helpers::{matched_check, matched_check_no_fields, struct_check};
 use proc_macro2::Span;
@@ -19,6 +21,7 @@ pub fn item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -202,6 +205,7 @@ pub fn expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -514,6 +518,7 @@ pub fn option_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -540,6 +545,7 @@ pub fn block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -571,6 +577,7 @@ pub fn stmt_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -615,6 +622,7 @@ pub fn bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -646,6 +654,7 @@ pub fn option_bound_lifetimes_search(macro_data: &mut MacroData) -> proc_macro2:
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -677,6 +686,7 @@ pub fn type_param_bound_search(macro_data: &mut MacroData) -> proc_macro2::Token
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -734,6 +744,7 @@ pub fn generic_param_search(macro_data: &mut MacroData) -> proc_macro2::TokenStr
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -789,6 +800,7 @@ pub fn where_predicate_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -838,6 +850,7 @@ pub fn where_clause_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -868,6 +881,7 @@ pub fn option_where_clause_search(macro_data: &mut MacroData) -> proc_macro2::To
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -900,6 +914,7 @@ pub fn generics_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -931,6 +946,7 @@ pub fn impl_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1006,6 +1022,7 @@ pub fn signature_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1044,6 +1061,7 @@ pub fn fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1088,6 +1106,7 @@ pub fn variadic_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1114,6 +1133,7 @@ pub fn variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1145,6 +1165,7 @@ pub fn option_variadic_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1176,6 +1197,7 @@ pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::Token
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1183,6 +1205,12 @@ pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::Token
     let fn_name = &fn_names.item_mod_content;
     let item_fn_name = &fn_names.item;
     let additional_input_name = &fn_names.additional_input_name;
+
+    let clone = match additional_type(true, additional_input_ty) {
+        Some(AdditionalType::NoReference) => quote! {.clone()},
+        Some(AdditionalType::Reference) => quote! {},
+        None => unreachable!("additional_type fn returned none with active: true!"),
+    };
 
     quote! {
         fn #fn_name(
@@ -1192,7 +1220,7 @@ pub fn item_mod_content_search(macro_data: &mut MacroData) -> proc_macro2::Token
             if let Some((_, items)) = search_item {
                 //No need to clone additional since we don't use additional_input multiple times
                 for item in items.iter_mut(){
-                    #item_fn_name(item, #additional_input_name.clone());
+                    #item_fn_name(item, #additional_input_name #clone);
                 }
             }
         }
@@ -1204,6 +1232,7 @@ pub fn fields_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1246,6 +1275,7 @@ pub fn field_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1288,6 +1318,7 @@ pub fn trait_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1359,6 +1390,7 @@ pub fn option_block_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1386,6 +1418,7 @@ pub fn option_eq_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1413,6 +1446,7 @@ pub fn fields_named_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1442,6 +1476,7 @@ pub fn option_box_expr_search(macro_data: &mut MacroData) -> proc_macro2::TokenS
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1469,6 +1504,7 @@ pub fn pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1595,6 +1631,7 @@ pub fn field_pat_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1625,6 +1662,7 @@ pub fn option_at_pat(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1652,6 +1690,7 @@ pub fn option_else_expr_search(macro_data: &mut MacroData) -> proc_macro2::Token
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1679,6 +1718,7 @@ pub fn arm_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1712,6 +1752,7 @@ pub fn arm_guard_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream 
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1741,6 +1782,7 @@ pub fn angle_bracketed_generic_arguments_search(
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1775,6 +1817,7 @@ pub fn option_angle_bracketed_generic_arguments_search(
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1807,6 +1850,7 @@ pub fn generic_argument_search(macro_data: &mut MacroData) -> proc_macro2::Token
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1865,6 +1909,7 @@ pub fn type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -1970,6 +2015,7 @@ pub fn option_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -1997,6 +2043,7 @@ pub fn bare_fn_arg_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2027,6 +2074,7 @@ pub fn return_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2108,6 +2156,7 @@ pub fn variant_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2146,6 +2195,7 @@ pub fn foreign_item_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2220,6 +2270,7 @@ pub fn qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream {
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2253,6 +2304,7 @@ pub fn option_qself_search(macro_data: &mut MacroData) -> proc_macro2::TokenStre
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -2285,6 +2337,7 @@ pub fn option_eq_type_search(macro_data: &mut MacroData) -> proc_macro2::TokenSt
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;
@@ -2312,6 +2365,7 @@ pub fn field_value_search(macro_data: &mut MacroData) -> proc_macro2::TokenStrea
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2348,6 +2402,7 @@ pub fn local_init_search(macro_data: &mut MacroData) -> proc_macro2::TokenStream
         fn_names,
         additional_input_ty,
         default_functions,
+        default_functions_after_system,
         special_functions,
         system_functions,
     } = macro_data;
@@ -2378,6 +2433,7 @@ pub fn option_local_init_search(macro_data: &mut MacroData) -> proc_macro2::Toke
         fn_names,
         additional_input_ty,
         default_functions: _,
+        default_functions_after_system: _,
         special_functions: _,
         system_functions: _,
     } = macro_data;

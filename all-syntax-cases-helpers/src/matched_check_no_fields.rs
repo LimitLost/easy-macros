@@ -82,6 +82,12 @@ pub fn matched_check_no_fields(item: TokenStream) -> TokenStream {
                         default_calls.push(call);
                     }
                 }
+                //Functions provided by user with #[after_system]
+                for func in default_functions_after_system.iter_mut(){
+                    if let Some(call) = func.all_inputs_check(&fields1, None, (additional_input_name, additional_input_ty)){
+                        default_calls.push(call);
+                    }
+                }
 
                 // Workaround since we can't create #example without spaces between tokens (added by compiler)
                 let default_calls_braced = crate::helpers::braced(crate::helpers::iter_token_stream(default_calls.into_iter()));
