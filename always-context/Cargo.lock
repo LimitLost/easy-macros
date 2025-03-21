@@ -27,6 +27,7 @@ name = "always-context"
 version = "0.1.0"
 dependencies = [
  "all-syntax-cases",
+ "helpers-macro-safe",
  "proc-macro2",
  "quote",
  "replace_with",
@@ -39,6 +40,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
+ "replace_with",
  "syn",
 ]
 

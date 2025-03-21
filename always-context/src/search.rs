@@ -1,10 +1,11 @@
 use all_syntax_cases::all_syntax_cases;
-use proc_macro::TokenStream;
 use quote::ToTokens;
-use syn::{Expr, Macro, punctuated::Punctuated, spanned::Spanned};
+use syn::spanned::Spanned;
+
+use crate::context_gen::{context, context_no_func_input};
 
 #[derive(Debug, Clone, Copy)]
-enum NoContext {
+pub enum NoContext {
     ///Don't put .with_context(context!()) at all
     /// #[no_context] attribute
     All,
@@ -32,35 +33,7 @@ fn always_context_attr_check(attrs: &mut Vec<syn::Attribute>) -> Option<NoContex
     None
 }
 
-fn context_base(
-    expr: Box<syn::Expr>,
-    question_span: proc_macro2::Span,
-    context_macro_input: proc_macro2::TokenStream,
-) -> Box<syn::Expr> {
-    let mut punc = Punctuated::new();
-    punc.push(Expr::Macro(syn::ExprMacro {
-        attrs: vec![],
-        mac: Macro {
-            path: syn::parse_quote_spanned! {question_span=>
-                context
-            },
-            bang_token: Default::default(),
-            delimiter: syn::MacroDelimiter::Paren(Default::default()),
-            tokens: context_macro_input,
-        },
-    }));
-
-    Box::new(syn::Expr::MethodCall(syn::ExprMethodCall {
-        attrs: vec![],
-        receiver: expr,
-        dot_token: Default::default(),
-        method: quote::format_ident!("with_context", span = question_span),
-        turbofish: None,
-        paren_token: Default::default(),
-        args: punc,
-    }))
-}
-
+//always_context syntax cases
 all_syntax_cases! {
     setup => {
         generated_fn_prefix: "always_context",
@@ -132,27 +105,6 @@ fn always_context_try(expr: &mut syn::ExprTry, mut no_context: Option<NoContext>
     }
 }
 
-fn context_no_func_input(expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Box<syn::Expr> {
-    context_base(expr, question_span, Default::default())
-}
-
-fn context(expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Box<syn::Expr> {
-    let mut format_str = String::new();
-
-    //TODO Find all variables used in our expr
-
-    context_base(expr, question_span, quote::quote_spanned! {question_span=>})
-}
-
-pub fn always_context(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let mut parsed = syn::parse_macro_input!(item as syn::Item);
-    //Adds .with_context(context!()) before all '?' without them
-    //Maybe add also function inputs with names into context?
-
-    always_context_item_handle(&mut parsed, None);
-
-    //TODO #[no_context] attribute, when we don't want context from this but our own?
-    //TODO #[no_context_inputs] attribute, when we don't want function inputs in context
-
-    parsed.into_token_stream().into()
+pub fn item_handle(item: &mut syn::Item, no_context: Option<NoContext>) {
+    always_context_item_handle(item, no_context);
 }

@@ -8,10 +8,12 @@ proc-macro = true
 
 [dependencies]
 # Hover and click on the version number to see their documentation
-syn = {version="2.0",features = ["full"]}
+syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 
 replace_with = "0.1.7"
 
 all-syntax-cases = { path = "../all-syntax-cases" }
+
+helpers-macro-safe = { path = "../helpers-macro-safe" }
