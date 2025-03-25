@@ -4,7 +4,6 @@ use helpers_context::context;
 use lazy_static::lazy_static;
 use proc_macro2::TokenTree;
 use quote::ToTokens;
-use syn::{Ident, LitStr};
 
 lazy_static! {
     static ref UNKNOWN: &'static str = "__unknown__";
@@ -13,6 +12,8 @@ lazy_static! {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
+///Real implementation is in attributes crate
 pub struct AttrWithUnknown {
     //Unknown coordinates
     ///Inside of final group/global
@@ -28,6 +29,8 @@ pub struct AttrWithUnknown {
     after_unknown: String,
 }
 #[derive(Debug)]
+#[allow(dead_code)]
+///Real implementation is in attributes crate
 struct PartialUnknownPos {
     skip_start: usize,
     skip_end: usize,
@@ -160,141 +163,4 @@ impl AttrWithUnknown {
         }
         Ok(None)
     }
-
-    pub fn get_unknown(
-        &self,
-        attr: &syn::Attribute,
-    ) -> anyhow::Result<Option<proc_macro2::TokenStream>> {
-        //Check if start and end aligns with before and after unknown
-        let attr_tokens = attr.to_token_stream();
-        let attr_str = attr_tokens.to_string();
-
-        //Speed up the process, check if the string starts and ends with tokens before and after the unknown
-        if !(attr_str.starts_with(&self.before_unknown) && attr_str.ends_with(&self.after_unknown))
-        {
-            return Ok(None);
-        }
-
-        let mut current_tokens = attr_tokens;
-
-        for group_index in self.unknown_group_coordinates.iter() {
-            match current_tokens.into_iter().nth(*group_index) {
-                Some(TokenTree::Group(group)) => {
-                    current_tokens = group.stream();
-                }
-                i => {
-                    anyhow::bail!("Bad group index! Expected Group, got {i:?} | self: {self:?}");
-                }
-            }
-        }
-
-        //Get tokens at the unknown (and after)
-        let mut unknown_tokens = current_tokens
-            .into_iter()
-            .skip(self.unknown_coordinate)
-            .collect::<Vec<TokenTree>>();
-        let unknown_tokens_len = unknown_tokens.len();
-
-        // Remove tokens after unknown
-        if !self.tokens_after_unknown.is_empty() {
-            unknown_tokens.drain(unknown_tokens_len - self.tokens_after_unknown.len()..);
-        }
-        // Remove tokens before unknown
-        unknown_tokens.drain(..self.unknown_coordinate);
-
-        // Handle partial_unknown_cords
-        {
-            let partial_unknown_cords = &self.partial_unknown_cords;
-
-            //Remove before unknown in ident/literal
-            if partial_unknown_cords.skip_start != 0 {
-                let mut remove_first = false;
-                match unknown_tokens.first_mut() {
-                    Some(TokenTree::Ident(ident)) => {
-                        let ident_str = ident.to_string();
-                        let unknown_replacement = &ident_str[partial_unknown_cords.skip_start..];
-
-                        if unknown_replacement.is_empty() {
-                            remove_first = true;
-                        } else {
-                            *ident = Ident::new(unknown_replacement, ident.span());
-                        }
-                    }
-                    Some(TokenTree::Literal(literal)) => {
-                        let lit_str = syn::parse2::<LitStr>(proc_macro2::TokenStream::from(
-                            TokenTree::Literal(literal.clone()),
-                        ))?;
-                        let literal_str = lit_str.value();
-                        let unknown_replacement = &literal_str[partial_unknown_cords.skip_start..];
-
-                        if unknown_replacement.is_empty() {
-                            remove_first = true;
-                        } else {
-                            *literal = proc_macro2::Literal::string(unknown_replacement);
-                        }
-                    }
-                    Some(i) => anyhow::bail!(
-                        "Expected ident or literal (for removing text before unknown), got {i}"
-                    ),
-                    None => {
-                        anyhow::bail!(
-                            "Unknown tokens is empty while looking for partial unknown! | self: {self:?}"
-                        );
-                    }
-                }
-
-                if remove_first {
-                    unknown_tokens.remove(0);
-                }
-            }
-            //Remove after unknown in ident/literal
-            if partial_unknown_cords.skip_end != 0 {
-                let mut remove_last = false;
-                match unknown_tokens.last_mut() {
-                    Some(TokenTree::Ident(ident)) => {
-                        let ident_str = ident.to_string();
-                        let unknown_replacement =
-                            &ident_str[0..ident_str.len() - partial_unknown_cords.skip_end];
-
-                        if unknown_replacement.is_empty() {
-                            remove_last = true;
-                        } else {
-                            *ident = Ident::new(unknown_replacement, ident.span());
-                        }
-                    }
-                    Some(TokenTree::Literal(literal)) => {
-                        let lit_str = syn::parse2::<LitStr>(proc_macro2::TokenStream::from(
-                            TokenTree::Literal(literal.clone()),
-                        ))?;
-                        let literal_str = lit_str.value();
-                        let unknown_replacement =
-                            &literal_str[0..literal_str.len() - partial_unknown_cords.skip_end];
-
-                        if unknown_replacement.is_empty() {
-                            remove_last = true;
-                        } else {
-                            *literal = proc_macro2::Literal::string(unknown_replacement);
-                        }
-                    }
-                    Some(i) => anyhow::bail!(
-                        "Expected ident or literal (for removing text after unknown), got {i}"
-                    ),
-                    None => {
-                        anyhow::bail!(
-                            "Unknown tokens is empty while looking for partial unknown! | self: {self:?}"
-                        );
-                    }
-                }
-
-                if remove_last {
-                    unknown_tokens.pop();
-                }
-            }
-        }
-
-        Ok(Some(proc_macro2::TokenStream::from_iter(unknown_tokens)))
-    }
 }
-
-/// Re-export macros
-pub use attributes_macros::{get_attributes, has_attributes};
