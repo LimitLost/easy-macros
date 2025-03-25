@@ -11,3 +11,6 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 replace_with = "0.1.7"
+
+# Allows to get crate from main Cargo.toml
+proc-macro-crate = "3.3.0"
