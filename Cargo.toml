@@ -6,15 +6,41 @@ edition = "2024"
 [dependencies]
 # Hover and click on the version number to see their documentation
 
-attributes = { path = "./attributes" }
-always-context = { path = "./always-context" }
-macro-result = { path = "./macro-result" }
-context-internal = { path = "./context-internal" }
-all-syntax-cases = { path = "./all-syntax-cases" }
-helpers = { path = "./helpers" }
+# Procedural macros
+all-syntax-cases = { path = "./all-syntax-cases", optional = true }
+always-context = { path = "./always-context", optional = true }
+attributes = { path = "./attributes", optional = true }
+macro-result = { path = "./macro-result", optional = true }
 
+# Helpers for creating procedural macros
+helpers = { path = "./helpers", optional = true }
+helpers-context = { path = "./helpers-context", optional = true }
+
+syn = { version = "2.0", features = ["full"], optional = true }
+quote = { version = "1.0", optional = true }
+proc-macro2 = { version = "1.0", optional = true }
+
+
+[dev-dependencies]
+# Procedural macro tests
 proc_macro_tests = { path = "./proc_macro_tests" }
+all-syntax-cases = { path = "./all-syntax-cases" }
 
-syn = "2.0"
+syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
+
+
+[features]
+default = []
+for-macro = [
+    "dep:all-syntax-cases",
+    "dep:always-context",
+    "dep:attributes",
+    "dep:macro-result",
+    "dep:helpers",
+    "dep:syn",
+    "dep:quote",
+    "dep:proc-macro2",
+]
+general = ["dep:always-context", "dep:helpers-context"]
