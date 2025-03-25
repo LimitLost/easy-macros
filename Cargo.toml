@@ -12,6 +12,8 @@ always-context = { path = "./always-context", optional = true }
 attributes = { path = "./attributes", optional = true }
 macro-result = { path = "./macro-result", optional = true }
 
+always-context-build = { path = "./always-context-build", optional = true }
+
 # Helpers for creating procedural macros
 helpers = { path = "./helpers", optional = true }
 helpers-context = { path = "./helpers-context", optional = true }
@@ -19,6 +21,7 @@ helpers-context = { path = "./helpers-context", optional = true }
 syn = { version = "2.0", features = ["full"], optional = true }
 quote = { version = "1.0", optional = true }
 proc-macro2 = { version = "1.0", optional = true }
+anyhow = { version = "1", optional = true }
 
 
 [dev-dependencies]
@@ -42,5 +45,7 @@ for-macro = [
     "dep:syn",
     "dep:quote",
     "dep:proc-macro2",
+    "dep:anyhow",
 ]
 general = ["dep:always-context", "dep:helpers-context"]
+build = ["dep:always-context-build"]
