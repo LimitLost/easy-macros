@@ -12,7 +12,7 @@ fn context_base(
     question_span: proc_macro2::Span,
     context_macro_input: proc_macro2::TokenStream,
 ) -> Box<syn::Expr> {
-    let mut punc = Punctuated::new();
+    let mut punc: Punctuated<Expr, syn::token::Comma> = Punctuated::new();
     punc.push(Expr::Macro(syn::ExprMacro {
         attrs: vec![],
         mac: Macro {
@@ -28,11 +28,11 @@ fn context_base(
     Box::new(syn::Expr::MethodCall(syn::ExprMethodCall {
         attrs: vec![],
         receiver: expr,
-        dot_token: Default::default(),
+        dot_token: syn::parse_quote_spanned! {question_span=> . },
         method: quote::format_ident!("with_context", span = question_span),
         turbofish: None,
         paren_token: Default::default(),
-        args: punc,
+        args: syn::parse_quote_spanned! {question_span=> #punc },
     }))
 }
 
@@ -43,12 +43,23 @@ pub fn context_no_func_input(
     context_base(expr, question_span, Default::default())
 }
 
+struct InputFound {
+    pub input: TokenStream,
+    pub display: bool,
+}
+
+impl quote::ToTokens for InputFound {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.input.to_tokens(tokens);
+    }
+}
+
 struct FoundContextInfo {
     ///If None show errors on unsupported Expr's
     call_found: Option<TokenStream>,
     ///Contains errors that should be shown by expr_error_wrap with compile_error!()
     current_errors: Vec<String>,
-    inputs_found: Vec<TokenStream>,
+    inputs_found: Vec<InputFound>,
 }
 
 impl ErrorData for FoundContextInfo {
@@ -125,55 +136,55 @@ fn context_method_call_handle(
 fn context_block_handle(_block: &mut syn::ExprBlock, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprBlock right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprBlock right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprIf (raise error (unsupported syntax))
 fn context_if_handle(_if: &mut syn::ExprIf, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprIf right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprIf right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprMatch (raise error (unsupported syntax))
 fn context_match_handle(_match: &mut syn::ExprMatch, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprMatch right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprMatch right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprWhile (raise error (unsupported syntax))
 fn context_while_handle(_while: &mut syn::ExprWhile, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprWhile right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprWhile right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprField (raise error (unsupported syntax))
 fn context_field_handle(_field: &mut syn::ExprField, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprField right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprField right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprForLoop (raise error (unsupported syntax))
 fn context_for_loop_handle(_for_loop: &mut syn::ExprForLoop, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprForLoop right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprForLoop right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprLoop (raise error (unsupported syntax))
 fn context_loop_handle(_loop: &mut syn::ExprLoop, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprLoop right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprLoop right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
 }
 // Handle ExprMacro (raise error (unsupported syntax))
 fn context_macro_handle(_macro: &mut syn::ExprMacro, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprMacro right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprMacro right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) ) ".to_string());
 }
 // Handle ExprPath (raise error (unsupported syntax))
 fn context_path_handle(_path: &mut syn::ExprPath, context_info: &mut FoundContextInfo) {
     context_info
         .current_errors
-        .push("Always Context Macro: ExprPath right before '?' is not supported".to_string());
+        .push("Always Context Macro: ExprPath right before '?' is not supported (If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 
 pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Box<syn::Expr> {
@@ -195,12 +206,19 @@ pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Bo
         let mut call_str = readable_token_stream(&quote_parsed.into_token_stream().to_string());
         if !inputs_found.is_empty() {
             call_str.push_str("\r\n\r\nArguments:\r\n");
-            //Add arguments to call_str in format: "argument: {}"
+            //Add arguments to call_str in format: "argument: {:?}"
             for input in &inputs_found {
-                call_str.push_str(&format!(
-                    "{}: {{}}\r\n\r\n",
-                    readable_token_stream(&input.to_token_stream().to_string())
-                ));
+                if input.display {
+                    call_str.push_str(&format!(
+                        "{}: {{}}\r\n\r\n",
+                        readable_token_stream(&input.to_token_stream().to_string())
+                    ));
+                } else {
+                    call_str.push_str(&format!(
+                        "{}: {{:?}}\r\n\r\n",
+                        readable_token_stream(&input.to_token_stream().to_string())
+                    ));
+                }
             }
         }
 

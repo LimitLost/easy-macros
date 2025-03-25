@@ -8,7 +8,7 @@ use search::item_handle;
 #[proc_macro_attribute]
 /// Procedural Macro Attribute
 ///
-/// Adds .with_context(context!()) before all '?' without them
+/// Adds .with_context(context!()) before all '?' without them (expects anyhow::Result function output, don't use type aliases)
 ///
 /// Also adds function names and inputs into context!() macro (by default)
 ///
@@ -22,7 +22,10 @@ use search::item_handle;
 ///
 /// # Supported attributes (function call arguments)
 ///
-/// - `#[context(path)]` - adds `.display()` after argument, inside of `context!()` macro, useful for `std::path::PathBuf` and `std::path::Path`
+/// - `#[context(display)]` - uses `{}` instead of `{:?}`, inside of `context!()` macro, useful when our input doesn't have `Debug` trait but it has `Display` trait
+/// - `#[context(.example())` - uses `.example()` on our argument to get value for display, inside of `context!()` macro
+/// - `#[context(tokens)]` -  same as `#[context(display)] #[context(.to_token_stream())]`
+/// - `#[context(tokens_vec)]` - same as `#[context(display)] #[context(.iter().map(|el|el.to_token_stream()).collect::<TokenStream>())]`
 pub fn always_context(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut parsed = syn::parse_macro_input!(item as syn::Item);
     //Adds .with_context(context!()) before all '?' without them

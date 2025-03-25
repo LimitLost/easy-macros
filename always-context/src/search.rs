@@ -1,6 +1,6 @@
 use all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
-use syn::spanned::Spanned;
+use syn::{ItemImpl, ItemTrait, TraitItem, Type, spanned::Spanned};
 
 use crate::context_gen::{context, context_no_func_input};
 
@@ -43,8 +43,10 @@ all_syntax_cases! {
         fn handle_attributes(attrs: &mut Vec<syn::Attribute>, no_context: &mut Option<NoContext>);
     }
     special_cases => {
-        fn always_context_try(expr_try: &mut syn::ExprTry, no_context: Option<NoContext>) ;
-        fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>) ;
+        fn always_context_try(expr_try: &mut syn::ExprTry, no_context: Option<NoContext>);
+        fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>);
+        fn always_context_item_trait(item_trait: &mut ItemTrait, no_context: Option<NoContext>);
+        fn always_context_item_impl(item_impl: &mut ItemImpl, no_context: Option<NoContext>);
     }
 }
 
@@ -101,6 +103,106 @@ fn always_context_try(expr: &mut syn::ExprTry, mut no_context: Option<NoContext>
             replace_with::replace_with_or_abort(&mut expr.expr, |ex| {
                 context(ex, expr.question_token.span())
             });
+        }
+    }
+}
+///Returns `true` if the type is `anyhow::Result`
+fn anyhow_result_check(ty: &Type) -> bool {
+    if let Type::Path(ty) = ty {
+        let mut segments = ty.path.segments.iter();
+        if let Some(segment) = segments.next() {
+            if segment.ident != "anyhow" {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        if let Some(segment) = segments.next() {
+            if segment.ident == "Result" {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn always_context_item_trait(item_trait: &mut ItemTrait, mut no_context: Option<NoContext>) {
+    let ItemTrait {
+        attrs,
+        vis: _,
+        unsafety: _,
+        auto_token: _,
+        restriction: _,
+        trait_token: _,
+        ident: _,
+        generics: _,
+        colon_token: _,
+        supertraits: _,
+        brace_token: _,
+        items,
+    } = item_trait;
+
+    handle_attributes(attrs, &mut no_context);
+
+    for item in items.iter_mut() {
+        if let TraitItem::Fn(f) = item {
+            if let Some(block) = &mut f.default {
+                match &mut f.sig.output {
+                    syn::ReturnType::Default => {
+                        //No return type, don't add ? anywhere
+                    }
+                    syn::ReturnType::Type(_, ty) => {
+                        //Check if our type is anyhow::Result
+                        if !anyhow_result_check(ty) {
+                            continue;
+                        }
+                        //Attr check
+                        let mut no_context = no_context;
+                        handle_attributes(&mut f.attrs, &mut no_context);
+
+                        //Add context to block
+                        always_context_block_handle(block, no_context);
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn always_context_item_impl(item_impl: &mut ItemImpl, mut no_context: Option<NoContext>) {
+    let ItemImpl {
+        attrs,
+        defaultness: _,
+        unsafety: _,
+        impl_token: _,
+        generics: _,
+        trait_: _,
+        self_ty: _,
+        brace_token: _,
+        items,
+    } = item_impl;
+
+    handle_attributes(attrs, &mut no_context);
+
+    for item in items.iter_mut() {
+        if let syn::ImplItem::Fn(m) = item {
+            match &mut m.sig.output {
+                syn::ReturnType::Default => {
+                    //No return type, don't add ? anywhere
+                }
+                syn::ReturnType::Type(_, ty) => {
+                    //Check if our type is anyhow::Result
+                    if !anyhow_result_check(ty) {
+                        continue;
+                    }
+                    //Attr check
+                    let mut no_context = no_context;
+                    handle_attributes(&mut m.attrs, &mut no_context);
+
+                    //Add context to block
+                    always_context_block_handle(&mut m.block, no_context);
+                }
+            }
         }
     }
 }
