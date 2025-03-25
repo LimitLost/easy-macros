@@ -52,8 +52,12 @@ pub fn fields_with_attributes(
                 }
             };
 
-            fields #iter .filter(|field|{
-                #crate_root::has_attributes!(field,#(#attributes)*)
+            fields #iter .enumerate() .filter_map(|(index,field)|{
+                if #crate_root::has_attributes!(field,#(#attributes)*) {
+                    Some((index, field))
+                } else {
+                    None
+                }
             })
         }
     });

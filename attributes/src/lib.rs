@@ -297,4 +297,4 @@ impl AttrWithUnknown {
 }
 
 /// Re-export macros
-pub use attributes_macros::{get_attributes, has_attributes};
+pub use attributes_macros::*;

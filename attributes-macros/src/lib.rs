@@ -77,7 +77,7 @@ pub fn get_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 /// fields_with_attributes!(&mut item, #[attr1]#[attr2]#[attr3]);
 /// ```
 /// # Return
-/// Returns `Iterator<Item = syn::Field>` of fields with the passed in attributes (all attributes must be present)
+/// Returns `Iterator<Item = (usize,syn::Field)>` (where `.0` is the index, `.1` is a field) of fields with the passed in attributes (all attributes must be present)
 pub fn fields_with_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
     fields_with_attributes::fields_with_attributes(item)
 }
@@ -99,7 +99,7 @@ pub fn fields_with_attributes(item: TokenStream) -> anyhow::Result<TokenStream> 
 /// fields_get_attributes!(&mut item, #[attr1]#[attr2]#[attr3(__unknown__)]);
 /// ```
 /// # Return
-/// Returns `Iterator<Item = (syn::Field, Vec<proc_macro2::TokenStream>) >` where `.0` is a field and `.1` are unknown replacements, all attributes must be present, for the field to be returned
+/// Returns `Vec< (usize, syn::Field, Vec<proc_macro2::TokenStream>) >` where `.0` is the index, `.1` is a field and `.2` are unknown replacements, all attributes must be present, for the field to be returned
 pub fn fields_get_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
     fields_get_attributes::fields_get_attributes(item)
 }
