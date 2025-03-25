@@ -1,9 +1,9 @@
 pub mod macros {
-    pub use macros::*;
-    pub use macros2::*;
+    pub use always_context::*;
+    pub use attributes::*;
 }
 
 pub use helpers;
 
-// #[cfg(test)]
+#[cfg(test)]
 mod macro_tests;
