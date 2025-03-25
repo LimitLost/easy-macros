@@ -57,9 +57,19 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
         for (index, attr) in our_func.attrs.iter().enumerate() {
             let attr_name = attr.path().to_token_stream().to_string();
             if attr_name == "proc_macro" || attr_name == "proc_macro_derive" {
-                err_result = Some(
-                    quote::quote! { quote::quote! {compile_error!("{}\r\n\r\nDebug Info: {:?}", ___macro_err, ___macro_err);} },
-                );
+                err_result = Some(quote::quote! {
+                let formatted_error = format!("{:?}", ___macro_err);
+                let mut result=quote::quote! {compile_error!};
+
+                //Adds (formatted_error) to the end of the result
+                result.extend( proc_macro2::TokenStream::from(proc_macro2::TokenTree::Group(proc_macro2::Group::new(
+                    proc_macro2::Delimiter::Parenthesis,
+                    syn::LitStr::new(&formatted_error, proc_macro2::Span::call_site()).into_token_stream(),
+                ))));
+
+                result.extend(quote::quote! {;});
+
+                result });
                 macro_attr = Some(attr.clone());
                 attr_index = Some(index);
                 break;
@@ -74,10 +84,19 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
                     panic!("proc_macro_attribute function must have two arguments");
                 };
                 err_result = Some(quote::quote! {
-                   let mut result = quote::quote! {compile_error!("{}\r\n\r\nDebug Info: {:?}", ___macro_err, ___macro_err);}
+                    let formatted_error= format!("{:?}", ___macro_err);
+                    let mut result = quote::quote! {compile_error!};
 
-                   result.extend(proc_macro2::TokenStream::from(#second_input_arg));
-                   result
+                    //Adds (formatted_error) to the end of the result
+                    result.extend( proc_macro2::TokenStream::from(proc_macro2::TokenTree::Group(proc_macro2::Group::new(
+                        proc_macro2::Delimiter::Parenthesis,
+                        syn::LitStr::new(&formatted_error, proc_macro2::Span::call_site()).into_token_stream(),
+                    ))));
+
+                    result.extend(quote::quote! {;});
+
+                    result.extend(proc_macro2::TokenStream::from(#second_input_arg));
+                    result
                 });
                 macro_attr = Some(attr.clone());
                 attr_index = Some(index);
