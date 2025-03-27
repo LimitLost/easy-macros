@@ -7,17 +7,22 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{Expr, Macro, punctuated::Punctuated};
 
+use crate::context_crate;
+
 fn context_base(
     expr: Box<syn::Expr>,
     question_span: proc_macro2::Span,
     context_macro_input: proc_macro2::TokenStream,
 ) -> Box<syn::Expr> {
     let mut punc: Punctuated<Expr, syn::token::Comma> = Punctuated::new();
+
+    let context_crate = context_crate();
+
     punc.push(Expr::Macro(syn::ExprMacro {
         attrs: vec![],
         mac: Macro {
             path: syn::parse_quote_spanned! {question_span=>
-                context
+                #context_crate::context
             },
             bang_token: Default::default(),
             delimiter: syn::MacroDelimiter::Paren(Default::default()),

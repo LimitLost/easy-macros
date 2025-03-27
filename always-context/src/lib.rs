@@ -1,9 +1,21 @@
 mod context_gen;
 mod search;
 
+use helpers_macro_safe::find_crate_list;
 use proc_macro::TokenStream;
-use quote::ToTokens;
+use quote::{ToTokens, quote};
 use search::item_handle;
+
+fn context_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate_list(&[
+        ("easy-lib", quote! {::helpers}),
+        ("easy-macros", quote! {::helpers}),
+    ]) {
+        found
+    } else {
+        quote! {self}
+    }
+}
 
 #[proc_macro_attribute]
 /// Procedural Macro Attribute
