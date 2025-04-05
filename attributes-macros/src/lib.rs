@@ -19,7 +19,18 @@ fn root_macros_crate() -> proc_macro2::TokenStream {
     ]) {
         found
     } else {
-        quote! {self}
+        quote! {}
+    }
+}
+
+fn context_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate_list(&[
+        ("easy-lib", quote! {::helpers}),
+        ("easy-macros", quote! {::helpers}),
+    ]) {
+        found
+    } else {
+        quote! {}
     }
 }
 

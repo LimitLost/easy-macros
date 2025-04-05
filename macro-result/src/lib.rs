@@ -1,5 +1,14 @@
+use helpers_macro_safe::find_crate_list;
 use proc_macro::TokenStream;
-use quote::ToTokens;
+use quote::{ToTokens, quote};
+
+fn external_crate_parent() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate_list(&[("easy-lib", quote! {}), ("easy-macros", quote! {})]) {
+        found
+    } else {
+        quote! {}
+    }
+}
 
 #[proc_macro_attribute]
 /// Allows for macros with `anyhow::Result<TokenStream>` return type
@@ -7,6 +16,8 @@ use quote::ToTokens;
 ///Creates a wrapper for passed in function, passed in function is placed inside of wrapper
 pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut our_func = syn::parse_macro_input!(item as syn::ItemFn);
+
+    let parent_crate = external_crate_parent();
 
     //Check if output of our function is a anyhow::Result<TokenStream>
     let func_output = &our_func.sig.output;
@@ -59,15 +70,15 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if attr_name == "proc_macro" || attr_name == "proc_macro_derive" {
                 err_result = Some(quote::quote! {
                 let formatted_error = format!("{:?}", ___macro_err);
-                let mut result=quote::quote! {compile_error!};
+                let mut result=#parent_crate::quote::quote! {compile_error!};
 
                 //Adds (formatted_error) to the end of the result
-                result.extend( proc_macro2::TokenStream::from(proc_macro2::TokenTree::Group(proc_macro2::Group::new(
-                    proc_macro2::Delimiter::Parenthesis,
-                    syn::LitStr::new(&formatted_error, proc_macro2::Span::call_site()).into_token_stream(),
+                result.extend( #parent_crate::proc_macro2::TokenStream::from(#parent_crate::proc_macro2::TokenTree::Group(#parent_crate::proc_macro2::Group::new(
+                    #parent_crate::proc_macro2::Delimiter::Parenthesis,
+                    #parent_crate::syn::LitStr::new(&formatted_error, #parent_crate::proc_macro2::Span::call_site()).into_token_stream(),
                 ))));
 
-                result.extend(quote::quote! {;});
+                result.extend(#parent_crate::quote::quote! {;});
 
                 result });
                 macro_attr = Some(attr.clone());
@@ -85,17 +96,17 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 };
                 err_result = Some(quote::quote! {
                     let formatted_error= format!("{:?}", ___macro_err);
-                    let mut result = quote::quote! {compile_error!};
+                    let mut result = #parent_crate::quote::quote! {compile_error!};
 
                     //Adds (formatted_error) to the end of the result
-                    result.extend( proc_macro2::TokenStream::from(proc_macro2::TokenTree::Group(proc_macro2::Group::new(
-                        proc_macro2::Delimiter::Parenthesis,
-                        syn::LitStr::new(&formatted_error, proc_macro2::Span::call_site()).into_token_stream(),
+                    result.extend( #parent_crate::proc_macro2::TokenStream::from(#parent_crate::proc_macro2::TokenTree::Group(#parent_crate::proc_macro2::Group::new(
+                        #parent_crate::proc_macro2::Delimiter::Parenthesis,
+                        #parent_crate::syn::LitStr::new(&formatted_error, #parent_crate::proc_macro2::Span::call_site()).into_token_stream(),
                     ))));
 
-                    result.extend(quote::quote! {;});
+                    result.extend(#parent_crate::quote::quote! {;});
 
-                    result.extend(proc_macro2::TokenStream::from(#second_input_arg));
+                    result.extend(#parent_crate::proc_macro2::TokenStream::from(#second_input_arg));
                     result
                 });
                 macro_attr = Some(attr.clone());
@@ -118,6 +129,8 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let result = quote::quote! {
         #macro_attr
         pub fn #func_name(#inputs) -> TokenStream {
+
+            use #parent_crate::quote::ToTokens;
 
             #our_func
 
