@@ -208,21 +208,21 @@ pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Bo
         let inputs_found = found_context_info.inputs_found;
         // This adds default into_token_stream() spaces, which quote!{} macro doesn't do
         let quote_parsed: syn::Expr = syn::parse_quote! {#call_found(#(#inputs_found),*)};
-        let mut call_str = readable_token_stream(&quote_parsed.into_token_stream().to_string());
+        let mut call_str = readable_token_stream(&quote_parsed.into_token_stream().to_string())
+            .replace('{', "{{")
+            .replace('}', "}}");
         if !inputs_found.is_empty() {
             call_str.push_str("\r\n\r\nArguments:\r\n");
             //Add arguments to call_str in format: "argument: {:?}"
             for input in &inputs_found {
+                let formatted = readable_token_stream(&input.to_token_stream().to_string())
+                    .replace('{', "{{")
+                    .replace('}', "}}");
+
                 if input.display {
-                    call_str.push_str(&format!(
-                        "{}: {{}}\r\n\r\n",
-                        readable_token_stream(&input.to_token_stream().to_string())
-                    ));
+                    call_str.push_str(&format!("{}: {{}}\r\n\r\n", formatted));
                 } else {
-                    call_str.push_str(&format!(
-                        "{}: {{:?}}\r\n\r\n",
-                        readable_token_stream(&input.to_token_stream().to_string())
-                    ));
+                    call_str.push_str(&format!("{}: {{:?}}\r\n\r\n", formatted));
                 }
             }
         }
