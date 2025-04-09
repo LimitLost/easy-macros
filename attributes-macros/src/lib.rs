@@ -8,7 +8,7 @@ use always_context::always_context;
 use helpers_macro_safe::find_crate_list;
 use macro_result::macro_result;
 use proc_macro::TokenStream;
-use quote::{ToTokens, quote};
+use quote::quote;
 
 fn root_macros_crate() -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[

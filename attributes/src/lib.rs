@@ -200,14 +200,6 @@ impl AttrWithUnknown {
         if !self.tokens_after_unknown.is_empty() {
             unknown_tokens.drain(unknown_tokens_len - self.tokens_after_unknown.len()..);
         }
-        if self.unknown_coordinate > unknown_tokens.len() {
-            anyhow::bail!(
-                "Unknown coordinate is greater than unknown tokens length! | self: {self:?} | unknown_tokens: {:?}",
-                unknown_tokens
-            );
-        }
-        // Remove tokens before unknown
-        unknown_tokens.drain(..self.unknown_coordinate);
 
         // Handle partial_unknown_cords
         {

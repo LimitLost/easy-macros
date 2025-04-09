@@ -2,7 +2,6 @@ use anyhow::Context;
 use attributes::{get_attributes, has_attributes};
 use helpers::{MacroResult, context};
 use proc_macro::TokenStream;
-use quote::ToTokens;
 use quote::quote;
 use syn::ItemStruct;
 
