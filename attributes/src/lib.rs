@@ -40,8 +40,9 @@ impl AttrWithUnknown {
         let string = stream.to_string();
         if let Some(pos) = string.find(*UNKNOWN) {
             //Get before and after unknown
-            let before_unknown = string[..pos].to_string();
-            let after_unknown = string[pos + UNKNOWN.len()..].to_string();
+            let before_unknown = string.get(..pos)?.to_string();
+            let after_unknown = string.get(pos + UNKNOWN.len()..)?.to_string();
+
             //Get all tokens, coordinates, and tokens after unknown
             //later remove last coordinate and use it as `unknown_coordinate`
             let mut unknown_group_coordinates = vec![];
@@ -198,6 +199,12 @@ impl AttrWithUnknown {
         // Remove tokens after unknown
         if !self.tokens_after_unknown.is_empty() {
             unknown_tokens.drain(unknown_tokens_len - self.tokens_after_unknown.len()..);
+        }
+        if self.unknown_coordinate > unknown_tokens.len() {
+            anyhow::bail!(
+                "Unknown coordinate is greater than unknown tokens length! | self: {self:?} | unknown_tokens: {:?}",
+                unknown_tokens
+            );
         }
         // Remove tokens before unknown
         unknown_tokens.drain(..self.unknown_coordinate);

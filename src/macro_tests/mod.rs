@@ -35,4 +35,5 @@ all_syntax_cases! {
 #[bbb((lol = X))]
 #[bbb((lol$$$X))]
 #[bbb((lol((lul))X))]
+#[sql(table = spec)]
 struct _AttributeTest {}

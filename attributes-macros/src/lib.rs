@@ -30,7 +30,7 @@ fn context_crate() -> proc_macro2::TokenStream {
     ]) {
         found
     } else {
-        quote! {}
+        quote! {self}
     }
 }
 

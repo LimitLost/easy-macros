@@ -6,7 +6,10 @@ use quote::ToTokens;
 use quote::quote;
 use syn::ItemStruct;
 
-#[proc_macro_derive(DeriveTestStruct, attributes(lol, lmao, xlold, xdedd, xnoned, xb, bbb))]
+#[proc_macro_derive(
+    DeriveTestStruct,
+    attributes(lol, lmao, xlold, xdedd, xnoned, xb, bbb, sql)
+)]
 #[macro_result::macro_result]
 pub fn attributes_test_struct(item: TokenStream) -> anyhow::Result<TokenStream> {
     let parsed = helpers::parse_macro_input!(item as syn::ItemStruct);
@@ -116,6 +119,59 @@ pub fn attributes_test_struct(item: TokenStream) -> anyhow::Result<TokenStream> 
         //Show Compiler error
         result.add(quote! {
             compile_error!("#[bbb((lol((lul))X))] attribute on struct not found");
+        });
+    }
+
+    let mut spec_found = false;
+    let mut a_5d_found = false;
+    let mut sql_eq_found = false;
+    let mut a_25_found = false;
+
+    for data in get_attributes!(parsed,#[sql(table = __unknown__)]).into_iter() {
+        match data
+            .to_string()
+            .replace(|c: char| c.is_whitespace(), "")
+            .as_str()
+        {
+            "spec" => spec_found = true,
+            "5d" => a_5d_found = true,
+            "=" => sql_eq_found = true,
+            "25" => a_25_found = true,
+            i => {
+                let f = format!(
+                    "(#[sql(table = __unknown__)]) Unexpected attribute on struct: {}",
+                    i
+                );
+                //Show Compiler error
+                result.add(quote! {
+                    compile_error!(#f);
+                });
+            }
+        }
+    }
+
+    if !spec_found {
+        //Show Compiler error
+        result.add(quote! {
+            compile_error!("#[sql(table = spec)] attribute on struct not found");
+        });
+    }
+
+    if !a_5d_found {
+        result.add(quote! {
+            compile_error!("#[sql(table = 5d)] attribute on struct not found");
+        });
+    }
+
+    if !sql_eq_found {
+        result.add(quote! {
+            compile_error!("#[sql(table = =)] attribute on struct not found");
+        });
+    }
+
+    if !a_25_found {
+        result.add(quote! {
+            compile_error!("#[sql(table = 25)] attribute on struct not found");
         });
     }
 
