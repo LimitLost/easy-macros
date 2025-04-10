@@ -30,7 +30,9 @@ pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 .to_token_stream()
                 .to_string()
                 .replace(|c: char| c.is_whitespace(), "");
-            if ty_str != "anyhow::Result<TokenStream>" {
+            if ty_str != "anyhow::Result<TokenStream>"
+                && ty_str != "anyhow::Result<proc_macro::TokenStream>"
+            {
                 panic!("Function must return a anyhow::Result<TokenStream>");
             }
         }
