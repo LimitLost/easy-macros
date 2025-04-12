@@ -8,6 +8,9 @@ use super::{FoundContextInfo, InputFound};
 struct ArgData {
     display_fn_call: TokenStream,
     display: bool,
+    not_sql: bool,
+    ///"Are we working with duplicate used for generating context?"
+    duplicate: bool,
 }
 
 all_syntax_cases! {
@@ -17,7 +20,35 @@ all_syntax_cases! {
     }
     default_cases=>{}
     special_cases=>{
+        fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData);
         fn handle_arg_attrs(attrs: &mut Vec<syn::Attribute>, data: &mut ArgData);
+    }
+}
+
+///Easy Sql integration
+fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData) {
+    handle_arg_attrs(&mut macro_.attrs, data);
+
+    //Perform this only on duplicate used for generating context
+    if !data.duplicate {
+        return;
+    }
+
+    //Add `debug_info_mode` keyword to the start of the sql! and sql_where! macros
+    if !data.not_sql {
+        let last_segment = if let Some(s) = macro_.mac.path.segments.last() {
+            s
+        } else {
+            return;
+        };
+        let last_segment_str = last_segment.ident.to_string();
+        if last_segment_str != "sql" && last_segment_str != "sql_where" {
+            return;
+        }
+        replace_with::replace_with_or_abort(
+            &mut macro_.mac.tokens,
+            |tokens| quote! { debug_info_mode #tokens},
+        );
     }
 }
 
@@ -47,6 +78,10 @@ fn handle_arg_attrs(attrs: &mut Vec<syn::Attribute>, data: &mut ArgData) {
                         data.display_fn_call = quote_spanned! {tokens_span=> .iter().map(|el|el.to_token_stream()).collect::<TokenStream>() };
                         to_remove.push(index);
                     }
+                    "not_sql" => {
+                        data.not_sql = true;
+                        to_remove.push(index);
+                    }
                     _ => {
                         if tokens_str_no_space.starts_with(".") {
                             data.display_fn_call = tokens.clone();
@@ -66,13 +101,20 @@ pub fn arg_handle(arg: &mut syn::Expr, context_info: &mut FoundContextInfo) {
     let mut data = ArgData {
         display_fn_call: quote! {},
         display: false,
+        not_sql: false,
+        duplicate: false,
     };
+
+    let mut arg_cloned = arg.clone();
+
     arg_expr_handle(arg, &mut data);
+    data.duplicate = true;
+    arg_expr_handle(&mut arg_cloned, &mut data);
 
     let display_fn_call = data.display_fn_call;
 
     context_info.inputs_found.push(InputFound {
-        input: quote! {(#arg) #display_fn_call},
+        input: quote! {(#arg_cloned) #display_fn_call},
         display: data.display,
     });
 }
