@@ -5,7 +5,7 @@ use context_arg::arg_handle;
 use helpers_macro_safe::{ErrorData, expr_error_wrap, readable_token_stream};
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
-use syn::{Expr, Macro, punctuated::Punctuated};
+use syn::{Expr, Macro, punctuated::Punctuated, spanned::Spanned};
 
 use crate::context_crate;
 
@@ -18,15 +18,17 @@ fn context_base(
 
     let context_crate = context_crate();
 
+    let line = question_span.span().start().line;
+
     punc.push(Expr::Macro(syn::ExprMacro {
         attrs: vec![],
         mac: Macro {
-            path: syn::parse_quote_spanned! {question_span=>
-                #context_crate::context
+            path: syn::parse_quote_spanned! {question_span =>
+                #context_crate::context_internal2
             },
             bang_token: Default::default(),
             delimiter: syn::MacroDelimiter::Paren(Default::default()),
-            tokens: context_macro_input,
+            tokens: quote! {#line, #context_macro_input},
         },
     }));
 

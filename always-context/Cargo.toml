@@ -10,7 +10,7 @@ proc-macro = true
 # Hover and click on the version number to see their documentation
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
-proc-macro2 = "1.0"
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
 
 replace_with = "0.1.7"
 

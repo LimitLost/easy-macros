@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::Token;
+use syn::{Expr, Token, punctuated::Punctuated, token::Comma};
 
 ///Same input as format! macro
 struct ContextInternalInput {
@@ -46,18 +46,34 @@ impl syn::parse::Parse for ContextInternalMaybeInput {
         Ok(ContextInternalMaybeInput::Yes(input.parse()?))
     }
 }
-#[proc_macro]
-///Use context! macro from helpers crate instead
-pub fn context_internal(item: TokenStream) -> TokenStream {
-    let parsed = syn::parse_macro_input!(item as ContextInternalMaybeInput);
 
-    let (mut passed_in_str, mut passed_in_args) = match parsed {
-        ContextInternalMaybeInput::Yes(context_internal_input) => (
-            context_internal_input.str.value(),
-            context_internal_input.args,
-        ),
-        ContextInternalMaybeInput::No => (String::new(), syn::punctuated::Punctuated::new()),
-    };
+struct ContextInternalInput2 {
+    line: syn::Expr,
+    deeper: Option<ContextInternalInput>,
+}
+
+impl syn::parse::Parse for ContextInternalInput2 {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let line = input.parse()?;
+        if !input.is_empty() {
+            input.parse::<Token![,]>()?;
+            let deeper = input.parse()?;
+            Ok(ContextInternalInput2 {
+                line,
+                deeper: Some(deeper),
+            })
+        } else {
+            Ok(ContextInternalInput2 { line, deeper: None })
+        }
+    }
+}
+
+fn context_base(
+    mut passed_in_str: String,
+    mut passed_in_args: Punctuated<Expr, Comma>,
+    line: Expr,
+    closure: bool,
+) -> TokenStream {
     if passed_in_str.is_empty() {
         passed_in_str = "{}:{}".to_owned();
     } else {
@@ -69,20 +85,63 @@ pub fn context_internal(item: TokenStream) -> TokenStream {
             file!()
         },
     );
-    passed_in_args.insert(
-        1,
-        syn::parse_quote! {
-            line!()
-        },
-    );
 
-    let result = quote::quote! {
-        format!(#passed_in_str, #passed_in_args)
+    passed_in_args.insert(1, line);
+
+    let result = if closure {
+        quote::quote! {
+            ||{format!(#passed_in_str, #passed_in_args)}
+        }
+    } else {
+        quote::quote! {
+            format!(#passed_in_str, #passed_in_args)
+        }
     };
 
     // panic!("{}", result.to_string());
 
     result.into()
+}
+
+#[proc_macro]
+///Use context! macro from helpers crate instead
+pub fn context_internal(item: TokenStream) -> TokenStream {
+    let parsed = syn::parse_macro_input!(item as ContextInternalMaybeInput);
+
+    let (passed_in_str, passed_in_args) = match parsed {
+        ContextInternalMaybeInput::Yes(context_internal_input) => (
+            context_internal_input.str.value(),
+            context_internal_input.args,
+        ),
+        ContextInternalMaybeInput::No => (String::new(), syn::punctuated::Punctuated::new()),
+    };
+
+    context_base(
+        passed_in_str,
+        passed_in_args,
+        syn::parse_quote! {
+            line!()
+        },
+        false,
+    )
+}
+
+///Used by `always_context` attribute macro
+///
+/// Since it needs to provide the current line by itself
+#[proc_macro]
+pub fn context_internal2(item: TokenStream) -> TokenStream {
+    let parsed = syn::parse_macro_input!(item as ContextInternalInput2);
+
+    let (passed_in_str, passed_in_args) = match parsed.deeper {
+        Some(context_internal_input) => (
+            context_internal_input.str.value(),
+            context_internal_input.args,
+        ),
+        None => (String::new(), syn::punctuated::Punctuated::new()),
+    };
+
+    context_base(passed_in_str, passed_in_args, parsed.line, true)
 }
 
 #[test]
