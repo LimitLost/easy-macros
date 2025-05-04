@@ -15,6 +15,9 @@ pub use readable_token_stream::readable_token_stream;
 mod find_crate;
 pub use find_crate::{find_crate, find_crate_list};
 
+mod token_stream_to_consistent_string;
+pub use token_stream_to_consistent_string::*;
+
 #[macro_export]
 ///Original Syn macro doesn't return Ok(TokenStream) on error, but instead returns TokenStream
 macro_rules! parse_macro_input {
