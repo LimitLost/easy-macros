@@ -63,7 +63,17 @@ fn handle_fn(sig: &syn::Signature, attrs: &[syn::Attribute]) -> anyhow::Result<b
         }
     }
 }
-
+/// # handle_item
+/// Handles the item and adds `#[always_context]` attribute to it if needed.
+///
+/// # Arguments
+/// * `item` - A reference to the parsed AST node representing one top-level item in the file.
+/// * `file_updates` - A mutable option that collects `FileUpdates` (line positions)
+///                    where `#[always_context]` should be inserted.
+///
+/// # Returns
+/// An `anyhow::Result<()>`, returning `Ok(())` on success or an error if something goes wrong
+/// during inspection.
 #[always_context]
 fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyhow::Result<()> {
     match item {
@@ -95,17 +105,46 @@ fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyh
                 }
             }
         }
-        syn::Item::Trait(item_trait) => {
-            if !has_always_context(&item_trait.attrs) {
-                let updates = file_updates.get_or_insert_default();
 
+        // Only adds if any method qualifies
+        syn::Item::Trait(item_trait) => {
+            let mut needs_attr = false;
+            for item in item_trait.items.iter() {
+                if let syn::TraitItem::Fn(method) = item {
+                    if handle_fn(
+                        #[context(tokens)]
+                        &method.sig,
+                        #[context(tokens_vec)]
+                        &method.attrs,
+                    )? {
+                        needs_attr = true;
+                    }
+                }
+            }
+
+            if needs_attr && !has_always_context(&item_trait.attrs) {
+                let updates = file_updates.get_or_insert_default();
                 updates.updates.push(item_trait.span().start());
             }
         }
-        syn::Item::Impl(item_impl) => {
-            if !has_always_context(&item_impl.attrs) {
-                let updates = file_updates.get_or_insert_default();
 
+        // Only adds if any method qualifies
+        syn::Item::Impl(item_impl) => {
+            let mut needs_attr = false;
+            for item in item_impl.items.iter() {
+                if let syn::ImplItem::Fn(method) = item {
+                    if handle_fn(
+                        #[context(tokens)]
+                        &method.sig,
+                        #[context(tokens_vec)]
+                        &method.attrs,
+                    )? {
+                        needs_attr = true;
+                    }
+                }
+            }
+            if needs_attr && !has_always_context(&item_impl.attrs) {
+                let updates = file_updates.get_or_insert_default();
                 updates.updates.push(item_impl.span().start());
             }
         }
@@ -126,6 +165,7 @@ fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyh
     }
     Ok(())
 }
+
 /// # Inputs
 /// `line` - 0 indexed
 #[always_context]
@@ -142,6 +182,11 @@ fn line_pos(haystack: &str, line: usize) -> anyhow::Result<usize> {
 
     Ok(found.end())
 }
+
+/// # handle_file
+/// Skips non .rs files and files with errors.
+/// Calls handle_item on each item.
+/// if any file need annotation `#[always_context]` it will be added to the file.
 #[always_context]
 fn handle_file(file_path: impl AsRef<Path>) -> anyhow::Result<()> {
     let file_path = file_path.as_ref();
