@@ -260,7 +260,7 @@ fn handle_dir(
         for r in ignore_list.iter() {
             let path_str = entry_path.display().to_string();
 
-            if r.is_match(&path_str[base_path_len_bytes..]) {
+            if r.is_match(&path_str) {
                 // Ignore this entry
                 continue 'entries;
             }
