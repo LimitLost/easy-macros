@@ -107,7 +107,11 @@ fn context_call_handle(call: &mut syn::ExprCall, context_info: &mut FoundContext
     //Anyhow method, go deeper
     let func_str = call.func.to_token_stream().to_string();
 
-    if func_str.ends_with(". with_context") || func_str.ends_with(". context") {
+    if func_str.ends_with(". with_context")
+        || func_str.ends_with(". context")
+        || func_str.ends_with(". map_err")
+        || func_str.ends_with(". map")
+    {
         get_context_expr_handle(&mut call.func, context_info);
         return;
     }
@@ -124,7 +128,8 @@ fn context_method_call_handle(
     context_info: &mut FoundContextInfo,
 ) {
     //Anyhow method, go deeper
-    if let "with_context" | "context" = method_call.method.to_string().as_str() {
+    if let "with_context" | "context" | "map_err" | "map" = method_call.method.to_string().as_str()
+    {
         get_context_expr_handle(&mut method_call.receiver, context_info);
         return;
     }
