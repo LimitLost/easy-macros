@@ -287,9 +287,10 @@ fn handle_dir(
 ///
 /// `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
 ///
-fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
+pub fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
     // Get the current directory
     let current_dir = std::env::current_dir()?;
+
     let base_path_len_bytes = current_dir.display().to_string().len();
     // Get the src directory
     let src_dir = current_dir.join("src");
@@ -298,6 +299,33 @@ fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[always_context]
+/// Build function that adds `#[always_context]` attribute to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// Use this function inside of Tauri projects.
+///
+/// # Arguments
+///
+/// `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+///
+pub fn build_result_tauri(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
+    // Get the current directory
+    let mut current_dir = std::env::current_dir()?;
+    //For some reason build script (in tauri projects) is called inside of non existing folder "tauri-src"
+    current_dir.pop();
+
+    let base_path_len_bytes = current_dir.display().to_string().len();
+    // Get the src directory
+    let src_dir = current_dir.join("src");
+
+    handle_dir(&src_dir, ignore_list, base_path_len_bytes)?;
+
+    Ok(())
+}
+
 /// Build function that adds `#[always_context]` attribute to every function with `anyhow::Result` return type and every `trait` and `impl` block.
 ///
 /// To every rust file in `src` directory.
@@ -310,6 +338,27 @@ fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
 ///
 pub fn build(ignore_list: &[regex::Regex]) {
     if let Err(err) = build_result(ignore_list) {
+        panic!(
+            "Always Context Build Error: {}\r\n\r\nDebug Info:\r\n\r\n{:?}",
+            err, err
+        );
+    }
+}
+
+/// Build function that adds `#[always_context]` attribute to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// Panics on error. Use `build_result_tauri()` for error handling.
+///
+/// Use this function inside of Tauri projects.
+///
+/// # Arguments
+///
+/// `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+///
+pub fn build_tauri(ignore_list: &[regex::Regex]) {
+    if let Err(err) = build_result_tauri(ignore_list) {
         panic!(
             "Always Context Build Error: {}\r\n\r\nDebug Info:\r\n\r\n{:?}",
             err, err
