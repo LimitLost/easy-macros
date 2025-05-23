@@ -109,6 +109,8 @@ fn context_call_handle(call: &mut syn::ExprCall, context_info: &mut FoundContext
 
     if func_str.ends_with(". with_context")
         || func_str.ends_with(". context")
+        || func_str.ends_with(". for_user")
+        || func_str.ends_with(". with_for_user")
         || func_str.ends_with(". map_err")
         || func_str.ends_with(". map")
     {
@@ -128,7 +130,8 @@ fn context_method_call_handle(
     context_info: &mut FoundContextInfo,
 ) {
     //Anyhow method, go deeper
-    if let "with_context" | "context" | "map_err" | "map" = method_call.method.to_string().as_str()
+    if let "with_context" | "context" | "for_user" | "with_for_user" | "map_err" | "map" =
+        method_call.method.to_string().as_str()
     {
         get_context_expr_handle(&mut method_call.receiver, context_info);
         return;
@@ -227,9 +230,9 @@ pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Bo
                     .replace('}', "}}");
 
                 if input.display {
-                    call_str.push_str(&format!("{}: {{}}\r\n\r\n", formatted));
+                    call_str.push_str(&format!("{formatted}: {{}}\r\n\r\n"));
                 } else {
-                    call_str.push_str(&format!("{}: {{:?}}\r\n\r\n", formatted));
+                    call_str.push_str(&format!("{formatted}: {{:?}}\r\n\r\n"));
                 }
             }
         }

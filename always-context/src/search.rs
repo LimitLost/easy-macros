@@ -1,6 +1,6 @@
 use all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
-use syn::{ItemImpl, ItemTrait, TraitItem, Type, spanned::Spanned};
+use syn::{ItemImpl, ItemTrait, PathArguments, TraitItem, Type, spanned::Spanned};
 
 use crate::context_gen::{context, context_no_func_input};
 
@@ -106,20 +106,29 @@ fn always_context_try(expr: &mut syn::ExprTry, mut no_context: Option<NoContext>
         }
     }
 }
-///Returns `true` if the type is `anyhow::Result`
-fn anyhow_result_check(ty: &Type) -> bool {
+///Returns `true` if the type is `anyhow::Result` or `Result<..., UserFriendlyError>`
+fn supported_result_check(ty: &Type) -> bool {
     if let Type::Path(ty) = ty {
         let mut segments = ty.path.segments.iter();
         if let Some(segment) = segments.next() {
-            if segment.ident != "anyhow" {
-                return false;
-            }
-        } else {
-            return false;
-        }
-        if let Some(segment) = segments.next() {
-            if segment.ident == "Result" {
-                return true;
+            match segment.ident.to_string().as_str() {
+                "Result" => {
+                    if let PathArguments::AngleBracketed(args) = &segment.arguments {
+                        let second_arg = match args.args.last() {
+                            Some(a) => a,
+                            None => return false,
+                        };
+                        return second_arg.to_token_stream().to_string() == "UserFriendlyError";
+                    }
+                }
+                "anyhow" => {
+                    if let Some(segment) = segments.next()
+                        && segment.ident == "Result"
+                    {
+                        return true;
+                    }
+                }
+                _ => {}
             }
         }
     }
@@ -145,24 +154,24 @@ fn always_context_item_trait(item_trait: &mut ItemTrait, mut no_context: Option<
     handle_attributes(attrs, &mut no_context);
 
     for item in items.iter_mut() {
-        if let TraitItem::Fn(f) = item {
-            if let Some(block) = &mut f.default {
-                match &mut f.sig.output {
-                    syn::ReturnType::Default => {
-                        //No return type, don't add ? anywhere
+        if let TraitItem::Fn(f) = item
+            && let Some(block) = &mut f.default
+        {
+            match &mut f.sig.output {
+                syn::ReturnType::Default => {
+                    //No return type, don't add ? anywhere
+                }
+                syn::ReturnType::Type(_, ty) => {
+                    //Check if our type is anyhow::Result
+                    if !supported_result_check(ty) {
+                        continue;
                     }
-                    syn::ReturnType::Type(_, ty) => {
-                        //Check if our type is anyhow::Result
-                        if !anyhow_result_check(ty) {
-                            continue;
-                        }
-                        //Attr check
-                        let mut no_context = no_context;
-                        handle_attributes(&mut f.attrs, &mut no_context);
+                    //Attr check
+                    let mut no_context = no_context;
+                    handle_attributes(&mut f.attrs, &mut no_context);
 
-                        //Add context to block
-                        always_context_block_handle(block, no_context);
-                    }
+                    //Add context to block
+                    always_context_block_handle(block, no_context);
                 }
             }
         }
@@ -192,7 +201,7 @@ fn always_context_item_impl(item_impl: &mut ItemImpl, mut no_context: Option<NoC
                 }
                 syn::ReturnType::Type(_, ty) => {
                     //Check if our type is anyhow::Result
-                    if !anyhow_result_check(ty) {
+                    if !supported_result_check(ty) {
                         continue;
                     }
                     //Attr check

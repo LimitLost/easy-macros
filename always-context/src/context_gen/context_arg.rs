@@ -56,37 +56,37 @@ fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData) {
 fn handle_arg_attrs(attrs: &mut Vec<syn::Attribute>, data: &mut ArgData) {
     let mut to_remove = Vec::new();
     for (index, attr) in attrs.iter_mut().enumerate() {
-        if attr.path().is_ident("context") {
-            if let syn::Meta::List(l) = &attr.meta {
-                let tokens = &l.tokens;
-                let tokens_str = tokens.to_string();
-                let tokens_str_no_space = tokens_str.replace(|c: char| c.is_whitespace(), "");
-                match tokens_str_no_space.as_str() {
-                    "display" => {
-                        data.display = true;
+        if attr.path().is_ident("context")
+            && let syn::Meta::List(l) = &attr.meta
+        {
+            let tokens = &l.tokens;
+            let tokens_str = tokens.to_string();
+            let tokens_str_no_space = tokens_str.replace(|c: char| c.is_whitespace(), "");
+            match tokens_str_no_space.as_str() {
+                "display" => {
+                    data.display = true;
+                    to_remove.push(index);
+                }
+                "tokens" => {
+                    data.display = true;
+                    let tokens_span = tokens.span();
+                    data.display_fn_call = quote_spanned! {tokens_span=> .to_token_stream() };
+                    to_remove.push(index);
+                }
+                "tokens_vec" => {
+                    data.display = true;
+                    let tokens_span = tokens.span();
+                    data.display_fn_call = quote_spanned! {tokens_span=> .iter().map(|el|el.to_token_stream()).collect::<TokenStream>() };
+                    to_remove.push(index);
+                }
+                "not_sql" => {
+                    data.not_sql = true;
+                    to_remove.push(index);
+                }
+                _ => {
+                    if tokens_str_no_space.starts_with(".") {
+                        data.display_fn_call = tokens.clone();
                         to_remove.push(index);
-                    }
-                    "tokens" => {
-                        data.display = true;
-                        let tokens_span = tokens.span();
-                        data.display_fn_call = quote_spanned! {tokens_span=> .to_token_stream() };
-                        to_remove.push(index);
-                    }
-                    "tokens_vec" => {
-                        data.display = true;
-                        let tokens_span = tokens.span();
-                        data.display_fn_call = quote_spanned! {tokens_span=> .iter().map(|el|el.to_token_stream()).collect::<TokenStream>() };
-                        to_remove.push(index);
-                    }
-                    "not_sql" => {
-                        data.not_sql = true;
-                        to_remove.push(index);
-                    }
-                    _ => {
-                        if tokens_str_no_space.starts_with(".") {
-                            data.display_fn_call = tokens.clone();
-                            to_remove.push(index);
-                        }
                     }
                 }
             }

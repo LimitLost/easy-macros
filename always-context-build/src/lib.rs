@@ -5,27 +5,36 @@ use anyhow::Context;
 use helpers_context::{context, context_internal2};
 use proc_macro2::{LineColumn, TokenStream};
 use quote::ToTokens;
-use syn::{Meta, Type, spanned::Spanned};
+use syn::{Meta, PathArguments, Type, spanned::Spanned};
 
 #[derive(Debug, Default)]
 struct FileUpdates {
     ///Where to add `#[always_context]`
     updates: Vec<LineColumn>,
 }
-///Returns `true` if the type is `anyhow::Result`
-fn anyhow_result_check(ty: &Type) -> bool {
+///Returns `true` if the type is `anyhow::Result` or `Result<..., UserFriendlyError>`
+fn supported_result_check(ty: &Type) -> bool {
     if let Type::Path(ty) = ty {
         let mut segments = ty.path.segments.iter();
         if let Some(segment) = segments.next() {
-            if segment.ident != "anyhow" {
-                return false;
-            }
-        } else {
-            return false;
-        }
-        if let Some(segment) = segments.next() {
-            if segment.ident == "Result" {
-                return true;
+            match segment.ident.to_string().as_str() {
+                "Result" => {
+                    if let PathArguments::AngleBracketed(args) = &segment.arguments {
+                        let second_arg = match args.args.last() {
+                            Some(a) => a,
+                            None => return false,
+                        };
+                        return second_arg.to_token_stream().to_string() == "UserFriendlyError";
+                    }
+                }
+                "anyhow" => {
+                    if let Some(segment) = segments.next()
+                        && segment.ident == "Result"
+                    {
+                        return true;
+                    }
+                }
+                _ => {}
             }
         }
     }
@@ -55,7 +64,7 @@ fn handle_fn(sig: &syn::Signature, attrs: &[syn::Attribute]) -> anyhow::Result<b
             Ok(false)
         }
         syn::ReturnType::Type(_, ty) => {
-            if anyhow_result_check(ty) && !has_always_context(attrs) {
+            if supported_result_check(ty) && !has_always_context(attrs) {
                 Ok(true)
             } else {
                 Ok(false)
@@ -91,17 +100,17 @@ fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyh
         }
         syn::Item::ForeignMod(item_foreign_mod) => {
             for item in item_foreign_mod.items.iter() {
-                if let syn::ForeignItem::Fn(foreign_item_fn) = item {
-                    if handle_fn(
+                if let syn::ForeignItem::Fn(foreign_item_fn) = item
+                    && handle_fn(
                         #[context(tokens)]
                         &foreign_item_fn.sig,
                         #[context(tokens_vec)]
                         &foreign_item_fn.attrs,
-                    )? {
-                        let updates = file_updates.get_or_insert_default();
+                    )?
+                {
+                    let updates = file_updates.get_or_insert_default();
 
-                        updates.updates.push(foreign_item_fn.span().start());
-                    }
+                    updates.updates.push(foreign_item_fn.span().start());
                 }
             }
         }
@@ -110,15 +119,15 @@ fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyh
         syn::Item::Trait(item_trait) => {
             let mut needs_attr = false;
             for item in item_trait.items.iter() {
-                if let syn::TraitItem::Fn(method) = item {
-                    if handle_fn(
+                if let syn::TraitItem::Fn(method) = item
+                    && handle_fn(
                         #[context(tokens)]
                         &method.sig,
                         #[context(tokens_vec)]
                         &method.attrs,
-                    )? {
-                        needs_attr = true;
-                    }
+                    )?
+                {
+                    needs_attr = true;
                 }
             }
 
@@ -132,15 +141,15 @@ fn handle_item(item: &syn::Item, file_updates: &mut Option<FileUpdates>) -> anyh
         syn::Item::Impl(item_impl) => {
             let mut needs_attr = false;
             for item in item_impl.items.iter() {
-                if let syn::ImplItem::Fn(method) = item {
-                    if handle_fn(
+                if let syn::ImplItem::Fn(method) = item
+                    && handle_fn(
                         #[context(tokens)]
                         &method.sig,
                         #[context(tokens_vec)]
                         &method.attrs,
-                    )? {
-                        needs_attr = true;
-                    }
+                    )?
+                {
+                    needs_attr = true;
                 }
             }
             if needs_attr && !has_always_context(&item_impl.attrs) {
@@ -338,10 +347,7 @@ pub fn build_result_tauri(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
 ///
 pub fn build(ignore_list: &[regex::Regex]) {
     if let Err(err) = build_result(ignore_list) {
-        panic!(
-            "Always Context Build Error: {}\r\n\r\nDebug Info:\r\n\r\n{:?}",
-            err, err
-        );
+        panic!("Always Context Build Error: {err:?}");
     }
 }
 
@@ -359,9 +365,6 @@ pub fn build(ignore_list: &[regex::Regex]) {
 ///
 pub fn build_tauri(ignore_list: &[regex::Regex]) {
     if let Err(err) = build_result_tauri(ignore_list) {
-        panic!(
-            "Always Context Build Error: {}\r\n\r\nDebug Info:\r\n\r\n{:?}",
-            err, err
-        );
+        panic!("Always Context Build Error: {err:?}");
     }
 }
