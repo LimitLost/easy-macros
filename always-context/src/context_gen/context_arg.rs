@@ -45,6 +45,7 @@ fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData) {
         if last_segment_str != "sql" && last_segment_str != "sql_where" {
             return;
         }
+
         replace_with::replace_with_or_abort(
             &mut macro_.mac.tokens,
             |tokens| quote! { debug_info_mode #tokens},

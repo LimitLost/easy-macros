@@ -28,8 +28,8 @@ fn supported_result_check(ty: &Type) -> bool {
                     }
                 }
                 "anyhow" => {
-                    if let Some(segment) = segments.next()
-                        && segment.ident == "Result"
+                    if let Some(second_segment) = segments.next()
+                        && second_segment.ident == "Result"
                     {
                         return true;
                     }
@@ -39,6 +39,29 @@ fn supported_result_check(ty: &Type) -> bool {
         }
     }
     false
+}
+
+#[test]
+fn supported_result_check_test() {
+    let anyhow_test_ty = syn::parse_quote! {
+        anyhow::Result<i32>
+    };
+    let user_friendly_error_test_ty = syn::parse_quote! {
+        Result<i32, UserFriendlyError>
+    };
+
+    let unsupported1_test_ty = syn::parse_quote! {
+        any::Result<i32>
+    };
+
+    let unsupported2_test_ty = syn::parse_quote! {
+        Result<i32,Error>
+    };
+
+    assert!(supported_result_check(&anyhow_test_ty));
+    assert!(supported_result_check(&user_friendly_error_test_ty));
+    assert!(!supported_result_check(&unsupported1_test_ty));
+    assert!(!supported_result_check(&unsupported2_test_ty));
 }
 
 fn has_always_context(attrs: &[syn::Attribute]) -> bool {
@@ -260,7 +283,7 @@ fn handle_dir(
     // Iterate over all files
     'entries: for entry in files {
         #[no_context_inputs]
-        let entry = entry?;
+        let entry = entry.context("Directory entry")?;
 
         // Get the file path
         let entry_path = entry.path();
@@ -328,7 +351,7 @@ pub fn build_result_tauri(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
 
     let base_path_len_bytes = current_dir.display().to_string().len();
     // Get the src directory
-    let src_dir = current_dir.join("src");
+    let src_dir = current_dir.join("src-tauri/src");
 
     handle_dir(&src_dir, ignore_list, base_path_len_bytes)?;
 
