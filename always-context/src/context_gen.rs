@@ -67,6 +67,10 @@ struct FoundContextInfo {
     ///Contains errors that should be shown by expr_error_wrap with compile_error!()
     current_errors: Vec<String>,
     inputs_found: Vec<InputFound>,
+
+    //Is any context provided? (either `.with_context` or `.context` or `.for_user` or `.with_for_user` function used)
+    with_context: bool,
+    // func_str: Option<String>,
 }
 
 impl ErrorData for FoundContextInfo {
@@ -89,6 +93,7 @@ all_syntax_cases! {
         fn expr_error_wrap(expr: &mut Expr, context_info: &mut FoundContextInfo);
     }
     special_cases => {
+        fn context_try_handle(expr: &mut syn::ExprTry, context_info: &mut FoundContextInfo);
         fn context_call_handle(call: &mut syn::ExprCall, context_info: &mut FoundContextInfo);
         fn context_method_call_handle(method_call: &mut syn::ExprMethodCall, context_info: &mut FoundContextInfo);
         fn context_block_handle(block: &mut syn::ExprBlock, context_info: &mut FoundContextInfo);
@@ -103,18 +108,38 @@ all_syntax_cases! {
     }
 }
 
+fn context_try_handle(_expr: &mut syn::ExprTry, context_info: &mut FoundContextInfo) {
+    context_info.current_errors.push(
+        "Always Context Macro: `?` Expression inside of another `?` is not supported".to_owned(),
+    );
+}
+
 fn context_call_handle(call: &mut syn::ExprCall, context_info: &mut FoundContextInfo) {
     //Anyhow method, go deeper
-    let func_str = call.func.to_token_stream().to_string();
+    let func_str = call
+        .func
+        .to_token_stream()
+        .to_string()
+        .replace(|c: char| c.is_whitespace(), "");
 
-    if func_str.ends_with(". with_context")
-        || func_str.ends_with(". context")
-        || func_str.ends_with(". for_user")
-        || func_str.ends_with(". with_for_user")
-        || func_str.ends_with(". map_err")
-        || func_str.ends_with(". map")
+    if func_str.ends_with(".with_context")
+        || func_str.ends_with(".context")
+        || func_str.ends_with(".for_user")
+        || func_str.ends_with(".with_for_user")
+        || func_str.ends_with(".map_err")
+        || func_str.ends_with(".map")
     {
+        if func_str.ends_with(".with_context")
+            || func_str.ends_with(".context")
+            || func_str.ends_with(".for_user")
+            || func_str.ends_with(".with_for_user")
+        {
+            context_info.with_context = true;
+        }
+        // context_info.func_str = Some(func_str);
+
         get_context_expr_handle(&mut call.func, context_info);
+        context_info.with_context = false;
         return;
     }
 
@@ -130,10 +155,15 @@ fn context_method_call_handle(
     context_info: &mut FoundContextInfo,
 ) {
     //Anyhow method, go deeper
+    let method_str = method_call.method.to_string();
     if let "with_context" | "context" | "for_user" | "with_for_user" | "map_err" | "map" =
-        method_call.method.to_string().as_str()
+        method_str.as_str()
     {
+        if let "with_context" | "context" | "for_user" | "with_for_user" = method_str.as_str() {
+            context_info.with_context = true;
+        }
         get_context_expr_handle(&mut method_call.receiver, context_info);
+        context_info.with_context = false;
         return;
     }
 
@@ -149,57 +179,96 @@ fn context_method_call_handle(
 
 //Handle ExprBlock (raise error (unsupported syntax))
 fn context_block_handle(_block: &mut syn::ExprBlock, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprBlock right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprBlock right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprIf (raise error (unsupported syntax))
 fn context_if_handle(_if: &mut syn::ExprIf, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprIf right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprIf right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprMatch (raise error (unsupported syntax))
 fn context_match_handle(_match: &mut syn::ExprMatch, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprMatch right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprMatch right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprWhile (raise error (unsupported syntax))
 fn context_while_handle(_while: &mut syn::ExprWhile, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprWhile right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprField right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprField (raise error (unsupported syntax))
 fn context_field_handle(_field: &mut syn::ExprField, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprField right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprField right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprForLoop (raise error (unsupported syntax))
 fn context_for_loop_handle(_for_loop: &mut syn::ExprForLoop, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprForLoop right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprForLoop right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprLoop (raise error (unsupported syntax))
 fn context_loop_handle(_loop: &mut syn::ExprLoop, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprLoop right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) )".to_string());
+        .push("Always Context Macro: ExprLoop right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprMacro (raise error (unsupported syntax))
 fn context_macro_handle(_macro: &mut syn::ExprMacro, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
     context_info
         .current_errors
-        .push("Always Context Macro: ExprMacro right before '?' is not supported (to fix use #[no_context] or #[no_context_inputs] or write proper code ;) ) ".to_string());
+        .push("Always Context Macro: ExprMacro right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 // Handle ExprPath (raise error (unsupported syntax))
 fn context_path_handle(_path: &mut syn::ExprPath, context_info: &mut FoundContextInfo) {
+    if context_info.with_context {
+        //Context was provided by hand by the user :)
+        return;
+    }
+
+    //let debug=context_info.func_str;
+
     context_info
         .current_errors
-        .push("Always Context Macro: ExprPath right before '?' is not supported (If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
+        .push("Always Context Macro: ExprPath right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 
 pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Box<syn::Expr> {
@@ -207,6 +276,8 @@ pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Bo
         call_found: None,
         current_errors: vec![],
         inputs_found: vec![],
+        with_context: false,
+        // func_str: None,
     };
 
     get_context_expr_handle(&mut expr, &mut found_context_info);
