@@ -125,14 +125,16 @@ fn context_call_handle(call: &mut syn::ExprCall, context_info: &mut FoundContext
     if func_str.ends_with(".with_context")
         || func_str.ends_with(".context")
         || func_str.ends_with(".for_user")
-        || func_str.ends_with(".with_for_user")
+        || func_str.ends_with(".context_for_user")
+        || func_str.ends_with(".with_context_for_user")
         || func_str.ends_with(".map_err")
         || func_str.ends_with(".map")
     {
         if func_str.ends_with(".with_context")
             || func_str.ends_with(".context")
+            || func_str.ends_with(".context_for_user")
+            || func_str.ends_with(".with_context_for_user")
             || func_str.ends_with(".for_user")
-            || func_str.ends_with(".with_for_user")
         {
             context_info.with_context = true;
         }
@@ -156,10 +158,20 @@ fn context_method_call_handle(
 ) {
     //Anyhow method, go deeper
     let method_str = method_call.method.to_string();
-    if let "with_context" | "context" | "for_user" | "with_for_user" | "map_err" | "map" =
-        method_str.as_str()
+    if let "with_context"
+    | "context"
+    | "for_user"
+    | "context_for_user"
+    | "with_context_for_user"
+    | "map_err"
+    | "map" = method_str.as_str()
     {
-        if let "with_context" | "context" | "for_user" | "with_for_user" = method_str.as_str() {
+        if let "with_context"
+        | "context"
+        | "context_for_user"
+        | "with_context_for_user"
+        | "for_user" = method_str.as_str()
+        {
             context_info.with_context = true;
         }
         get_context_expr_handle(&mut method_call.receiver, context_info);
