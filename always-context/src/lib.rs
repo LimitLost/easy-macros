@@ -1,4 +1,3 @@
-#![feature(proc_macro_span)]
 mod context_gen;
 mod search;
 
