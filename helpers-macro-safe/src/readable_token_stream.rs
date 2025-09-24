@@ -1,7 +1,50 @@
-/// Removes all unnecessary spaces from string representation of token stream,
-/// But not every space is unnecessary
+/// Formats a token stream string by removing unnecessary whitespace while preserving readability.
 ///
-/// Just removes spaces, that's it
+/// This function processes the string representation of token streams to remove
+/// redundant spaces while keeping necessary spacing for readability. It's particularly
+/// useful for cleaning up generated code or preparing token streams for debugging.
+///
+/// # Arguments
+///
+/// * `tokens_str` - A string representation of tokens (e.g., from `TokenStream :: to_string ()`)
+///
+/// # Returns
+///
+/// A cleaned string with unnecessary whitespace removed but readability preserved
+///
+/// # Whitespace Rules
+///
+/// The function removes spaces in these cases:
+/// - Multiple consecutive spaces are collapsed to one
+/// - Spaces after opening delimiters: `(`, `!`, `&`, `[`, `<`, `>`, `.`
+/// - Spaces before closing delimiters and punctuation: `.`, `,`, `(`, `[`, `:`, `;`, `!`, `<`, `>`, `?`
+/// - Spaces between consecutive closing delimiters: `))`, `}}`, `]]`
+///
+/// # Examples
+///
+/// ```rust
+/// use easy_macros_helpers_macro_safe::readable_token_stream;
+///
+/// let spaced = "Vec < String >";
+/// let clean = readable_token_stream(spaced);
+/// assert_eq!(clean, "Vec<String>");
+///
+/// let input = "a  b   c";
+/// let clean = readable_token_stream(input);
+/// assert_eq!(clean, "a b c");
+/// ```
+///
+/// # Use Cases
+///
+/// - Cleaning up token streams for debugging output
+/// - Formatting generated code for better readability
+/// - Preparing code for display in error messages
+///
+/// # Safety
+///
+/// This function includes an assertion to ensure that only whitespace is removed,
+/// not actual token content. If this assertion fails, it indicates a bug in the
+/// whitespace removal logic.
 pub fn readable_token_stream(tokens_str: &str) -> String {
     let mut result = String::new();
 

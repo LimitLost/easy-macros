@@ -1,3 +1,39 @@
+/// Generates a vector of identifiers by appending numeric indices to a base name.
+///
+/// This function is useful in procedural macros when you need to generate multiple
+/// similar identifiers, such as field names, variable names, or function parameters.
+///
+/// # Arguments
+///
+/// * `name` - The base identifier to which indices will be appended
+/// * `count` - The number of indexed identifiers to generate (0 to count-1)
+///
+/// # Returns
+///
+/// A vector of `syn::Ident` with numeric suffixes: `[name0, name1, name2, ...]`
+///
+/// # Examples
+///
+/// ```rust
+/// use easy_macros_helpers_macro_safe::indexed_name;
+/// use quote::quote;
+///
+/// let base = syn::parse_quote!(field);
+/// let names = indexed_name(base, 3);
+///
+/// // Use in a quote! macro to generate struct fields
+/// let output = quote! {
+///     struct MyStruct {
+///         #(#names: i32,)*
+///     }
+/// };
+/// // Expands to: struct MyStruct { field0: i32, field1: i32, field2: i32, }
+/// ```
+///
+/// # Use Cases
+///
+/// - Creating multiple similar variables in generated code
+/// - Building function parameter lists with indexed names
 pub fn indexed_name(name: syn::Ident, count: usize) -> Vec<syn::Ident> {
     let mut names = Vec::new();
     for i in 0..count {

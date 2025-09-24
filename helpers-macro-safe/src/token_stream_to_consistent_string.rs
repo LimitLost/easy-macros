@@ -1,10 +1,51 @@
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-/// Removes spaces between tokens (when using `TokenStream::to_string()` sometimes spaces appear, sometimes they don't (depending on the generation context))
+/// Converts a token stream to a consistent string representation without spaces.
 ///
-/// When operating on `syn::File` they generally appear
+/// The standard `TokenStream::to_string()` method can produce inconsistent output
+/// depending on the context - sometimes including spaces between tokens, sometimes not.
+/// This function ensures a consistent, space-free representation that's reliable
+/// for comparisons, hashing, or other operations requiring deterministic output.
 ///
-/// But inside of procedural macros they generally don't
+/// # Context-Dependent Behavior of `TokenStream::to_string()`
+///
+/// - When operating on `syn::File`: spaces generally appear between tokens
+/// - Inside procedural macros: spaces generally don't appear
+/// - Other contexts: behavior may vary
+///
+/// # Arguments
+///
+/// * `tokens` - The token stream to convert to a consistent string
+///
+/// # Returns
+///
+/// A string representation with no spaces between tokens, ensuring consistent
+/// output regardless of the original context
+///
+/// # Examples
+///
+/// ```rust
+/// use easy_macros_helpers_macro_safe::token_stream_to_consistent_string;
+/// use quote::quote;
+///
+/// let tokens = quote! { fn hello() -> String { "hello world".to_string() } };
+/// let result = token_stream_to_consistent_string(tokens);
+/// // Always produces: "fnhello()->String{\"hello world\".to_string()}"
+/// // Regardless of context
+/// ```
+///
+/// # Token Processing
+///
+/// The function handles different token types:
+/// - **Groups**: Processes delimiters (`()`, `{}`, `[]`) and recursively processes contents
+/// - **Identifiers**: Removes leading/trailing whitespace
+/// - **Punctuation**: Removes leading/trailing whitespace  
+/// - **Literals**: Removes leading/trailing whitespace
+///
+/// # Use Cases
+///
+/// - Comparing token streams for equality regardless of spacing
+/// - Debugging token streams with predictable output
 pub fn token_stream_to_consistent_string(tokens: TokenStream) -> String {
     let mut result_str = String::new();
 
