@@ -8,23 +8,7 @@ use proc_macro2::TokenStream;
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::MacroResult;
-/// use quote::quote;
-///
-/// let mut result = MacroResult::default();
-///
-/// // Add multiple token streams
-/// result.add(quote! { let x = 1; });
-/// result.add(quote! { let y = 2; });
-/// result.add(quote! { println!("{} + {} = {}", x, y, x + y); });
-///
-/// // Wrap in braces to create a block
-/// result.braced();
-///
-/// let tokens = result.finalize();
-/// // Result: { let x = 1; let y = 2; println!("{} + {} = {}", x, y, x + y); }
-/// ```
+#[doc = docify::embed!("examples/macro_result_detailed.rs", detailed_example)]
 #[derive(Debug, Default)]
 pub struct MacroResult {
     result: TokenStream,
@@ -42,14 +26,7 @@ impl MacroResult {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// use easy_macros_helpers_macro_safe::MacroResult;
-    /// use quote::quote;
-    ///
-    /// let mut result = MacroResult::default();
-    /// result.add(quote! { fn hello() });
-    /// result.add(quote! { { println!("Hello, world!"); } });
-    /// ```
+#[doc = docify::embed!("examples/macro_result_add.rs", add_example)]
     pub fn add(&mut self, item: TokenStream) {
         self.result.extend(item);
     }
@@ -61,18 +38,7 @@ impl MacroResult {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// use easy_macros_helpers_macro_safe::MacroResult;
-    /// use quote::quote;
-    ///
-    /// let mut result = MacroResult::default();
-    /// result.add(quote! { let x = 42; });
-    /// result.add(quote! { x * 2 });
-    /// result.braced();
-    ///
-    /// let tokens = result.finalize();
-    /// // Result: { let x = 42; x * 2 }
-    /// ```
+#[doc = docify::embed!("examples/macro_result_braced.rs", braced_example)]
     pub fn braced(&mut self) {
         replace_with::replace_with_or_abort(&mut self.result, |result| {
             quote::quote! {
@@ -94,15 +60,7 @@ impl MacroResult {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// use easy_macros_helpers_macro_safe::MacroResult;
-    /// use quote::quote;
-    ///
-    /// let mut result = MacroResult::default();
-    /// result.add(quote! { println!("Done!"); });
-    ///
-    /// let final_tokens = result.finalize();
-    /// ```
+#[doc = docify::embed!("examples/macro_result_finalize.rs", finalize_example)]
     pub fn finalize(self) -> TokenStream {
         self.result
     }

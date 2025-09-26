@@ -62,25 +62,7 @@ pub use token_stream_to_consistent_string::*;
 ///
 /// # Examples
 ///
-/// ```ignore
-/// use easy_macros_helpers_macro_safe::parse_macro_input;
-/// use easy_macros_macro_result::macro_result;
-/// // or just easy_macros::{parse_macro_input, macro_result};
-/// use proc_macro::TokenStream;
-/// use syn::DeriveInput;
-///
-/// #[proc_macro_derive(MyDerive)]
-/// #[macro_result]
-/// pub fn my_derive(input: TokenStream) -> anyhow::Result<TokenStream> {
-///     // This will return compile errors automatically on parse failure
-///     let input = parse_macro_input!(input as DeriveInput);
-///     
-///     // Your macro logic here...
-///     Ok(quote::quote! {
-///         // Generated code
-///     }.into())
-/// }
-/// ```
+#[doc = docify::embed!("examples/parse_macro_input_usage.rs", parse_macro_example)]
 ///
 /// # Advantages over syn's version
 ///

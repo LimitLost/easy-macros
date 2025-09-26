@@ -22,3 +22,6 @@ replace_with = "0.1.7"
 
 # Allows to get crate from main Cargo.toml
 proc-macro-crate = "3.3.0"
+
+# Docify for external example files
+docify = "0.4.1"

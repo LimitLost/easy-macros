@@ -9,54 +9,11 @@ use syn::{Block, Expr, ExprBlock, spanned::Spanned};
 ///
 /// ## Basic Usage with `Vec<String>`
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::ErrorData;
-///
-/// let mut errors = Vec::<String>::new();
-/// errors.push("Invalid syntax".to_string());
-/// errors.push("Missing required field".to_string());
-///
-/// assert!(!errors.no_errors());
-/// let error_messages = errors.error_data();
-/// assert!(errors.no_errors()); // Errors are consumed
-/// ```
+#[doc = docify::embed!("examples/error_data_basic.rs", error_data_basic)]
 ///
 /// ## Custom Implementation
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::ErrorData;
-///
-/// #[derive(Default)]
-/// struct ValidationErrors {
-///     errors: Vec<String>,
-///     other_data: String,
-/// }
-///
-/// impl ValidationErrors {
-///     fn add_error(&mut self, msg: &str) {
-///         self.errors.push(msg.to_string());
-///     }
-/// }
-///
-/// impl ErrorData for ValidationErrors {
-///     fn no_errors(&self) -> bool {
-///         self.errors.no_errors()
-///     }
-///
-///     fn error_data(&mut self) -> Vec<String> {
-///         self.errors.error_data()
-///     }
-/// }
-///
-/// let mut validator = ValidationErrors::default();
-/// validator.add_error("Field 'name' is required");
-/// validator.add_error("Field 'age' must be a positive number");
-///
-/// assert!(!validator.no_errors());
-/// let messages = validator.error_data();
-/// assert_eq!(messages.len(), 2);
-/// assert!(validator.no_errors()); // All errors consumed
-/// ```
+#[doc = docify::embed!("examples/error_data_custom.rs", error_data_custom)]
 pub trait ErrorData {
     /// Returns `true` if there are no errors, `false` otherwise.
     ///
@@ -113,73 +70,11 @@ impl ErrorData for Vec<String> {
 ///
 /// ## Basic Usage
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::{expr_error_wrap, ErrorData};
-/// use syn::parse_quote;
-///
-/// let mut expr = parse_quote!(42);
-/// let mut errors = vec![
-///     "This is a warning".to_string(),
-///     "Another issue found".to_string(),
-/// ];
-///
-/// expr_error_wrap(&mut expr, &mut errors);
-///
-/// // The expression is now wrapped with compile errors:
-/// // {
-/// //     compile_error!("This is a warning");
-/// //     compile_error!("Another issue found");
-/// //     42
-/// // }
-/// ```
+#[doc = docify::embed!("examples/expr_error_wrap_detailed.rs", expr_error_wrap_basic)]
 ///
 /// ## Using Custom ErrorData Implementation
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::{expr_error_wrap, ErrorData};
-/// use syn::parse_quote;
-///
-/// #[derive(Default)]
-/// struct MacroValidator {
-///     errors: Vec<String>,
-///     context: String,
-/// }
-///
-/// impl MacroValidator {
-///     fn new(context: &str) -> Self {
-///         Self {
-///             errors: Vec::new(),
-///             context: context.to_string(),
-///         }
-///     }
-///     
-///     fn validate_field(&mut self, field_name: &str, is_valid: bool) {
-///         if !is_valid {
-///             self.errors.push(format!("Invalid field '{}' in {}", field_name, self.context));
-///         }
-///     }
-/// }
-///
-/// impl ErrorData for MacroValidator {
-///     fn no_errors(&self) -> bool {
-///         self.errors.no_errors()
-///     }
-///
-///     fn error_data(&mut self) -> Vec<String> {
-///         self.errors.error_data()
-///     }
-/// }
-///
-/// // Usage in a procedural macro context
-/// let mut validator = MacroValidator::new("MyStruct");
-/// validator.validate_field("name", false);
-/// validator.validate_field("id", false);
-///
-/// let mut result_expr = parse_quote!(MyStruct::default());
-/// expr_error_wrap(&mut result_expr, &mut validator);
-///
-/// // The expression now includes compile-time validation errors
-/// ```
+#[doc = docify::embed!("examples/expr_error_wrap_custom.rs", expr_error_wrap_custom)]
 ///
 /// # Use Cases
 ///
