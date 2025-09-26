@@ -16,7 +16,7 @@ dependencies = [
 name = "all-syntax-cases-helpers"
 version = "0.1.0"
 dependencies = [
- "helpers-macro-safe",
+ "easy-macros-helpers-macro-safe",
  "proc-macro2",
  "quote",
  "syn",
@@ -24,10 +24,21 @@ dependencies = [
 
 [[package]]
 name = "always-context"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "all-syntax-cases",
- "helpers-macro-safe",
+ "easy-macros-helpers-macro-safe",
+ "proc-macro2",
+ "quote",
+ "replace_with",
+ "syn",
+]
+
+[[package]]
+name = "easy-macros-helpers-macro-safe"
+version = "0.1.0"
+dependencies = [
+ "proc-macro-crate",
  "proc-macro2",
  "quote",
  "replace_with",
@@ -45,17 +56,6 @@ name = "hashbrown"
 version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
-
-[[package]]
-name = "helpers-macro-safe"
-version = "0.1.0"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "replace_with",
- "syn",
-]
 
 [[package]]
 name = "indexmap"
@@ -84,9 +84,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.94"
+version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
+checksum = "89ae43fd86e4158d6db51ad8e2b80f313af9cc74f5c0e03ccb87de09998732de"
 dependencies = [
  "unicode-ident",
 ]

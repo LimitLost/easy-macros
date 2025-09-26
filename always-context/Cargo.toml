@@ -17,4 +17,4 @@ replace_with = "0.1.7"
 
 all-syntax-cases = { path = "../all-syntax-cases" }
 
-helpers-macro-safe = { path = "../helpers-macro-safe" }
+easy-macros-helpers-macro-safe = { path = "../helpers-macro-safe" }

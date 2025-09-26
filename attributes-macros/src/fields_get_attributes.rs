@@ -1,5 +1,5 @@
 use always_context::always_context;
-use helpers_macro_safe::{MacroResult, parse_macro_input};
+use easy_macros_helpers_macro_safe::{MacroResult, parse_macro_input};
 use quote::quote;
 
 use crate::{

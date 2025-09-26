@@ -22,7 +22,7 @@ regex = "1.11.1"
 
 macro-result = { path = "../macro-result" }
 always-context = { path = "../always-context" }
-helpers-macro-safe = { path = "../helpers-macro-safe" }
+easy-macros-helpers-macro-safe = { path = "../helpers-macro-safe" }
 helpers-context = { path = "../helpers-context" }
 
 [build-dependencies]

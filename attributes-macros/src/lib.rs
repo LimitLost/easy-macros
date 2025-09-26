@@ -5,7 +5,7 @@ mod get_attributes;
 mod has_attributes;
 
 use always_context::always_context;
-use helpers_macro_safe::find_crate_list;
+use easy_macros_helpers_macro_safe::find_crate_list;
 use macro_result::macro_result;
 use proc_macro::TokenStream;
 use quote::quote;

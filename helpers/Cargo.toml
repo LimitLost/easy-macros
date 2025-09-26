@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 helpers-context = { path = "../helpers-context" }
-helpers-macro-safe = { path = "../helpers-macro-safe" }
+easy-macros-helpers-macro-safe = { path = "../helpers-macro-safe" }
