@@ -24,4 +24,4 @@ replace_with = "0.1.7"
 proc-macro-crate = "3.3.0"
 
 docify = "0.4.1"
-anyhow = "1.0.100"
+anyhow = "1.0"
