@@ -24,15 +24,7 @@ use proc_macro2::{Delimiter, TokenStream, TokenTree};
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::token_stream_to_consistent_string;
-/// use quote::quote;
-///
-/// let tokens = quote! { fn hello() -> String { "hello world".to_string() } };
-/// let result = token_stream_to_consistent_string(tokens);
-/// // Always produces: "fnhello()->String{\"hello world\".to_string()}"
-/// // Regardless of context
-/// ```
+#[doc = docify::embed!("src/examples.rs", token_stream_consistent_string_example)]
 ///
 /// # Token Processing
 ///

@@ -31,27 +31,7 @@ use quote::quote;
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::find_crate;
-/// use quote::quote;
-///
-/// // Find a crate without additional path
-/// if let Some(path) = find_crate("serde", quote!()) {
-///     // Returns: `serde` or `crate` depending on context
-/// }
-///
-/// // Find a crate with additional path segments
-/// if let Some(path) = find_crate("my_crate", quote!(::utils::helper)) {
-///     // Returns: `my_crate::utils::helper` or `crate::utils::helper`
-/// }
-///
-/// // With a renamed crate in Cargo.toml:
-/// // [dependencies]
-/// // serde_renamed = { package = "serde", version = "1.0" }
-/// if let Some(path) = find_crate("serde", quote!(::Serialize)) {
-///     // Returns: `serde_renamed::Serialize`
-/// }
-/// ```
+#[doc = docify::embed!("src/examples.rs", find_crate_basic_usage)]
 ///
 /// # Use Cases
 ///
@@ -105,32 +85,9 @@ pub fn find_crate(crate_name: &str, after_name: TokenStream) -> Option<TokenStre
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::find_crate_list;
-/// use quote::quote;
+#[doc = docify::embed!("src/examples.rs", find_crate_list_basic_example)]
 ///
-/// let crates = &[
-///     ("tokio", quote!(::runtime)),
-///     ("async-std", quote!(::task)),
-///     ("smol", quote!()),
-/// ];
-///
-/// if let Some(async_runtime) = find_crate_list(crates) {
-///     // Uses the first available async runtime crate
-/// }
-///
-/// // With renamed crates in Cargo.toml:
-/// // [dependencies]
-/// // tokio_renamed = { package = "tokio", version = "1.0" }
-/// // async_std = "1.0"
-/// let crates = &[
-///     ("tokio", quote!(::runtime)),      // Will find "tokio_renamed"
-///     ("async-std", quote!(::task)),     // Will find "async_std"
-/// ];
-/// if let Some(path) = find_crate_list(crates) {
-///     // Returns: tokio_renamed::runtime
-/// }
-/// ```
+#[doc = docify::embed!("src/examples.rs", find_crate_list_renamed_example)]
 ///
 /// # Use Cases
 ///

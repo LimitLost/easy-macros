@@ -14,21 +14,7 @@
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::indexed_name;
-/// use quote::quote;
-///
-/// let base = syn::parse_quote!(field);
-/// let names = indexed_name(base, 3);
-///
-/// // Use in a quote! macro to generate struct fields
-/// let output = quote! {
-///     struct MyStruct {
-///         #(#names: i32,)*
-///     }
-/// };
-/// // Expands to: struct MyStruct { field0: i32, field1: i32, field2: i32, }
-/// ```
+#[doc = docify::embed!("src/examples.rs", indexed_name_basic_example)]
 ///
 /// # Use Cases
 ///

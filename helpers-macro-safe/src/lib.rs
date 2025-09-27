@@ -34,12 +34,19 @@ pub use find_crate::{find_crate, find_crate_list};
 mod token_stream_to_consistent_string;
 pub use token_stream_to_consistent_string::*;
 
+#[cfg(test)]
+mod examples;
+
+// This attribute is needed because this macro crashes cargo check in VS Code for some reason
+#[cfg(test)]
+docify::compile_markdown!("README.docify.md", "README.md");
+
 #[macro_export]
 /// Adjusted version of syn's `parse_macro_input!` macro for `#[macro_result]` procedural macro attribute.
 ///
 /// Unlike syn's original `parse_macro_input!` macro, this version returns `Ok(TokenStream)`
 /// on parse errors instead of returning a `TokenStream` directly. This makes
-/// it more suitable for use in procedural macros which are returning anyhow::Result<TokenStream>. See `macro_result` macro.
+/// it more suitable for use in procedural macros which are returning `anyhow::Result<TokenStream>`. See `macro_result` macro.
 ///
 /// # Behavior
 ///
@@ -63,9 +70,7 @@ pub use token_stream_to_consistent_string::*;
 /// # Examples
 ///
 /// ```ignore
-/// use easy_macros_helpers_macro_safe::parse_macro_input;
-/// use easy_macros_macro_result::macro_result;
-/// // or just easy_macros::{parse_macro_input, macro_result};
+/// use easy_macros::{parse_macro_input, macro_result};
 /// use proc_macro::TokenStream;
 /// use syn::DeriveInput;
 ///
@@ -85,7 +90,7 @@ pub use token_stream_to_consistent_string::*;
 /// # Advantages over syn's version
 ///
 /// - Returns `Ok(TokenStream)` on errors instead of raw `TokenStream`
-/// - Better integration with macros that return for example anyhow::Result<TokenStream>
+/// - Better integration with macros that return for example `anyhow::Result<TokenStream>`
 ///
 /// # Parameters
 ///

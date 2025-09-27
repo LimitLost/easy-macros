@@ -22,18 +22,7 @@
 ///
 /// # Examples
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::readable_token_stream;
-///
-/// let spaced = "Vec < String >";
-/// let clean = readable_token_stream(spaced);
-/// assert_eq!(clean, "Vec<String>");
-///
-/// let input = "a  b   c";
-/// let clean = readable_token_stream(input);
-/// assert_eq!(clean, "a b c");
-/// ```
-///
+#[doc = docify::embed!("src/examples.rs", readable_token_stream_example)]
 /// # Use Cases
 ///
 /// - Cleaning up token streams for debugging output

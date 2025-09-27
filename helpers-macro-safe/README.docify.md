@@ -29,27 +29,7 @@ by not depending on any other procedural macros from other crates included in th
 
 ### Using `MacroResult` for Token Accumulation
 
-```rust,ignore
-let mut result = MacroResult::default();
-
-// Add multiple token streams
-result.add(quote! {
-    println!("Hello");
-});
-result.add(quote! {
-    println!("World");
-});
-
-// Wrap everything in braces
-result.braced();
-
-// Get final result
-let tokens = result.finalize();
-assert_eq!(
-    readable_token_stream(&tokens.to_string()),
-    "{ println!(\"Hello\"); println!(\"World\"); }"
-);
-```
+<!-- docify::embed!("src/examples.rs", readme_macro_result_example) -->
 
 ### Support for `Result<TokenStream, ...>` with `parse_macro_input!`
 
@@ -69,63 +49,12 @@ fn my_macro(input: TokenStream) -> anyhow::Result<TokenStream> {
 
 ### Generating Indexed Names
 
-```rust,ignore
-let field_names = indexed_name(syn::parse_quote!(field), 3);
-let output = quote! {
-    struct MyStruct {
-        #(#field_names: i32,)*
-    }
-};
-assert_eq!(
-    readable_token_stream(&output.to_string()),
-    "struct MyStruct { field0: i32, field1: i32, field2: i32, }"
-);
-```
+<!-- docify::embed!("src/examples.rs", readme_indexed_name_example) -->
 
 ### Error Wrapping for Better Diagnostics
 
-```rust,ignore
-let mut errors = Vec::<String>::new();
-let mut expr = syn::parse_quote!(some_expression);
-
-// Add some errors
-errors.push("This field is required".to_string());
-errors.push("Invalid type specified".to_string());
-
-// Wrap expression with compile errors
-expr_error_wrap(&mut expr, &mut errors);
-assert_eq!(
-    quote! { #expr }.to_string(),
-    quote! {
-        {
-            compile_error!("This field is required");
-            compile_error!("Invalid type specified");
-            some_expression
-        }
-    }
-    .to_string()
-);
-```
+<!-- docify::embed!("src/examples.rs", readme_error_wrapping_example) -->
 
 ### Finding Crate References (with Renaming Support)
 
-```rust,ignore
-if let Some(path) = find_crate("serde", quote!(::Serialize)) {
-    // Use path in generated code
-}
-
-// Handles renamed crates automatically
-// If Cargo.toml has: serde_renamed = { package = "serde", version = "1.0" }
-// The above will return: serde_renamed::Serialize
-
-// Try multiple crates with fallbacks
-let async_crates = &[
-    ("tokio", quote!(::runtime::Runtime)),
-    ("async-std", quote!(::task)),
-    ("smol", quote!()),
-];
-
-if let Some(async_path) = find_crate_list(async_crates) {
-    // Uses first available async runtime
-}
-```
+<!-- docify::embed!("src/examples.rs", readme_find_crate_example) -->
