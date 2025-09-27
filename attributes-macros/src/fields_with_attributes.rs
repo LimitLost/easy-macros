@@ -1,5 +1,5 @@
 use always_context::always_context;
-use easy_macros_helpers_macro_safe::{MacroResult, parse_macro_input};
+use easy_macros_helpers_macro_safe::{TokensBuilder, parse_macro_input};
 use quote::quote;
 
 use crate::{
@@ -15,7 +15,7 @@ pub fn fields_with_attributes(
 
     let operate_on = parsed.operate_on;
     let attributes = parsed.attributes;
-    let mut result = MacroResult::default();
+    let mut result = TokensBuilder::default();
 
     let (iter, maybe_fields, unit_handle) = match parsed.reference {
         Some(Reference::Ref) => (

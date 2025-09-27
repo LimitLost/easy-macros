@@ -1,7 +1,7 @@
 use always_context::always_context;
 use anyhow::Context;
 use easy_macros_helpers_macro_safe::{
-    MacroResult, find_crate_list, indexed_name, parse_macro_input,
+    TokensBuilder, find_crate_list, indexed_name, parse_macro_input,
 };
 use helpers_context::context_internal2;
 use proc_macro::TokenStream;
@@ -31,7 +31,7 @@ pub fn get_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
     let operate_on = parsed.operate_on;
     let mut attributes = parsed.attributes;
-    let mut result = MacroResult::default();
+    let mut result = TokensBuilder::default();
 
     let unknown_attr = {
         let mut unknown_attr = None;

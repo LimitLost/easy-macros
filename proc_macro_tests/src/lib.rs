@@ -1,6 +1,6 @@
 use anyhow::Context;
 use attributes::{get_attributes, has_attributes};
-use helpers::{MacroResult, context};
+use helpers::{TokensBuilder, context};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::ItemStruct;
@@ -13,7 +13,7 @@ use syn::ItemStruct;
 pub fn attributes_test_struct(item: TokenStream) -> anyhow::Result<TokenStream> {
     let parsed = helpers::parse_macro_input!(item as syn::ItemStruct);
 
-    let mut result = MacroResult::default();
+    let mut result = TokensBuilder::default();
 
     if !has_attributes!(parsed, #[lol]) {
         //Show Compiler error
@@ -185,7 +185,7 @@ pub fn attributes_test_struct(item: TokenStream) -> anyhow::Result<TokenStream> 
 pub fn macro_test_eq(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let parsed = syn::parse_macro_input!(item as syn::ItemStruct);
 
-    let mut result = MacroResult::default();
+    let mut result = TokensBuilder::default();
 
     let not_real_struct: ItemStruct = syn::parse_quote! {
         struct TestStruct{

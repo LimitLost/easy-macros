@@ -11,12 +11,12 @@ use quote::quote;
 use std::error::Error;
 use syn::parse_quote;
 
-// MacroResult examples
+// TokensBuilder examples
 
 #[docify::export_content]
 #[test]
-fn macro_result_basic_usage() {
-    let mut result = MacroResult::default();
+fn tokens_builder_basic_usage() {
+    let mut result = TokensBuilder::default();
 
     // Add multiple token streams
     result.add(quote! { let x = 1; });
@@ -34,8 +34,8 @@ fn macro_result_basic_usage() {
 }
 
 #[docify::export_content]
-fn macro_result_add_example() {
-    let mut result = MacroResult::default();
+fn tokens_builder_add_example() {
+    let mut result = TokensBuilder::default();
     result.add(quote! { fn hello() });
     result.add(quote! { { println!("Hello, world!"); } });
 
@@ -48,8 +48,8 @@ fn macro_result_add_example() {
 
 #[docify::export_content]
 #[test]
-fn macro_result_braced_example() {
-    let mut result = MacroResult::default();
+fn tokens_builder_braced_example() {
+    let mut result = TokensBuilder::default();
     result.add(quote! { let x = 42; });
     result.add(quote! { x * 2 });
     result.braced();
@@ -63,8 +63,8 @@ fn macro_result_braced_example() {
 
 #[docify::export_content]
 #[test]
-fn macro_result_finalize_example() {
-    let mut result = MacroResult::default();
+fn tokens_builder_finalize_example() {
+    let mut result = TokensBuilder::default();
     result.add(quote! { println!("Done!"); });
 
     let final_tokens = result.finalize();
@@ -74,11 +74,11 @@ fn macro_result_finalize_example() {
     );
 }
 
-// README MacroResult example - using extern crate name for external users
+// README TokensBuilder example - using extern crate name for external users
 #[docify::export_content]
 #[test]
-fn readme_macro_result_example() {
-    let mut result = MacroResult::default();
+fn readme_tokens_builder_example() {
+    let mut result = TokensBuilder::default();
 
     // Add multiple token streams
     result.add(quote! {

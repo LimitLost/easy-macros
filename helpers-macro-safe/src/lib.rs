@@ -1,6 +1,6 @@
 //! ### Token Stream Management
 //!
-//! - [`MacroResult`] - Accumulate and combine token streams with methods inside
+//! - [`TokensBuilder`] - Accumulate and combine token streams with methods inside
 //! - [`readable_token_stream`] - Format token strings for better readability
 //! - [`token_stream_to_consistent_string`] - Normalize token representation across contexts
 //!
@@ -20,7 +20,7 @@ mod indexed_name;
 pub use indexed_name::indexed_name;
 
 mod macro_result;
-pub use macro_result::MacroResult;
+pub use macro_result::TokensBuilder;
 
 mod expr_error_wrap;
 pub use expr_error_wrap::{ErrorData, expr_error_wrap};

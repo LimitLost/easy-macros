@@ -18,7 +18,7 @@ by not depending on any other procedural macros from other crates included in th
 
 ### Token Stream Management
 
-- [`MacroResult`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/struct.MacroResult.html) - Accumulate and combine token streams with methods inside
+- [`TokensBuilder`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html) - Accumulate and combine token streams with methods inside
 - [`readable_token_stream`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.readable_token_stream.html) - Format token strings for better readability
 - [`token_stream_to_consistent_string`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.token_stream_to_consistent_string.html) - Normalize token representation across contexts
 
@@ -35,13 +35,13 @@ by not depending on any other procedural macros from other crates included in th
 
 ## Examples
 
-### Using `MacroResult` for Token Accumulation
+### Using `TokensBuilder` for Token Accumulation
 
 ```rust
-use easy_macros::MacroResult;
+use easy_macros::TokensBuilder;
 use quote::quote;
 
-let mut result = MacroResult::default();
+let mut result = TokensBuilder::default();
 
 // Add multiple token streams
 result.add(quote! {

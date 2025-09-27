@@ -1,6 +1,6 @@
 use super::data::HandleAttrsInput;
 use always_context::always_context;
-use easy_macros_helpers_macro_safe::{MacroResult, indexed_name, parse_macro_input};
+use easy_macros_helpers_macro_safe::{TokensBuilder, indexed_name, parse_macro_input};
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -11,7 +11,7 @@ pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
     let operate_on = parsed.operate_on;
     let attributes = parsed.attributes;
-    let mut result = MacroResult::default();
+    let mut result = TokensBuilder::default();
 
     let attributes_len = attributes.len();
 
