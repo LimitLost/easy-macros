@@ -71,13 +71,13 @@ pub fn token_stream_to_consistent_string(tokens: TokenStream) -> String {
                 }
             }
             TokenTree::Ident(ident) => {
-                result_str.push_str(&ident.to_string().trim_start().trim_end());
+                result_str.push_str(ident.to_string().trim_start().trim_end());
             }
             TokenTree::Punct(punct) => {
-                result_str.push_str(&punct.to_string().trim_start().trim_end());
+                result_str.push_str(punct.to_string().trim_start().trim_end());
             }
             TokenTree::Literal(literal) => {
-                result_str.push_str(&literal.to_string().trim_start().trim_end());
+                result_str.push_str(literal.to_string().trim_start().trim_end());
             }
         }
     }

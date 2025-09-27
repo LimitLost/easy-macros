@@ -87,9 +87,7 @@ pub fn readable_token_stream(tokens_str: &str) -> String {
     assert_eq!(
         result.replace(|c: char| c.is_whitespace(), ""),
         tokens_str.replace(|c: char| c.is_whitespace(), ""),
-        "Only whitespace should be removed from token stream | Result: `{}` | Original: `{}`",
-        result,
-        tokens_str
+        "Only whitespace should be removed from token stream | Result: `{result}` | Original: `{tokens_str}`"
     );
 
     result
@@ -117,7 +115,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for input: `{}`", input);
+            assert_eq!(result, expected, "Failed for input: `{input}`");
         }
     }
 
@@ -133,7 +131,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for input: `{}`", input);
+            assert_eq!(result, expected, "Failed for input: `{input}`");
         }
     }
 
@@ -149,7 +147,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for input: `{}`", input);
+            assert_eq!(result, expected, "Failed for input: `{input}`");
         }
     }
 
@@ -172,7 +170,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for input: `{}`", input);
+            assert_eq!(result, expected, "Failed for input: `{input}`");
         }
     }
 
@@ -207,8 +205,7 @@ mod tests {
             let result = readable_token_stream(input);
             assert_eq!(
                 result, expected,
-                "Failed for deeply nested generics: `{}`",
-                input
+                "Failed for deeply nested generics: `{input}`",
             );
         }
     }
@@ -255,7 +252,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for Rust syntax: `{}`", input);
+            assert_eq!(result, expected, "Failed for Rust syntax: `{input}`");
         }
     }
 
@@ -286,11 +283,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(
-                result, expected,
-                "Failed for complex expression: `{}`",
-                input
-            );
+            assert_eq!(result, expected, "Failed for complex expression: `{input}`",);
         }
     }
 
@@ -323,8 +316,7 @@ mod tests {
             let result = readable_token_stream(input);
             assert_eq!(
                 result, expected,
-                "Failed for string/char literal: `{}`",
-                input
+                "Failed for string/char literal: `{input}`",
             );
         }
     }
@@ -349,7 +341,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for mixed delimiters: `{}`", input);
+            assert_eq!(result, expected, "Failed for mixed delimiters: `{input}`",);
         }
     }
 
@@ -371,7 +363,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for operators: `{}`", input);
+            assert_eq!(result, expected, "Failed for operators: `{input}`");
         }
     }
 
@@ -394,11 +386,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(
-                result, expected,
-                "Failed for real-world example: `{}`",
-                input
-            );
+            assert_eq!(result, expected, "Failed for real-world example: `{input}`",);
         }
     }
 
@@ -431,7 +419,7 @@ mod tests {
 
         for (input, expected) in test_cases {
             let result = readable_token_stream(input);
-            assert_eq!(result, expected, "Failed for edge case: `{}`", input);
+            assert_eq!(result, expected, "Failed for edge case: `{input}`",);
         }
     }
 
@@ -476,8 +464,7 @@ mod tests {
             let second_pass = readable_token_stream(&first_pass);
             assert_eq!(
                 first_pass, second_pass,
-                "Function should be idempotent. Input: `{}`, First: `{}`, Second: `{}`",
-                input, first_pass, second_pass
+                "Function should be idempotent. Input: `{input}`, First: `{first_pass}`, Second: `{second_pass}`"
             );
         }
     }
@@ -506,8 +493,7 @@ mod tests {
 
             assert_eq!(
                 input_no_whitespace, result_no_whitespace,
-                "Non-whitespace content should be identical. Input: `{}`, Result: `{}`",
-                input, result
+                "Non-whitespace content should be identical. Input: `{input}`, Result: `{result}`"
             );
         }
     }
@@ -541,16 +527,14 @@ mod tests {
             // Result should not have consecutive spaces
             assert!(
                 !result.contains("  "),
-                "Result should not contain consecutive spaces. Result: `{}`",
-                result
+                "Result should not contain consecutive spaces. Result: `{result}`",
             );
 
             // Result should not start with spaces, but may end with spaces in some cases
             if !input.trim().is_empty() {
                 assert!(
                     !result.starts_with(' '),
-                    "Result should not start with spaces. Result: `{}`",
-                    result
+                    "Result should not start with spaces. Result: `{result}`"
                 );
             }
         }
@@ -568,8 +552,7 @@ mod tests {
             if matches!(open, '(' | '[' | '<') {
                 assert!(
                     !result.contains(&format!("{open} ")),
-                    "Should not have space after {open}. Result: `{}`",
-                    result
+                    "Should not have space after {open}. Result: `{result}`"
                 );
             }
 
@@ -583,9 +566,7 @@ mod tests {
             let _result = readable_token_stream(&input);
             assert!(
                 result.len() <= input.len(),
-                "Nested delimiters should not increase length. Input: `{}`, Result: `{}`",
-                input,
-                result
+                "Nested delimiters should not increase length. Input: `{input}`, Result: `{result}`"
             );
         }
     }
@@ -629,11 +610,7 @@ mod tests {
 
         for (input, expected) in boundary_cases {
             let result = readable_token_stream(input);
-            assert_eq!(
-                result, expected,
-                "Boundary condition failed for: `{}`",
-                input
-            );
+            assert_eq!(result, expected, "Boundary condition failed for: `{input}`");
         }
     }
 
@@ -654,8 +631,7 @@ mod tests {
             let result = readable_token_stream(input);
             assert_eq!(
                 result, expected,
-                "Unicode/special char test failed for: `{}`",
-                input
+                "Unicode/special char test failed for: `{input}`"
             );
         }
     }
