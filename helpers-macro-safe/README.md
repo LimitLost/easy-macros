@@ -55,7 +55,7 @@ assert_eq!(
 
 ```rust,ignore
 #[proc_macro]
-#[macro_result]
+#[anyhow_result]
 fn my_macro(input: TokenStream) -> anyhow::Result<TokenStream> {
     //This doesn't return TokenStream on compile errors, but Ok(TokenStream) with compile_error! inside
     let parsed = parse_macro_input!(input as syn::DeriveInput);

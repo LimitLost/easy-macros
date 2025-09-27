@@ -42,11 +42,11 @@ mod examples;
 docify::compile_markdown!("README.docify.md", "README.md");
 
 #[macro_export]
-/// Adjusted version of syn's `parse_macro_input!` macro for `#[macro_result]` procedural macro attribute.
+/// Adjusted version of syn's `parse_macro_input!` macro for `#[anyhow_result]` procedural macro attribute.
 ///
 /// Unlike syn's original `parse_macro_input!` macro, this version returns `Ok(TokenStream)`
 /// on parse errors instead of returning a `TokenStream` directly. This makes
-/// it more suitable for use in procedural macros which are returning `anyhow::Result<TokenStream>`. See `macro_result` macro.
+/// it more suitable for use in procedural macros which are returning `anyhow::Result<TokenStream>`. See `anyhow_result` macro.
 ///
 /// # Behavior
 ///
@@ -70,12 +70,12 @@ docify::compile_markdown!("README.docify.md", "README.md");
 /// # Examples
 ///
 /// ```ignore
-/// use easy_macros::{parse_macro_input, macro_result};
+/// use easy_macros::{parse_macro_input, anyhow_result};
 /// use proc_macro::TokenStream;
 /// use syn::DeriveInput;
 ///
 /// #[proc_macro_derive(MyDerive)]
-/// #[macro_result]
+/// #[anyhow_result]
 /// pub fn my_derive(input: TokenStream) -> anyhow::Result<TokenStream> {
 ///     // This will return compile errors automatically on parse failure
 ///     let input = parse_macro_input!(input as DeriveInput);

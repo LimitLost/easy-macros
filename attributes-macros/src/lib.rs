@@ -5,8 +5,8 @@ mod get_attributes;
 mod has_attributes;
 
 use always_context::always_context;
+use anyhow_result::anyhow_result;
 use easy_macros_helpers_macro_safe::find_crate_list;
-use macro_result::macro_result;
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -36,7 +36,7 @@ fn context_crate() -> proc_macro2::TokenStream {
 
 #[always_context]
 #[proc_macro]
-#[macro_result]
+#[anyhow_result]
 ///Returns true if the passed in item has all passed in attributes (one or more)
 pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
     has_attributes::has_attributes(item)
@@ -55,7 +55,7 @@ pub fn has_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
 #[always_context]
 #[proc_macro]
-#[macro_result]
+#[anyhow_result]
 ///# Examples
 /// ```rust
 /// // item must have `.attrs` field
@@ -73,7 +73,7 @@ pub fn get_attributes(item: TokenStream) -> anyhow::Result<TokenStream> {
 
 #[always_context]
 #[proc_macro]
-#[macro_result]
+#[anyhow_result]
 ///# Examples
 /// ```rust
 /// // item must have `.fields` field
@@ -95,7 +95,7 @@ pub fn fields_with_attributes(item: TokenStream) -> anyhow::Result<TokenStream> 
 
 #[always_context]
 #[proc_macro]
-#[macro_result]
+#[anyhow_result]
 ///# Examples
 /// ```rust
 /// // item must have `.fields` field

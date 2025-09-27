@@ -9,7 +9,7 @@ use syn::ItemStruct;
     DeriveTestStruct,
     attributes(lol, lmao, xlold, xdedd, xnoned, xb, bbb, sql)
 )]
-#[macro_result::macro_result]
+#[anyhow_result::anyhow_result]
 pub fn attributes_test_struct(item: TokenStream) -> anyhow::Result<TokenStream> {
     let parsed = helpers::parse_macro_input!(item as syn::ItemStruct);
 

@@ -4,8 +4,8 @@ pub mod macros {
     pub use always_context::*;
     #[cfg(feature = "build")]
     pub use always_context_build;
+    pub use anyhow_result::*;
     pub use attributes::*;
-    pub use macro_result::*;
 }
 
 #[cfg(all(feature = "build", not(feature = "for-macro")))]

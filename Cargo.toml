@@ -11,7 +11,7 @@ license = "Apache-2.0"
 all-syntax-cases = { path = "./all-syntax-cases", optional = true }
 always-context = { path = "./always-context", optional = true }
 attributes = { path = "./attributes", optional = true }
-macro-result = { path = "./macro-result", optional = true }
+anyhow-result = { path = "./anyhow-result", optional = true }
 
 always-context-build = { path = "./always-context-build", optional = true }
 
@@ -41,7 +41,7 @@ for-macro = [
     "dep:all-syntax-cases",
     "dep:always-context",
     "dep:attributes",
-    "dep:macro-result",
+    "dep:anyhow-result",
     "dep:helpers",
     "dep:syn",
     "dep:quote",

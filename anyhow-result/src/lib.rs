@@ -14,7 +14,7 @@ fn external_crate_parent() -> proc_macro2::TokenStream {
 /// Allows for macros with `anyhow::Result<TokenStream>` return type
 ///
 ///Creates a wrapper for passed in function, passed in function is placed inside of wrapper
-pub fn macro_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut our_func = syn::parse_macro_input!(item as syn::ItemFn);
 
     let parent_crate = external_crate_parent();
