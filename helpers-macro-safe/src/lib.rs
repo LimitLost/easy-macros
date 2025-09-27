@@ -19,8 +19,8 @@
 mod indexed_name;
 pub use indexed_name::indexed_name;
 
-mod macro_result;
-pub use macro_result::TokensBuilder;
+mod tokens_builder;
+pub use tokens_builder::TokensBuilder;
 
 mod expr_error_wrap;
 pub use expr_error_wrap::{ErrorData, expr_error_wrap};
