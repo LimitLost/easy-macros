@@ -7,7 +7,7 @@
 //! ### Error Handling
 //!
 //! - [`parse_macro_input!`] - Enhanced version of syn's macro that returns `Ok(TokenStream)` on parse errors (instead of `TokenStream`)
-//! - [`expr_error_wrap`] with [`ErrorData`] trait - Wrap expressions with compile-time error reporting
+//! - [`expr_error_wrap`] with [`CompileErrorProvider`] trait - Wrap expressions with compile-time error reporting
 //!
 //! ### Code Generation Utilities
 //!
@@ -23,7 +23,7 @@ mod tokens_builder;
 pub use tokens_builder::TokensBuilder;
 
 mod expr_error_wrap;
-pub use expr_error_wrap::{ErrorData, expr_error_wrap};
+pub use expr_error_wrap::{CompileErrorProvider, expr_error_wrap};
 
 mod readable_token_stream;
 pub use readable_token_stream::readable_token_stream;

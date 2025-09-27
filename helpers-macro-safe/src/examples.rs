@@ -206,7 +206,7 @@ fn readme_find_crate_example() {
         // Uses first available async runtime
     }
 }
-// ErrorData examples
+// CompileErrorProvider examples
 
 #[docify::export_content]
 #[test]
@@ -235,7 +235,7 @@ fn error_data_custom_implementation() {
         }
     }
 
-    impl ErrorData for ValidationErrors {
+    impl CompileErrorProvider for ValidationErrors {
         fn no_errors(&self) -> bool {
             self.errors.no_errors()
         }
@@ -308,7 +308,7 @@ fn expr_error_wrap_custom_validator() {
         }
     }
 
-    impl ErrorData for MacroValidator {
+    impl CompileErrorProvider for MacroValidator {
         fn no_errors(&self) -> bool {
             self.errors.no_errors()
         }

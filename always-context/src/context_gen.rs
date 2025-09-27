@@ -2,7 +2,9 @@ mod context_arg;
 
 use all_syntax_cases::all_syntax_cases;
 use context_arg::arg_handle;
-use easy_macros_helpers_macro_safe::{ErrorData, expr_error_wrap, readable_token_stream};
+use easy_macros_helpers_macro_safe::{
+    CompileErrorProvider, expr_error_wrap, readable_token_stream,
+};
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{Expr, Macro, punctuated::Punctuated, spanned::Spanned};
@@ -73,7 +75,7 @@ struct FoundContextInfo {
     // func_str: Option<String>,
 }
 
-impl ErrorData for FoundContextInfo {
+impl CompileErrorProvider for FoundContextInfo {
     fn no_errors(&self) -> bool {
         self.current_errors.is_empty()
     }

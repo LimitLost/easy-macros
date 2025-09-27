@@ -14,7 +14,7 @@ use syn::{Block, Expr, ExprBlock, spanned::Spanned};
 /// ## Custom Implementation
 ///
 #[doc = docify::embed!("src/examples.rs", error_data_custom_implementation)]
-pub trait ErrorData {
+pub trait CompileErrorProvider {
     /// Returns `true` if there are no errors, `false` otherwise.
     ///
     /// This method is used to check whether error wrapping is needed.
@@ -36,7 +36,7 @@ pub trait ErrorData {
     fn error_data(&mut self) -> Vec<String>;
 }
 
-impl ErrorData for Vec<String> {
+impl CompileErrorProvider for Vec<String> {
     fn no_errors(&self) -> bool {
         self.is_empty()
     }
@@ -57,7 +57,7 @@ impl ErrorData for Vec<String> {
 /// # Arguments
 ///
 /// * `expr` - The expression to wrap (will be modified in place)
-/// * `error_info` - A struct or collection implementing [`ErrorData`]
+/// * `error_info` - A struct or collection implementing [`CompileErrorProvider`]
 ///
 /// # Behavior
 ///
@@ -72,7 +72,7 @@ impl ErrorData for Vec<String> {
 ///
 #[doc = docify::embed!("src/examples.rs", expr_error_wrap_basic_usage)]
 ///
-/// ## Using Custom ErrorData Implementation
+/// ## Using Custom CompileErrorProvider Implementation
 ///
 #[doc = docify::embed!("src/examples.rs", expr_error_wrap_custom_validator)]
 ///
@@ -81,7 +81,7 @@ impl ErrorData for Vec<String> {
 /// - Warning about deprecated or problematic usage patterns
 /// - Validating macro input and reporting multiple issues at once
 /// - Creating compile-time assertions with custom messages
-pub fn expr_error_wrap(expr: &mut Expr, error_info: &mut impl ErrorData) {
+pub fn expr_error_wrap(expr: &mut Expr, error_info: &mut impl CompileErrorProvider) {
     if !error_info.no_errors() {
         let errors = error_info.error_data();
 

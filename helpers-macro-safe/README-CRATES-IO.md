@@ -25,7 +25,7 @@ by not depending on any other procedural macros from other crates included in th
 ### Error Handling
 
 - [`parse_macro_input!`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/macro.parse_macro_input.html) - Enhanced version of syn's macro that returns `Ok(TokenStream)` on parse errors (instead of `TokenStream`)
-- [`expr_error_wrap`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.expr_error_wrap.html) with [`ErrorData`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/trait.ErrorData.html) trait - Wrap expressions with compile-time error reporting
+- [`expr_error_wrap`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.expr_error_wrap.html) with [`CompileErrorProvider`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/trait.CompileErrorProvider.html) trait - Wrap expressions with compile-time error reporting
 
 ### Code Generation Utilities
 
@@ -95,7 +95,7 @@ let output = quote! {
 ### Error Wrapping for Better Diagnostics
 
 ```rust
-use easy_macros::{expr_error_wrap, ErrorData};
+use easy_macros::{expr_error_wrap, CompileErrorProvider};
 
 let mut errors = Vec::<String>::new();
 let mut expr = syn::parse_quote!(some_expression);
