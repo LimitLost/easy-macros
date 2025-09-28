@@ -314,16 +314,24 @@ mod full_examples {
     // find_crate examples
 
     #[docify::export_content]
+    #[test]
     fn find_crate_basic_usage() {
         // Find a crate without additional path
         if let Some(path) = find_crate("serde", quote!()) {
-            // Returns: `serde` or `crate` depending on context
+            // Returns: `serde` or `crate` or renamed crate depending on context
+            // Can also return none if crate is not found
+
+            // In easy_macros_helpers it returns "serde"
+            assert_eq!(path.to_string(), "serde");
         }
 
         // Find a crate with additional path segments
+        let found_my_crate = find_crate("my_crate", quote!(::utils::helper));
         if let Some(path) = find_crate("my_crate", quote!(::utils::helper)) {
-            // Returns: `my_crate::utils::helper` or `crate::utils::helper`
+            // Returns: `my_crate::utils::helper` or `crate::utils::helper` or renamed crate variant
         }
+        // Not used by `easy_macros_helpers`
+        assert!(found_my_crate.is_none());
 
         // With a renamed crate in Cargo.toml:
         // [dependencies]
