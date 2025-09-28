@@ -25,8 +25,8 @@ mod context;
 #[cfg(feature = "context")]
 pub use context::*;
 
-#[cfg(all(test, feature = "context"))]
-mod context_tests;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "full")]
 mod indexed_name;
