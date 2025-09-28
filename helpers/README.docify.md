@@ -8,6 +8,10 @@ by not depending on any other procedural macros from other crates included in th
 
 ## Core Features
 
+### Error Context Generation
+
+- [`context!`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/macro.context.html) - Generate context strings for error handling with automatic file/line information
+
 ### Token Stream Management
 
 - [`TokensBuilder`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html) - Accumulate and combine token streams with methods inside
@@ -26,6 +30,10 @@ by not depending on any other procedural macros from other crates included in th
 - [`find_crate_list`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.find_crate_list.html) - Try multiple crates, return first found
 
 ## Examples
+
+### Using `context!` for Error Handling
+
+<!-- docify::embed!("src/examples.rs", readme_context_basic_example) -->
 
 ### Using `TokensBuilder` for Token Accumulation
 

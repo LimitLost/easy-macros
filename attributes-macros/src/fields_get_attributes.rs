@@ -1,5 +1,5 @@
 use always_context::always_context;
-use easy_macros_helpers_macro_safe::{TokensBuilder, parse_macro_input};
+use helpers::{TokensBuilder, parse_macro_input};
 use quote::quote;
 
 use crate::{

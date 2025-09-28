@@ -1,4 +1,4 @@
-use easy_macros_helpers_macro_safe::indexed_name;
+use helpers::indexed_name;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Token, punctuated::Punctuated};

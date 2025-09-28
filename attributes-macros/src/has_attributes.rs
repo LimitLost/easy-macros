@@ -1,6 +1,6 @@
 use super::data::HandleAttrsInput;
 use always_context::always_context;
-use easy_macros_helpers_macro_safe::{TokensBuilder, indexed_name, parse_macro_input};
+use helpers::{TokensBuilder, indexed_name, parse_macro_input};
 use proc_macro::TokenStream;
 use quote::quote;
 

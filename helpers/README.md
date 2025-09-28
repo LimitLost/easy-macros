@@ -8,6 +8,10 @@ by not depending on any other procedural macros from other crates included in th
 
 ## Core Features
 
+### Error Context Generation
+
+- [`context!`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/macro.context.html) - Generate context strings for error handling with automatic file/line information
+
 ### Token Stream Management
 
 - [`TokensBuilder`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html) - Accumulate and combine token streams with methods inside
@@ -26,6 +30,25 @@ by not depending on any other procedural macros from other crates included in th
 - [`find_crate_list`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.find_crate_list.html) - Try multiple crates, return first found
 
 ## Examples
+
+### Using `context!` for Error Handling
+
+```rust,ignore
+use std::fs;
+
+fn load_config() -> anyhow::Result<String> {
+    // Context with a custom message - this will be the failing operation
+    fs::read_to_string("settings.json")
+        .with_context(context!("Failed to load application settings"))
+}
+
+let result = load_config();
+assert!(result.is_err());
+
+let error_msg = format!("{:?}", result.unwrap_err());
+assert!(error_msg.contains("Failed to load application settings"));
+assert!(error_msg.contains("examples.rs"));
+```
 
 ### Using `TokensBuilder` for Token Accumulation
 

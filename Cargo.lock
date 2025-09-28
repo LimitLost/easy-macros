@@ -25,7 +25,7 @@ dependencies = [
 name = "all-syntax-cases-helpers"
 version = "0.1.0"
 dependencies = [
- "easy-macros-helpers-macro-safe",
+ "helpers",
  "proc-macro2",
  "quote",
  "syn",
@@ -36,7 +36,7 @@ name = "always-context"
 version = "1.0.0"
 dependencies = [
  "all-syntax-cases",
- "easy-macros-helpers-macro-safe",
+ "helpers",
  "proc-macro2",
  "quote",
  "replace_with",
@@ -49,7 +49,7 @@ version = "0.1.0"
 dependencies = [
  "always-context",
  "anyhow",
- "helpers-context",
+ "helpers",
  "proc-macro2",
  "quote",
  "regex",
@@ -66,7 +66,7 @@ checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 name = "anyhow-result"
 version = "0.1.0"
 dependencies = [
- "easy-macros-helpers-macro-safe",
+ "helpers",
  "proc-macro2",
  "quote",
  "syn",
@@ -80,7 +80,7 @@ dependencies = [
  "always-context-build",
  "anyhow",
  "attributes-macros",
- "helpers-context",
+ "helpers",
  "lazy_static",
  "proc-macro2",
  "quote",
@@ -96,8 +96,7 @@ dependencies = [
  "always-context-build",
  "anyhow",
  "anyhow-result",
- "easy-macros-helpers-macro-safe",
- "helpers-context",
+ "helpers",
  "lazy_static",
  "proc-macro-crate",
  "proc-macro2",
@@ -246,23 +245,9 @@ dependencies = [
  "anyhow-result",
  "attributes",
  "helpers",
- "helpers-context",
  "proc-macro2",
  "proc_macro_tests",
  "quote",
- "syn",
-]
-
-[[package]]
-name = "easy-macros-helpers-macro-safe"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "docify",
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "replace_with",
  "syn",
 ]
 
@@ -350,15 +335,14 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 name = "helpers"
 version = "0.1.0"
 dependencies = [
- "easy-macros-helpers-macro-safe",
- "helpers-context",
-]
-
-[[package]]
-name = "helpers-context"
-version = "0.1.0"
-dependencies = [
+ "anyhow",
  "context-internal",
+ "docify",
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "replace_with",
+ "syn",
 ]
 
 [[package]]

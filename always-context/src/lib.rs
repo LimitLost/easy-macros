@@ -1,7 +1,7 @@
 mod context_gen;
 mod search;
 
-use easy_macros_helpers_macro_safe::find_crate_list;
+use helpers::find_crate_list;
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 use search::item_handle;

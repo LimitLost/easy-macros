@@ -13,7 +13,7 @@ lazy_static = "*"
 regex = "1.11.1"
 
 always-context = { path = "../always-context" }
-helpers-context = { path = "../helpers-context" }
+helpers = { path = "../helpers" }
 
 attributes-macros = { path = "../attributes-macros" }
 

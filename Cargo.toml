@@ -17,7 +17,6 @@ always-context-build = { path = "./always-context-build", optional = true }
 
 # Helpers for creating procedural macros
 helpers = { path = "./helpers", optional = true }
-helpers-context = { path = "./helpers-context", optional = true }
 
 syn = { version = "2.0", features = ["full","extra-traits"], optional = true }
 quote = { version = "1.0", optional = true }
@@ -48,5 +47,5 @@ for-macro = [
     "dep:proc-macro2",
     "dep:anyhow",
 ]
-general = ["dep:always-context", "dep:helpers-context"]
+general = ["dep:always-context", "dep:helpers", "helpers/context"]
 build = ["dep:always-context-build"]
