@@ -1,3 +1,5 @@
+//! Use `full` feature to enable all available functionality.
+//!
 //! ### General Use (not only for macros)
 //!
 //! - [`context!`] - Generates context strings for error handling with automatic file/line information (requires `context` feature)
@@ -28,37 +30,37 @@ pub use context::*;
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "full")]
+#[cfg(feature = "indexed-name")]
 mod indexed_name;
-#[cfg(feature = "full")]
+#[cfg(feature = "indexed-name")]
 pub use indexed_name::indexed_name;
 
-#[cfg(feature = "full")]
+#[cfg(feature = "tokens-builder")]
 mod tokens_builder;
-#[cfg(feature = "full")]
+#[cfg(feature = "tokens-builder")]
 pub use tokens_builder::TokensBuilder;
 
-#[cfg(feature = "full")]
+#[cfg(feature = "expr-error-wrap")]
 mod expr_error_wrap;
-#[cfg(feature = "full")]
+#[cfg(feature = "expr-error-wrap")]
 pub use expr_error_wrap::{CompileErrorProvider, expr_error_wrap};
 
-#[cfg(feature = "full")]
+#[cfg(feature = "readable-token-stream")]
 mod readable_token_stream;
-#[cfg(feature = "full")]
+#[cfg(feature = "readable-token-stream")]
 pub use readable_token_stream::readable_token_stream;
 
-#[cfg(feature = "full")]
+#[cfg(feature = "find-crate")]
 mod find_crate;
-#[cfg(feature = "full")]
+#[cfg(feature = "find-crate")]
 pub use find_crate::{find_crate, find_crate_list};
 
-#[cfg(feature = "full")]
+#[cfg(feature = "token-stream-consistent")]
 mod token_stream_to_consistent_string;
-#[cfg(feature = "full")]
+#[cfg(feature = "token-stream-consistent")]
 pub use token_stream_to_consistent_string::*;
 
-#[cfg(feature = "full")]
+#[cfg(feature = "parse-macro-input")]
 mod parse_macro_input;
 
 #[cfg(test)]

@@ -6,10 +6,6 @@
 #![allow(unused_variables, unused_imports, dead_code)]
 
 use crate::*;
-use proc_macro2::TokenStream;
-use quote::quote;
-use std::error::Error;
-use syn::parse_quote;
 
 // Context macro examples
 #[cfg(feature = "context")]
@@ -189,6 +185,8 @@ mod context_examples {
 #[cfg(feature = "full")]
 mod full_examples {
     use super::*;
+    use quote::quote;
+    use syn::parse_quote;
 
     #[docify::export_content]
     #[test]

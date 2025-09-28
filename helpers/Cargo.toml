@@ -16,18 +16,37 @@ readme = "README-CRATES-IO.md"
 
 context-internal = { path = "../context-internal", optional = true}
 
-syn = { version = "2.0", features = ["full"] }
-quote = "1.0"
-proc-macro2 = "1.0"
+syn = { version = "2.0", features = ["full"], optional = true }
+quote = { version = "1.0", optional = true}
+proc-macro2 = { version = "1.0", optional = true}
 
-replace_with = "0.1.7"
+replace_with = { version = "0.1.7", optional = true}
 
 # Allows to get crate from main Cargo.toml
-proc-macro-crate = "3.3.0"
+proc-macro-crate = { version = "3.3.0", optional = true}
 
 docify = "0.4.1"
-anyhow = "1.0"
+
+[dev-dependencies]
+anyhow = { version = "1.0"}
+
 
 [features]
 context = ["dep:context-internal"]
-full = ["context"]
+indexed-name = ["dep:quote","dep:syn"]
+tokens-builder = ["dep:proc-macro2","dep:quote","dep:replace_with"]
+expr-error-wrap = ["dep:syn","dep:replace_with"]
+readable-token-stream = []
+find-crate = ["dep:proc-macro-crate","dep:proc-macro2","dep:quote","dep:syn"]
+token-stream-consistent = ["dep:proc-macro2"]
+parse-macro-input = []
+full = [
+    "context",
+    "indexed-name",
+    "tokens-builder", 
+    "expr-error-wrap",
+    "readable-token-stream",
+    "find-crate",
+    "token-stream-consistent",
+    "parse-macro-input"
+]
