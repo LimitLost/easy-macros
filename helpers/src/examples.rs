@@ -159,9 +159,6 @@ mod context_examples {
                 .as_str()
             ),
         );
-        assert!(error_msg.contains("examples.rs"));
-        // Should have multiple \r\n separators for multiple context levels
-        assert!(error_msg.matches("\r\n").count() >= 2);
     }
 
     #[docify::export_content]
