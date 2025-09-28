@@ -1,3 +1,4 @@
+#[doc(hidden)]
 pub use context_internal::{context_internal, context_internal2};
 
 #[macro_export]

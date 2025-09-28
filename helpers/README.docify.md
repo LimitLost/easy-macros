@@ -1,33 +1,32 @@
 # What is this?
 
-[![Crates.io](https://img.shields.io/crates/v/easy-macros-helpers-macro-safe.svg)](https://crates.io/crates/easy-macros-helpers-macro-safe)
-[![Documentation](https://docs.rs/easy-macros-helpers-macro-safe/badge.svg)](https://docs.rs/easy-macros-helpers-macro-safe)
+[![Crates.io](https://img.shields.io/crates/v/easy-macros-helpers.svg)](https://crates.io/crates/easy-macros-helpers)
+[![Documentation](https://docs.rs/easy-macros-helpers/badge.svg)](https://docs.rs/easy-macros-helpers)
 
-Easy Macros Helpers (Macro Safe) is a collection of utility functions provided and used by the [Easy Macros crate](https://crates.io/crates/easy_macros) that avoids dependency loops
-by not depending on any other procedural macros from other crates included in the [Easy Macros](https://crates.io/crates/easy_macros).
+Easy Macros Helpers (Macro Safe) is a collection of utility functions provided and used by the [Easy Macros crate](https://crates.io/crates/easy_macros)
 
 ## Core Features
 
 ### Error Context Generation
 
-- [`context!`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/macro.context.html) - Generate context strings for error handling with automatic file/line information
+- [`context!`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/macro.context.html) - Generate context strings for error handling with automatic file/line information
 
 ### Token Stream Management
 
-- [`TokensBuilder`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html) - Accumulate and combine token streams with methods inside
-- [`readable_token_stream`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.readable_token_stream.html) - Format token strings for better readability
-- [`token_stream_to_consistent_string`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.token_stream_to_consistent_string.html) - Normalize token representation across contexts
+- [`TokensBuilder`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html) - Accumulate and combine token streams with methods inside
+- [`readable_token_stream`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.readable_token_stream.html) - Format token strings for better readability
+- [`token_stream_to_consistent_string`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.token_stream_to_consistent_string.html) - Normalize token representation across contexts
 
 ### Error Handling
 
-- [`parse_macro_input!`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/macro.parse_macro_input.html) - Enhanced version of syn's macro that returns `Ok(TokenStream)` on parse errors (instead of `TokenStream`)
-- [`expr_error_wrap`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.expr_error_wrap.html) with [`CompileErrorProvider`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/trait.CompileErrorProvider.html) trait - Wrap expressions with compile-time error reporting
+- [`parse_macro_input!`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/macro.parse_macro_input.html) - Enhanced version of syn's macro that returns `Ok(TokenStream)` on parse errors (instead of `TokenStream`)
+- [`expr_error_wrap`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.expr_error_wrap.html) with [`CompileErrorProvider`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/trait.CompileErrorProvider.html) trait - Wrap expressions with compile-time error reporting
 
 ### Code Generation Utilities
 
-- [`indexed_name`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.indexed_name.html) - Generate indexed identifiers (`field0`, `field1`, etc.)
-- [`find_crate`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.find_crate.html) - Locate crate references for generated code (supports renaming)
-- [`find_crate_list`](https://docs.rs/easy-macros-helpers-macro-safe/latest/easy_macros_helpers_macro_safe/fn.find_crate_list.html) - Try multiple crates, return first found
+- [`indexed_name`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.indexed_name.html) - Generate indexed identifiers (`field0`, `field1`, etc.)
+- [`find_crate`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.find_crate.html) - Locate crate references for generated code (supports renaming)
+- [`find_crate_list`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/fn.find_crate_list.html) - Try multiple crates, return first found
 
 ## Examples
 

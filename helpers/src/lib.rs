@@ -2,7 +2,7 @@
 //!
 //! ### General Use (not only for macros)
 //!
-//! - [`context!`] - Generates context strings for error handling with automatic file/line information (requires `context` feature)
+//! - [`context!`] - Generates context strings for error handling with automatic file/line information
 //!
 //! ### Token Stream Management
 //!
