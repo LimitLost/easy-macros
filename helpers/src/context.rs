@@ -64,7 +64,7 @@ pub use context_internal::{context_internal, context_internal2};
 ///
 /// # See Also
 ///
-/// - [`anyhow::Context`] - The trait that provides the `.with_context()` method
+/// - [`anyhow::Context`](https://docs.rs/anyhow/latest/anyhow/trait.Context.html) - The trait that provides the `.with_context()` method
 /// - [`format!`] - The standard formatting macro that this macro's syntax is based on
 /// - [`file!`] and [`line!`] - The macros used internally to get location information
 macro_rules! context {
