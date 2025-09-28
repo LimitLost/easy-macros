@@ -104,7 +104,9 @@ fn context_base(
 }
 
 #[proc_macro]
-///Use context! macro from helpers crate instead
+/// Macro used by `context!` macro in easy_macros_helpers crate
+///
+/// Use context! macro from helpers crate instead
 pub fn context_internal(item: TokenStream) -> TokenStream {
     let parsed = syn::parse_macro_input!(item as ContextInternalMaybeInput);
 
@@ -126,7 +128,7 @@ pub fn context_internal(item: TokenStream) -> TokenStream {
     )
 }
 
-///Used by `always_context` attribute macro
+/// Macro used by `always_context` attribute macro
 ///
 /// Since it needs to provide the current line by itself
 #[proc_macro]
