@@ -46,8 +46,15 @@ let result = load_config();
 assert!(result.is_err());
 
 let error_msg = format!("{:?}", result.unwrap_err());
-assert!(error_msg.contains("Failed to load application settings"));
-assert!(error_msg.contains("examples.rs"));
+assert!(
+    error_msg.contains(
+        format!(
+            "src/examples.rs:{}\r\nFailed to load application settings",
+            line!() - 11 // context! is called 11 lines above
+        )
+        .as_str()
+    )
+);
 ```
 
 ### Using `TokensBuilder` for Token Accumulation

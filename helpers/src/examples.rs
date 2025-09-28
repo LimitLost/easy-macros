@@ -32,8 +32,156 @@ mod context_examples {
         assert!(result.is_err());
 
         let error_msg = format!("{:?}", result.unwrap_err());
-        assert!(error_msg.contains("Failed to load application settings"));
+        assert!(
+            error_msg.contains(
+                format!(
+                    "src/examples.rs:{}\r\nFailed to load application settings",
+                    line!() - 11 // context! is called 11 lines above
+                )
+                .as_str()
+            )
+        );
+    }
+
+    #[docify::export_content]
+    #[test]
+    fn context_basic_usage_example() {
+        use std::fs;
+
+        fn risky_operation() -> anyhow::Result<String> {
+            // This will show "src/examples.rs:line" if it fails
+            fs::read_to_string("missing_file.txt").with_context(context!())
+        }
+
+        let result = risky_operation();
+        assert!(result.is_err());
+
+        let error_msg = format!("{:?}", result.unwrap_err());
+        // Should contain file path and line
+        assert!(error_msg.contains(format!("src/examples.rs:{}", line!() - 8).as_str()));
+    }
+
+    #[docify::export_content]
+    #[test]
+    fn context_with_custom_message_example() {
+        use std::fs;
+
+        fn load_config(path: &str) -> anyhow::Result<String> {
+            fs::read_to_string(path).with_context(context!("Failed to load config file"))
+        }
+
+        let result = load_config("nonexistent.txt");
+        assert!(result.is_err());
+
+        let error_msg = format!("{:?}", result.unwrap_err());
+        assert!(
+            error_msg.contains(
+                format!(
+                    "src/examples.rs:{}\r\nFailed to load config file",
+                    line!() - 11
+                )
+                .as_str()
+            )
+        );
+    }
+
+    #[docify::export_content]
+    #[test]
+    fn context_with_formatted_message_example() {
+        use std::fs;
+
+        fn process_user_data(user_id: u64) -> anyhow::Result<()> {
+            let fetch_data = || -> anyhow::Result<String> {
+                fs::read_to_string("missing_data.txt")
+                    .with_context(context!("Failed to fetch data for user {}", user_id))
+            };
+
+            let validate_data = |_data: &str| -> anyhow::Result<()> {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "invalid",
+                ))
+                .with_context(context!("Data validation failed for user {}", user_id))
+            };
+
+            let data = fetch_data()?;
+            validate_data(&data)?;
+
+            Ok(())
+        }
+
+        let result = process_user_data(42);
+        assert!(result.is_err());
+
+        let error_msg = format!("{:?}", result.unwrap_err());
+        assert!(
+            error_msg.contains(
+                format!(
+                    "src/examples.rs:{}\r\nFailed to fetch data for user 42",
+                    line!() - 25
+                )
+                .as_str()
+            )
+        );
+    }
+
+    #[docify::export_content]
+    #[test]
+    fn context_chaining_multiple_levels_example() {
+        use std::fs;
+
+        fn outer_function() -> anyhow::Result<()> {
+            inner_function().with_context(context!("Failed in outer function"))
+        }
+
+        fn inner_function() -> anyhow::Result<()> {
+            let _ = fs::File::open("nonexistent.txt")
+                .with_context(context!("Failed to open configuration file"))?;
+            Ok(())
+        }
+
+        let result = outer_function();
+        assert!(result.is_err());
+
+        let error_msg = format!("{:?}", result.unwrap_err());
+        assert!(
+            error_msg.contains(
+                format!(
+                    "src/examples.rs:{}\r\nFailed in outer function",
+                    line!() - 17
+                )
+                .as_str()
+            )
+        );
+        assert!(
+            error_msg.contains(
+                format!(
+                    //Spaces are added by anyhow for indentation
+                    "src/examples.rs:{}\r\n       Failed to open configuration file",
+                    line!() - 22
+                )
+                .as_str()
+            ),
+        );
         assert!(error_msg.contains("examples.rs"));
+        // Should have multiple \r\n separators for multiple context levels
+        assert!(error_msg.matches("\r\n").count() >= 2);
+    }
+
+    #[docify::export_content]
+    #[test]
+    fn context_manual_generation_example() {
+        // You can also call the closure manually
+        let ctx = context!("Operation failed with code {}", 500);
+        let result = ctx();
+
+        assert_eq!(
+            result,
+            format!(
+                "src/examples.rs:{}\r\nOperation failed with code 500",
+                line!() - 7
+            )
+        );
     }
 }
 

@@ -44,64 +44,23 @@ pub use context_internal::{context_internal, context_internal2};
 ///
 /// ## Basic Usage
 ///
-/// ```ignore
-/// fn risky_operation() -> Result<String> {
-///     // This will show "src/lib.rs:123" if it fails
-///     std::fs::read_to_string("missing_file.txt")
-///         .with_context(context!())
-/// }
-/// ```
+#[doc = docify::embed!("src/examples.rs", context_basic_usage_example)]
 ///
 /// ## With Custom Messages
 ///
-/// ```ignore
-/// fn load_config(path: &str) -> Result<String> {
-///     std::fs::read_to_string(path)
-///         .with_context(context!("Failed to load config file"))
-/// }
-/// ```
+#[doc = docify::embed!("src/examples.rs", context_with_custom_message_example)]
 ///
 /// ## With Formatted Messages
 ///
-/// ```ignore
-/// fn process_user_data(user_id: u64) -> Result<()> {
-///     let data = fetch_data()
-///         .with_context(context!("Failed to fetch data for user {}", user_id))?;
-///     
-///     validate_data(&data)
-///         .with_context(context!("Data validation failed for user {}", user_id))?;
-///     
-///     Ok(())
-/// }
-/// # fn fetch_data() -> Result<String> { Ok("data".to_string()) }
-/// # fn validate_data(_: &str) -> Result<()> { Ok(()) }
-/// ```
+#[doc = docify::embed!("src/examples.rs", context_with_formatted_message_example)]
 ///
 /// ## Chaining Multiple Context Levels
 ///
-/// ```ignore
-/// fn outer_function() -> Result<()> {
-///     inner_function()
-///         .with_context(context!("Failed in outer function"))?;
-///     Ok(())
-/// }
-///
-/// fn inner_function() -> Result<()> {
-///     std::fs::File::open("nonexistent.txt")
-///         .map(|_| ())
-///         .with_context(context!("Failed to open configuration file"))
-/// }
-/// ```
+#[doc = docify::embed!("src/examples.rs", context_chaining_multiple_levels_example)]
 ///
 /// ## Manual Context Generation
 ///
-/// ```rust
-/// use easy_macros_helpers_macro_safe::context;
-///
-/// // You can also call the closure manually
-/// let ctx = context!("Operation failed with code {}", 500);
-/// println!("Context: {}", ctx()); // Prints: "src/main.rs:42\r\nOperation failed with code 500"
-/// ```
+#[doc = docify::embed!("src/examples.rs", context_manual_generation_example)]
 ///
 /// # See Also
 ///
