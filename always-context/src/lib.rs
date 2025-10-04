@@ -39,6 +39,7 @@ fn context_crate() -> proc_macro2::TokenStream {
 /// - `#[context(tokens)]` -  same as `#[context(display)] #[context(.to_token_stream())]`
 /// - `#[context(tokens_vec)]` - same as `#[context(display)] #[context(.iter().map(|el|el.to_token_stream()).collect::<TokenStream>())]`
 /// - `#[context(not_sql)]` - use on `sql!` and `sql_where!` macros if they are not a part of `easy_sql`
+/// - `#[context(ignore)]` or `#[context(ignored)]` or `#[context(no)]` - don't include this argument value in context at all
 pub fn always_context(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut parsed = syn::parse_macro_input!(item as syn::Item);
     //Adds .with_context(context!()) before all '?' without them

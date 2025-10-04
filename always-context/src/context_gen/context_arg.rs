@@ -11,6 +11,8 @@ struct ArgData {
     not_sql: bool,
     ///"Are we working with duplicate used for generating context?"
     duplicate: bool,
+    /// Ignore argument
+    ignore: bool,
 }
 
 all_syntax_cases! {
@@ -84,6 +86,10 @@ fn handle_arg_attrs(attrs: &mut Vec<syn::Attribute>, data: &mut ArgData) {
                     data.not_sql = true;
                     to_remove.push(index);
                 }
+                "ignore" | "ignored" | "no" => {
+                    data.ignore = true;
+                    to_remove.push(index);
+                }
                 _ => {
                     if tokens_str_no_space.starts_with(".") {
                         data.display_fn_call = tokens.clone();
@@ -104,6 +110,7 @@ pub fn arg_handle(arg: &mut syn::Expr, context_info: &mut FoundContextInfo) {
         display: false,
         not_sql: false,
         duplicate: false,
+        ignore: false,
     };
 
     let mut arg_cloned = arg.clone();
@@ -112,10 +119,17 @@ pub fn arg_handle(arg: &mut syn::Expr, context_info: &mut FoundContextInfo) {
     data.duplicate = true;
     arg_expr_handle(&mut arg_cloned, &mut data);
 
-    let display_fn_call = data.display_fn_call;
+    if data.ignore {
+        context_info.inputs_found.push(InputFound {
+            input: quote! {"ignored"},
+            display: true,
+        })
+    } else {
+        let display_fn_call = data.display_fn_call;
 
-    context_info.inputs_found.push(InputFound {
-        input: quote! {(#arg_cloned) #display_fn_call},
-        display: data.display,
-    });
+        context_info.inputs_found.push(InputFound {
+            input: quote! {(#arg_cloned) #display_fn_call},
+            display: data.display,
+        })
+    };
 }
