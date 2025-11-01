@@ -67,5 +67,5 @@ mod parse_macro_input;
 mod examples;
 
 // This attribute is needed because this macro crashes cargo check in VS Code for some reason
-#[cfg(test)]
+#[cfg(feature = "generate-readme")]
 docify::compile_markdown!("README.docify.md", "README.md");
