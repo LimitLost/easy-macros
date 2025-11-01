@@ -18,3 +18,7 @@ replace_with = "0.1.7"
 all-syntax-cases = { path = "../all-syntax-cases" }
 
 helpers = { path = "../helpers" }
+
+[features]
+# Easy SQL integration
+easy_sql = []
