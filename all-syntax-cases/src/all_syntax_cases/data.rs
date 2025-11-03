@@ -20,6 +20,10 @@ impl syn::parse::Parse for InputSetup {
         while !input.is_empty() {
             if input.peek(Token![,]) {
                 let _comma: Token![,] = input.parse()?;
+                // Support trailing comma
+                if input.is_empty() {
+                    break;
+                }
             }
             let member: syn::Member = input.parse()?;
             let _colon: Token![:] = input.parse()?;
