@@ -1,12 +1,42 @@
-use helpers::find_crate_list;
+use helpers::find_crate;
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 
-fn external_crate_parent() -> proc_macro2::TokenStream {
-    if let Some(found) = find_crate_list(&[("easy-lib", quote! {}), ("easy-macros", quote! {})]) {
+fn crate_missing_panic(crate_name: &str) -> ! {
+    panic!(
+        "Using anyhow-result requires `{crate_name}` crate to be present in dependencies! You can add it with `{crate_name} = \"*\"` in your Cargo.toml dependencies or with `cargo add {crate_name}` command."
+    );
+}
+
+fn quote_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate("quote", quote! {}) {
         found
     } else {
-        quote! {}
+        crate_missing_panic("quote");
+    }
+}
+
+fn syn_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate("syn", quote! {}) {
+        found
+    } else {
+        crate_missing_panic("syn");
+    }
+}
+
+fn proc_macro2_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate("proc-macro2", quote! {}) {
+        found
+    } else {
+        crate_missing_panic("proc-macro2");
+    }
+}
+
+fn anyhow_crate() -> proc_macro2::TokenStream {
+    if let Some(found) = find_crate("anyhow", quote! {}) {
+        found
+    } else {
+        crate_missing_panic("anyhow");
     }
 }
 
@@ -17,23 +47,35 @@ fn external_crate_parent() -> proc_macro2::TokenStream {
 pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut our_func = syn::parse_macro_input!(item as syn::ItemFn);
 
-    let parent_crate = external_crate_parent();
+    // let parent_crate = external_crate_parent();
+    let quote_crate = quote_crate();
+    let syn_crate = syn_crate();
+    let proc_macro2_crate = proc_macro2_crate();
+    let anyhow_crate = anyhow_crate()
+        .to_string()
+        .replace(|c: char| c.is_whitespace(), "");
 
     //Check if output of our function is a anyhow::Result<TokenStream>
     let func_output = &our_func.sig.output;
     match func_output {
         syn::ReturnType::Default => {
-            panic!("Function must return a anyhow::Result<TokenStream>")
+            panic!(
+                "Function must return a {}::Result<TokenStream>",
+                anyhow_crate
+            )
         }
         syn::ReturnType::Type(_, ty) => {
             let ty_str = ty
                 .to_token_stream()
                 .to_string()
                 .replace(|c: char| c.is_whitespace(), "");
-            if ty_str != "anyhow::Result<TokenStream>"
-                && ty_str != "anyhow::Result<proc_macro::TokenStream>"
+            if ty_str != format!("{}::Result<TokenStream>", anyhow_crate)
+                && ty_str != format!("{}::Result<proc_macro::TokenStream>", anyhow_crate)
             {
-                panic!("Function must return a anyhow::Result<TokenStream>");
+                panic!(
+                    "Function must return a {}::Result<TokenStream>",
+                    anyhow_crate
+                );
             }
         }
     }
@@ -72,15 +114,15 @@ pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if attr_name == "proc_macro" || attr_name == "proc_macro_derive" {
                 err_result = Some(quote::quote! {
                 let formatted_error = format!("{:?}", ___macro_err);
-                let mut result=#parent_crate::quote::quote! {compile_error!};
+                let mut result=#quote_crate::quote! {compile_error!};
 
                 //Adds (formatted_error) to the end of the result
-                result.extend( #parent_crate::proc_macro2::TokenStream::from(#parent_crate::proc_macro2::TokenTree::Group(#parent_crate::proc_macro2::Group::new(
-                    #parent_crate::proc_macro2::Delimiter::Parenthesis,
-                    #parent_crate::syn::LitStr::new(&formatted_error, #parent_crate::proc_macro2::Span::call_site()).into_token_stream(),
+                result.extend( #proc_macro2_crate::TokenStream::from(#proc_macro2_crate::TokenTree::Group(#proc_macro2_crate::Group::new(
+                    #proc_macro2_crate::Delimiter::Parenthesis,
+                    #syn_crate::LitStr::new(&formatted_error, #proc_macro2_crate::Span::call_site()).into_token_stream(),
                 ))));
 
-                result.extend(#parent_crate::quote::quote! {;});
+                result.extend(#quote_crate::quote! {;});
 
                 result });
                 macro_attr = Some(attr.clone());
@@ -98,17 +140,17 @@ pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 };
                 err_result = Some(quote::quote! {
                     let formatted_error= format!("{:?}", ___macro_err);
-                    let mut result = #parent_crate::quote::quote! {compile_error!};
+                    let mut result = #quote_crate::quote! {compile_error!};
 
                     //Adds (formatted_error) to the end of the result
-                    result.extend( #parent_crate::proc_macro2::TokenStream::from(#parent_crate::proc_macro2::TokenTree::Group(#parent_crate::proc_macro2::Group::new(
-                        #parent_crate::proc_macro2::Delimiter::Parenthesis,
-                        #parent_crate::syn::LitStr::new(&formatted_error, #parent_crate::proc_macro2::Span::call_site()).into_token_stream(),
+                    result.extend( #proc_macro2_crate::TokenStream::from(#proc_macro2_crate::TokenTree::Group(#proc_macro2_crate::Group::new(
+                        #proc_macro2_crate::Delimiter::Parenthesis,
+                        #syn_crate::LitStr::new(&formatted_error, #proc_macro2_crate::Span::call_site()).into_token_stream(),
                     ))));
 
-                    result.extend(#parent_crate::quote::quote! {;});
+                    result.extend(#quote_crate::quote! {;});
 
-                    result.extend(#parent_crate::proc_macro2::TokenStream::from(#second_input_arg));
+                    result.extend(#proc_macro2_crate::TokenStream::from(#second_input_arg));
                     result
                 });
                 macro_attr = Some(attr.clone());
@@ -128,11 +170,18 @@ pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     our_func.attrs.remove(attr_index);
 
-    let result = quote::quote! {
-        #macro_attr
-        pub fn #func_name(#inputs) -> TokenStream {
+    // Extract doc comments and other attributes to copy to the wrapper, excluding the proc_macro attribute
+    let wrapper_attrs = our_func.attrs.iter().enumerate().filter_map(|(i, attr)| {
+        // Skip the attribute we just removed (adjust index since we already removed one)
+        if i == attr_index { None } else { Some(attr) }
+    });
 
-            use #parent_crate::quote::ToTokens;
+    let result = quote::quote! {
+        #(#wrapper_attrs)*
+        #macro_attr
+        pub fn #func_name(#inputs) -> proc_macro::TokenStream {
+
+            use #quote_crate::ToTokens;
 
             #our_func
 
