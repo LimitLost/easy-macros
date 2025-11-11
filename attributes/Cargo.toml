@@ -16,7 +16,8 @@ always-context = { package = "easy-macros-always-context", path = "../always-con
 helpers = { package = "easy-macros-helpers", path = "../helpers", features = ["context"] }
 attributes-macros = { package = "easy-macros-attributes-macros", path = "../attributes-macros" }
 
-attributes-macros = { path = "../attributes-macros" }
+[features]
+easy-sql = ["attributes-macros/easy-sql"]
 
 [build-dependencies]
 always-context-build = { package = "easy-macros-always-context-build", path = "../always-context-build" }
