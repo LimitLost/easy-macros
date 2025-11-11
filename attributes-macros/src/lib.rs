@@ -68,27 +68,33 @@ use helpers::find_crate_list;
 use proc_macro::TokenStream;
 use quote::quote;
 
-fn root_macros_crate() -> proc_macro2::TokenStream {
+fn crate_missing_panic(crate_name: &str, for_macro: &str) -> ! {
+    panic!(
+        "Using {for_macro} requires `{crate_name}` (or `easy-macros` crate) to be present in dependencies! You can add it with `{crate_name} = \"*\"` in your Cargo.toml dependencies or with `cargo add {crate_name}` command."
+    );
+}
+
+fn root_macros_crate(required_by: &str) -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-lib", quote! {::macros}),
         ("easy-macros", quote! {::macros}),
-        ("attributes", quote! {}),
-        ("attributes-macros", quote! {}),
+        ("easy-macros-attributes", quote! {}),
+        ("easy-macros-attributes-macros", quote! {}),
     ]) {
         found
     } else {
-        quote! {}
+        crate_missing_panic("easy-macros-attributes", required_by);
     }
 }
 
-fn context_crate() -> proc_macro2::TokenStream {
+fn context_crate(required_by: &str) -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-lib", quote! {::helpers}),
         ("easy-macros", quote! {::helpers}),
+        ("easy-macros-helpers", quote! {}),
+        ("easy-macros-attributes-macros", quote! {::helpers}),
     ]) {
         found
     } else {
-        quote! {self}
+        crate_missing_panic("easy-macros-helpers", required_by);
     }
 }
 

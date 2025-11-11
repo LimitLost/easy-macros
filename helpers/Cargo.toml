@@ -7,14 +7,14 @@ edition = "2024"
 homepage = "https://github.com/LimitLost/easy-macros"
 keywords = ["procedural-macros", "proc-macro", "macros", "utilities", "helpers"]
 license = "Apache-2.0"
-name = "helpers"
+name = "easy-macros-helpers"
 readme = "README-CRATES-IO.md"
 repository = "https://github.com/LimitLost/easy-macros"
 version = "0.1.0"
 
 [dependencies]
 
-context-internal = {path = "../context-internal", optional = true}
+context-internal = { package = "easy-macros-context-internal", path = "../context-internal", optional = true}
 
 proc-macro2 = {version = "1.0", optional = true}
 quote = {version = "1.0", optional = true}

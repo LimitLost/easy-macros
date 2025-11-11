@@ -1,5 +1,5 @@
 [package]
-name = "always-context"
+name = "easy-macros-always-context"
 version = "1.0.0"
 edition = "2024"
 rust-version = "1.88" # From this version, proc-macro can use span-locations feature without nightly
@@ -15,9 +15,8 @@ proc-macro2 = { version = "1.0.100", features = ["span-locations"] }
 
 replace_with = "0.1.7"
 
-all-syntax-cases = { path = "../all-syntax-cases" }
-
-helpers = { path = "../helpers" }
+all-syntax-cases = { package = "easy-macros-all-syntax-cases", path = "../all-syntax-cases" }
+helpers = { package = "easy-macros-helpers", path = "../helpers" }
 
 [features]
 # Easy SQL integration

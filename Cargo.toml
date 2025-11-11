@@ -8,15 +8,15 @@ license = "Apache-2.0"
 # Hover and click on the version number to see their documentation
 
 # Procedural macros
-all-syntax-cases = { path = "./all-syntax-cases", optional = true }
-always-context = { path = "./always-context", optional = true }
-attributes = { path = "./attributes", optional = true }
-anyhow-result = { path = "./anyhow-result", optional = true }
+all-syntax-cases = {package = "easy-macros-all-syntax-cases",path = "./all-syntax-cases", optional = true }
+always-context = { package = "easy-macros-always-context", path = "./always-context", optional = true }
+attributes = { package = "easy-macros-attributes", path = "./attributes", optional = true }
+anyhow-result = { package = "easy-macros-anyhow-result", path = "./anyhow-result", optional = true }
 
-always-context-build = { path = "./always-context-build", optional = true }
+always-context-build = { package = "easy-macros-always-context-build", path = "./always-context-build", optional = true }
 
 # Helpers for creating procedural macros
-helpers = { path = "./helpers", optional = true }
+helpers = { package = "easy-macros-helpers", path = "./helpers", optional = true }
 
 syn = { version = "2.0", features = ["full","extra-traits"], optional = true }
 quote = { version = "1.0", optional = true }
@@ -26,8 +26,8 @@ anyhow = { version = "1", optional = true }
 
 [dev-dependencies]
 # Procedural macro tests
-proc_macro_tests = { path = "./proc_macro_tests" }
-all-syntax-cases = { path = "./all-syntax-cases" }
+proc-macro-tests = { package = "easy-macros-proc-macro-tests", path = "./proc_macro_tests" }
+all-syntax-cases = { package = "easy-macros-all-syntax-cases", path = "./all-syntax-cases" }
 
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
@@ -46,6 +46,7 @@ for-macro = [
     "dep:quote",
     "dep:proc-macro2",
     "dep:anyhow",
+    "helpers/full"
 ]
 easy-sql = ["always-context/easy-sql"]
 general = ["dep:always-context", "dep:helpers", "helpers/context"]

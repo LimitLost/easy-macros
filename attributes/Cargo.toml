@@ -1,5 +1,5 @@
 [package]
-name = "attributes"
+name = "easy-macros-attributes"
 version = "0.1.0"
 edition = "2024"
 
@@ -12,10 +12,11 @@ anyhow = "1"
 lazy_static = "*"
 regex = "1.11.1"
 
-always-context = { path = "../always-context" }
-helpers = { path = "../helpers" }
+always-context = { package = "easy-macros-always-context", path = "../always-context" }
+helpers = { package = "easy-macros-helpers", path = "../helpers", features = ["context"] }
+attributes-macros = { package = "easy-macros-attributes-macros", path = "../attributes-macros" }
 
 attributes-macros = { path = "../attributes-macros" }
 
 [build-dependencies]
-always-context-build = { path = "../always-context-build" }
+always-context-build = { package = "easy-macros-always-context-build", path = "../always-context-build" }

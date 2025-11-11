@@ -8,8 +8,8 @@ use search::item_handle;
 
 fn context_crate() -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-lib", quote! {::helpers}),
         ("easy-macros", quote! {::helpers}),
+        ("easy-macros-helpers", quote! {}),
     ]) {
         found
     } else {

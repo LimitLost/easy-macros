@@ -1,5 +1,5 @@
 [package]
-name = "proc_macro_tests"
+name = "easy-macros-proc-macro-tests"
 version = "0.1.0"
 edition = "2024"
 
@@ -13,11 +13,11 @@ quote = "1.0"
 proc-macro2 = "1.0"
 anyhow = "1"
 
-attributes = { path = "../attributes" }
+attributes = { package = "easy-macros-attributes", path = "../attributes" }
 
-context-internal = { path = "../context-internal" }
-always-context = { path = "../always-context" }
-anyhow-result = { path = "../anyhow-result" }
+context-internal = { package = "easy-macros-context-internal", path = "../context-internal" }
+always-context = { package = "easy-macros-always-context", path = "../always-context" }
+anyhow-result = { package = "easy-macros-anyhow-result", path = "../anyhow-result" }
 
 
-helpers = { path = "../helpers" }
+helpers = { package = "easy-macros-helpers", path = "../helpers" }
