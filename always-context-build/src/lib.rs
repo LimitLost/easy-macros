@@ -2,7 +2,7 @@ use std::{io::Write, path::Path};
 
 use always_context::always_context;
 use anyhow::Context;
-use helpers::{context, context_internal2};
+use helpers::context;
 use proc_macro2::{LineColumn, TokenStream};
 use quote::ToTokens;
 use syn::{Meta, PathArguments, Type, spanned::Spanned};
