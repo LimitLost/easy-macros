@@ -8,6 +8,7 @@ proc-macro = true
 
 [features]
 generate-readme = []
+easy-sql = []
 
 [dependencies]
 # Hover and click on the version number to see their documentation
