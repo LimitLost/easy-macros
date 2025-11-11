@@ -14,14 +14,8 @@ pub mod macros {
     #[cfg(feature = "build")]
     pub use always_context_build;
 }
-
-#[cfg(feature = "for-macro")]
-pub use {anyhow, helpers, proc_macro2, quote, syn};
-
-#[cfg(all(feature = "general", not(feature = "for-macro")))]
-pub mod helpers {
-    pub use helpers::*;
-}
+#[cfg(any(feature = "for-macro", feature = "general"))]
+pub use helpers;
 
 #[cfg(all(feature = "general", not(feature = "for-macro")))]
 pub mod macros {
