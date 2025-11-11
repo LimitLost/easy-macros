@@ -13,3 +13,8 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 all-syntax-cases-helpers = { path = "../all-syntax-cases-helpers" }
+
+[dev-dependencies]
+all-syntax-cases = { path = "." }
+
+syn = {version="2.0",features = ["visit-mut"]}
