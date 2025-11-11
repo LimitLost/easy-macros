@@ -3,8 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/easy-macros-helpers.svg)](https://crates.io/crates/easy-macros-helpers)
 [![Documentation](https://docs.rs/easy-macros-helpers/badge.svg)](https://docs.rs/easy-macros-helpers)
 
-Easy Macros Helpers (Macro Safe) is a collection of utility functions provided and used by the [Easy Macros crate](https://crates.io/crates/easy_macros) that avoids dependency loops
-by not depending on any other procedural macros from other crates included in the [Easy Macros](https://crates.io/crates/easy_macros).
+Easy Macros Helpers (Macro Safe) is a collection of utility functions provided and used by the [Easy Macros crate](https://crates.io/crates/easy_macros)
 
 ## Core Features
 
