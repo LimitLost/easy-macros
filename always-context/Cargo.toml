@@ -21,4 +21,4 @@ helpers = { path = "../helpers" }
 
 [features]
 # Easy SQL integration
-easy_sql = []
+easy-sql = []

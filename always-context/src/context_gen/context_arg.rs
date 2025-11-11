@@ -8,7 +8,7 @@ use super::{FoundContextInfo, InputFound};
 struct ArgData {
     display_fn_call: TokenStream,
     display: bool,
-    #[cfg(feature = "easy_sql")]
+    #[cfg(feature = "easy-sql")]
     not_sql: bool,
     ///"Are we working with duplicate used for generating context?"
     duplicate: bool,
@@ -38,7 +38,7 @@ fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData) {
     }
 
     //Add `debug_info_mode` keyword to the start of the sql! and query! macros
-    #[cfg(feature = "easy_sql")]
+    #[cfg(feature = "easy-sql")]
     if !data.not_sql {
         let last_segment = if let Some(s) = macro_.mac.path.segments.last() {
             s
@@ -84,7 +84,7 @@ fn handle_arg_attrs(attrs: &mut Vec<syn::Attribute>, data: &mut ArgData) {
                     data.display_fn_call = quote_spanned! {tokens_span=> .iter().map(|el|el.to_token_stream()).collect::<TokenStream>() };
                     to_remove.push(index);
                 }
-                #[cfg(feature = "easy_sql")]
+                #[cfg(feature = "easy-sql")]
                 "not_sql" => {
                     data.not_sql = true;
                     to_remove.push(index);
@@ -111,7 +111,7 @@ pub fn arg_handle(arg: &mut syn::Expr, context_info: &mut FoundContextInfo) {
     let mut data = ArgData {
         display_fn_call: quote! {},
         display: false,
-        #[cfg(feature = "easy_sql")]
+        #[cfg(feature = "easy-sql")]
         not_sql: false,
         duplicate: false,
         ignore: false,

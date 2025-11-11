@@ -47,5 +47,6 @@ for-macro = [
     "dep:proc-macro2",
     "dep:anyhow",
 ]
+easy-sql = ["always-context/easy-sql"]
 general = ["dep:always-context", "dep:helpers", "helpers/context"]
 build = ["dep:always-context-build"]
