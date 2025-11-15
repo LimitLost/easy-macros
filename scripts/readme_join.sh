@@ -84,7 +84,7 @@ fi
 # Find candidate directories: those that contain Sub-Crate-Readme_Start.md and README.md
 # Exclude top-level 'main-crate' and '.git' directories.
 
-SKIP_DIRS=("main-crate" ".git" )
+SKIP_DIRS=("-main-crate" ".git" )
 is_skipped() {
   local d="$1"
   for s in "${SKIP_DIRS[@]}"; do
