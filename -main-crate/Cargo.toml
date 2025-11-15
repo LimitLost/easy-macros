@@ -18,26 +18,21 @@ categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
 # Hover and click on the version number to see their documentation
 
 # Procedural macros
-all-syntax-cases = {package = "easy-macros-all-syntax-cases",path = "./all-syntax-cases", optional = true }
-always-context = { package = "easy-macros-always-context", path = "./always-context", optional = true }
-attributes = { package = "easy-macros-attributes", path = "./attributes", optional = true }
-anyhow-result = { package = "easy-macros-anyhow-result", path = "./anyhow-result", optional = true }
+all-syntax-cases = {package = "easy-macros-all-syntax-cases",version = "0.1.0", optional = true }
+always-context = { package = "easy-macros-always-context", version = "1.0.0", optional = true }
+attributes = { package = "easy-macros-attributes", version = "0.1.0", optional = true }
+anyhow-result = { package = "easy-macros-anyhow-result", version = "0.1.0", optional = true }
 
-always-context-build = { package = "easy-macros-always-context-build", path = "./always-context-build", optional = true }
+always-context-build = { package = "easy-macros-always-context-build", version = "0.1.0", optional = true }
 
 # Helpers for creating procedural macros
 helpers = { package = "easy-macros-helpers", version = "0.1.0", optional = true }
 
-syn = { version = "2.0", features = ["full","extra-traits"], optional = true }
-quote = { version = "1.0", optional = true }
-proc-macro2 = { version = "1.0", optional = true }
-anyhow = { version = "1", optional = true }
-
 
 [dev-dependencies]
 # Procedural macro tests
-proc-macro-tests = { package = "easy-macros-proc-macro-tests", path = "./proc_macro_tests" }
-all-syntax-cases = { package = "easy-macros-all-syntax-cases", path = "./all-syntax-cases" }
+proc-macro-tests = { package = "easy-macros-proc-macro-tests", version = "0.1.0"}
+all-syntax-cases = { package = "easy-macros-all-syntax-cases", version = "0.1.0" }
 
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
@@ -46,18 +41,43 @@ proc-macro2 = "1.0"
 
 [features]
 default = []
-for-macro = [
-    "dep:all-syntax-cases",
-    "dep:always-context",
-    "dep:attributes",
-    "dep:anyhow-result",
-    "dep:helpers",
-    "dep:syn",
-    "dep:quote",
-    "dep:proc-macro2",
-    "dep:anyhow",
-    "helpers/full"
-]
-easy-sql = ["always-context/easy-sql"]
-general = ["dep:always-context", "dep:helpers", "helpers/context"]
+
+# Feature groups
+general = ["always-context", "context"]
 build = ["dep:always-context-build"]
+full = [
+    "all-syntax-cases",
+    "always-context",
+    "attributes",
+    "anyhow-result",
+
+    "context",
+    "indexed-name",
+    "tokens-builder",
+    "expr-error-wrap",
+    "readable-token-stream",
+    "find-crate",
+    "token-stream-consistent",
+    "parse-macro-input",
+]
+
+# Individual crate features
+all-syntax-cases = ["dep:all-syntax-cases"]
+always-context = ["dep:always-context"]
+attributes = ["dep:attributes"]
+anyhow-result = ["dep:anyhow-result"]
+
+helpers-dont-use-directly-this-feature = ["dep:helpers"]
+
+# Helpers features (granular)
+context = ["helpers-dont-use-directly-this-feature", "helpers/context"]
+indexed-name = ["helpers-dont-use-directly-this-feature", "helpers/indexed-name"]
+tokens-builder = ["helpers-dont-use-directly-this-feature", "helpers/tokens-builder"]
+expr-error-wrap = ["helpers-dont-use-directly-this-feature", "helpers/expr-error-wrap"]
+readable-token-stream = ["helpers-dont-use-directly-this-feature", "helpers/readable-token-stream"]
+find-crate = ["helpers-dont-use-directly-this-feature", "helpers/find-crate"]
+token-stream-consistent = ["helpers-dont-use-directly-this-feature", "helpers/token-stream-consistent"]
+parse-macro-input = ["helpers-dont-use-directly-this-feature", "helpers/parse-macro-input"]
+
+# Integration features
+easy-sql = ["always-context?/easy-sql", "attributes?/easy-sql"]

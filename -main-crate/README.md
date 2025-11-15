@@ -175,7 +175,7 @@ pub fn derive_routes(input: TokenStream) -> anyhow::Result<TokenStream> {
 - **`general`** - Error context (`#[always_context]`, `context!`) for any project
 - **`for-macro`** - All tools for proc-macro development (includes `general`)
 - **`build`** - Build macro that auto-adds `#[always_context]` to all functions returning `anyhow::Result`
-- **`easy-sql`** - Add Easy-Sql crate integration for `#[always_context]`
+- **`easy-sql`** - Add Easy-Sql crate integration for `#[always_context]` and attribute macros
 
 ## License
 
