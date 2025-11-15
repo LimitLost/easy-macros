@@ -445,22 +445,6 @@ This crate is part of the larger Easy Macros ecosystem and integrates seamlessly
 - **Context generation**: Automatic error context using [`context!`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/macro.context.html)
 - **Token stream utilities**: Built on [`TokensBuilder`](https://docs.rs/easy-macros-helpers/latest/easy_macros_helpers_macro_safe/struct.TokensBuilder.html)
 
-## When to Use This Crate
-
-**Perfect for:**
-
-- Building derive macros that need attribute-based configuration
-- Creating code generators that parse custom attributes
-- Implementing domain-specific languages embedded in attributes
-- Extracting metadata from attributes for code analysis
-- Building validation or serialization libraries
-
-**Consider alternatives for:**
-
-- Simple attribute presence checking (built-in `cfg` attributes might suffice)
-- Runtime attribute access (use reflection crates instead)
-- Non-procedural macro contexts
-
 ---
 
 **Note**: All examples in this README are tested as part of the test suite. See `src/examples.rs` for the full, runnable code.
