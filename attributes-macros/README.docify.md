@@ -1,9 +1,8 @@
 # What is this?
 
 [![Crates.io](https://img.shields.io/crates/v/easy-macros-attributes.svg)](https://crates.io/crates/easy-macros-attributes)
-[![Documentation](https://docs.rs/easy-macros-attributes/badge.svg)](https://docs.rs/easy-macros-attributes)
 
-Easy Macros Attributes is a specialized crate within the [Easy Macros ecosystem](https://crates.io/crates/easy_macros) that provides powerful procedural macros for working with Rust attributes. It enables pattern matching, extraction, and filtering based on attributes in your code, with support for unknown placeholders and flexible matching patterns.
+This crate provides procedural macros for working with Rust attributes. It enables pattern matching, extraction, and filtering based on attributes in your code, with support for unknown placeholders and flexible matching patterns.
 
 ## Core Features
 
