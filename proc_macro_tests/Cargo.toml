@@ -22,11 +22,11 @@ quote = "1.0"
 proc-macro2 = "1.0"
 anyhow = "1"
 
-attributes = { package = "easy-macros-attributes", path = "../attributes" }
+attributes = { package = "easy-macros-attributes", version = "0.1.0" }
 
-context-internal = { package = "easy-macros-context-internal", path = "../context-internal" }
-always-context = { package = "easy-macros-always-context", path = "../always-context" }
-anyhow-result = { package = "easy-macros-anyhow-result", path = "../anyhow-result" }
+context-internal = { package = "easy-macros-context-internal", version = "0.1.0" }
+always-context = { package = "easy-macros-always-context", version = "1.0.0" }
+anyhow-result = { package = "easy-macros-anyhow-result", version = "0.1.0" }
 
 
 helpers = { package = "easy-macros-helpers", version = "0.1.0" }
