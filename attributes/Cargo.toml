@@ -18,12 +18,12 @@ quote = "1.0"
 proc-macro2 = "1.0"
 
 anyhow = "1"
-lazy_static = "*"
+lazy_static = "1"
 regex = "1.11.1"
 
-always-context = { package = "easy-macros-always-context", path = "../always-context" }
+always-context = { package = "easy-macros-always-context", version = "1.0.0" }
 helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["context"] }
-attributes-macros = { package = "easy-macros-attributes-macros", path = "../attributes-macros" }
+attributes-macros = { package = "easy-macros-attributes-macros", version = "0.1.0" }
 
 docify = "0.4.1"
 
@@ -32,4 +32,4 @@ generate-readme = []
 easy-sql = ["attributes-macros/easy-sql"]
 
 [build-dependencies]
-always-context-build = { package = "easy-macros-always-context-build", path = "../always-context-build" }
+always-context-build = { package = "easy-macros-always-context-build", version = "0.1.0" }
