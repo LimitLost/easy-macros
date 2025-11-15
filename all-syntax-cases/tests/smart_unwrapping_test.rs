@@ -2,7 +2,7 @@
 //!
 //! Tests to verify smart unwrapping works for both default_cases and special_cases
 
-use all_syntax_cases::all_syntax_cases;
+use easy_macros_all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
 use syn::parse_quote;
 

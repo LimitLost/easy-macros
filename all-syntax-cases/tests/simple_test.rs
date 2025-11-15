@@ -2,7 +2,7 @@
 //!
 //! Minimal test to verify macro expansion works
 
-use all_syntax_cases::all_syntax_cases;
+use easy_macros_all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
 use syn::parse_quote;
 

@@ -3,7 +3,7 @@
 //! Test file to verify all claims made in the comparison documentation
 //! Each test validates a specific documented behavior by actually running the macro
 
-use all_syntax_cases::all_syntax_cases;
+use easy_macros_all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
 use syn::parse_quote;
 use syn::visit_mut::{self, VisitMut};
