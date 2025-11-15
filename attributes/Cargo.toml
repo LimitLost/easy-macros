@@ -22,7 +22,7 @@ lazy_static = "*"
 regex = "1.11.1"
 
 always-context = { package = "easy-macros-always-context", path = "../always-context" }
-helpers = { package = "easy-macros-helpers", path = "../helpers", features = ["context"] }
+helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["context"] }
 attributes-macros = { package = "easy-macros-attributes-macros", path = "../attributes-macros" }
 
 [features]
