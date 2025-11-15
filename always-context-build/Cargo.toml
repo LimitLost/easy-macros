@@ -3,6 +3,15 @@ name = "easy-macros-always-context-build"
 version = "0.1.0"
 edition = "2024"
 
+description = "Easy Macros support library"
+readme = "README-CRATES-IO.md"
+
+license = "Apache-2.0"
+authors = ["LimitLost (JQ) <jq@limitlost.com>"]
+documentation = "https://docs.rs/easy-macros"
+homepage = "https://github.com/LimitLost/easy-macros"
+repository = "https://github.com/LimitLost/easy-macros"
+
 [dependencies]
 syn = { version = "2.0", features = ["full"] }
 anyhow = "1.0.97"

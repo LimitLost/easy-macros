@@ -1,16 +1,16 @@
 [package]
-authors = ["LimitLost (JQ) <jq@limitlost.com>"]
-categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
-description = "Easy Macros support library"
-documentation = "https://docs.rs/easy-macros"
 edition = "2024"
-homepage = "https://github.com/LimitLost/easy-macros"
-keywords = ["procedural-macros", "proc-macro", "macros", "utilities", "helpers"]
-license = "Apache-2.0"
 name = "easy-macros-helpers"
-readme = "README-CRATES-IO.md"
-repository = "https://github.com/LimitLost/easy-macros"
 version = "0.1.0"
+
+description = "Easy Macros support library"
+readme = "README-CRATES-IO.md"
+
+license = "Apache-2.0"
+authors = ["LimitLost (JQ) <jq@limitlost.com>"]
+documentation = "https://docs.rs/easy-macros"
+homepage = "https://github.com/LimitLost/easy-macros"
+repository = "https://github.com/LimitLost/easy-macros"
 
 [dependencies]
 

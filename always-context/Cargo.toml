@@ -4,6 +4,15 @@ version = "1.0.0"
 edition = "2024"
 rust-version = "1.88" # From this version, proc-macro can use span-locations feature without nightly
 
+description = "Easy Macros support library"
+readme = "README-CRATES-IO.md"
+
+license = "Apache-2.0"
+authors = ["LimitLost (JQ) <jq@limitlost.com>"]
+documentation = "https://docs.rs/easy-macros"
+homepage = "https://github.com/LimitLost/easy-macros"
+repository = "https://github.com/LimitLost/easy-macros"
+
 [lib]
 proc-macro = true
 

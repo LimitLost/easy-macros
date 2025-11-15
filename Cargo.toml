@@ -4,6 +4,16 @@ version = "1.0.0"
 edition = "2024"
 license = "Apache-2.0"
 
+description = "Toolkit for building Rust procedural macros + generating debug info"
+readme = "README.md"
+
+authors = ["LimitLost (JQ) <jq@limitlost.com>"]
+documentation = "https://docs.rs/easy-macros"
+homepage = "https://github.com/LimitLost/easy-macros"
+repository = "https://github.com/LimitLost/easy-macros"
+keywords = ["procedural-macros", "proc-macro", "macros", "utilities", "helpers"]
+categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
+
 [dependencies]
 # Hover and click on the version number to see their documentation
 
