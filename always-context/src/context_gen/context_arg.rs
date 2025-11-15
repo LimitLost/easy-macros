@@ -33,6 +33,7 @@ fn macro_handle(macro_: &mut syn::ExprMacro, data: &mut ArgData) {
     handle_arg_attrs(&mut macro_.attrs, data);
 
     //Perform this only on duplicate used for generating context
+    #[cfg(feature = "easy-sql")]
     if !data.duplicate {
         return;
     }
