@@ -1,9 +1,8 @@
 # What is this?
 
 [![Crates.io](https://img.shields.io/crates/v/easy-macros-attributes.svg)](https://crates.io/crates/easy-macros-attributes)
-[![Documentation](https://docs.rs/easy-macros-attributes/badge.svg)](https://docs.rs/easy-macros-attributes)
 
-Easy Macros Attributes is a specialized crate within the [Easy Macros ecosystem](https://crates.io/crates/easy_macros) that provides powerful procedural macros for working with Rust attributes. It enables pattern matching, extraction, and filtering based on attributes in your code, with support for unknown placeholders and flexible matching patterns.
+This crate provides procedural macros for working with Rust attributes. It enables pattern matching, extraction, and filtering based on attributes in your code, with support for unknown placeholders and flexible matching patterns.
 
 ## Core Features
 
@@ -321,11 +320,11 @@ use easy_macros_attributes::{fields_with_attributes, fields_get_attributes};
 #[proc_macro_derive(ApiEndpoints)]
 pub fn derive_api_endpoints(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    
+
     // Get all fields with route attributes, extracting HTTP methods
-    let routes: Vec<(usize, syn::Field, Vec<proc_macro2::TokenStream>)> = 
+    let routes: Vec<(usize, syn::Field, Vec<proc_macro2::TokenStream>)> =
         fields_get_attributes!(input, #[route(__unknown__)]);
-    
+
     let route_implementations = routes.iter().map(|(_, field, methods)| {
         let field_name = &field.ident;
         // Note: A field might have multiple route attributes with different methods
@@ -336,12 +335,12 @@ pub fn derive_api_endpoints(input: TokenStream) -> TokenStream {
                 }
             }
         });
-        
+
         quote! {
             #(#method_impls)*
         }
     });
-    
+
     quote! {
         impl ApiEndpoints for YourStruct {
             #(#route_implementations)*
@@ -372,7 +371,7 @@ The `__unknown__` placeholder is a powerful feature that allows pattern matching
 // Method extraction
 #[route(__unknown__, "/path")]     // Captures HTTP method
 
-// Path parameter extraction  
+// Path parameter extraction
 #[route(GET, __unknown__)]         // Captures full path
 
 // Partial identifier matching
@@ -449,6 +448,7 @@ This crate is part of the larger Easy Macros ecosystem and integrates seamlessly
 ## When to Use This Crate
 
 **Perfect for:**
+
 - Building derive macros that need attribute-based configuration
 - Creating code generators that parse custom attributes
 - Implementing domain-specific languages embedded in attributes
@@ -456,6 +456,7 @@ This crate is part of the larger Easy Macros ecosystem and integrates seamlessly
 - Building validation or serialization libraries
 
 **Consider alternatives for:**
+
 - Simple attribute presence checking (built-in `cfg` attributes might suffice)
 - Runtime attribute access (use reflection crates instead)
 - Non-procedural macro contexts

@@ -2,4 +2,4 @@
 
 [![Crates.io](https://img.shields.io/crates/v/easy-macros-helpers.svg)](https://crates.io/crates/easy-macros-helpers)
 
-Macros needed by the [easy-macros-attributes crate](https://crates.io/crates/easy_macros-attributes).
+Build macro that adds #[always_context] to every function that returns anyhow::Result

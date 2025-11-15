@@ -18,28 +18,34 @@ fn context_crate() -> proc_macro2::TokenStream {
 }
 
 #[proc_macro_attribute]
-/// Procedural Macro Attribute
+/// Automatically adds `.with_context(context!())` to all `?` operators that don't already have context.
 ///
-/// Adds .with_context(context!()) before all '?' without them (expects anyhow::Result function output, don't use type aliases)
+/// Transforms `operation()?` into `operation().with_context(context!("operation()"))?`
+/// with function call details, arguments, and file location.
 ///
-/// Also adds function names and inputs into context!() macro (by default)
+/// # Requirements
 ///
-/// # Supported attributes (general)
+/// - Function must return `anyhow::Result<T>` or `Result<T, UserFriendlyError>` (please add an issue if you need support for other types)
 ///
-/// (for example: in the selected scope, before expression)
+/// # Control Attributes
 ///
-/// - `#[no_context]` - Don't put `.with_context(context!())` at all
-/// - `#[no_context_inputs]` - Don't put function names and inputs in `context!()`, does just `.with_context(context!())`
-/// - `#[enable_context]` - Enable context generation back, if it was disabled by other attribute, it's also auto disabled in macros
+/// ## Function-level
+/// - `#[no_context]` - Disable context generation entirely
+/// - `#[no_context_inputs]` - Add context but exclude function arguments  
+/// - `#[enable_context]` - Re-enable context (useful in macros where auto-disabled)
 ///
-/// # Supported attributes (function call arguments)
+/// ## Argument-level
+/// - `#[context(display)]` - Use `Display` instead of `Debug` for formatting
+/// - `#[context(.method())]` - Call method on argument before displaying
+/// - `#[context(tokens)]` - Format as token stream (equivalent to `display` + `.to_token_stream()`)
+/// - `#[context(tokens_vec)]` - Format as token stream collection
+/// - `#[context(not_sql)]` - Use on `sql!` and `query!` macros if not part of `easy_sql` (requires `easy-sql` feature)
+/// - `#[context(ignore)]` or `#[context(ignored)]` or `#[context(no)]` - Exclude this argument from context
 ///
-/// - `#[context(display)]` - uses `{}` instead of `{:?}`, inside of `context!()` macro, useful when our input doesn't have `Debug` trait but it has `Display` trait
-/// - `#[context(.example())` - uses `.example()` on our argument to get value for display, inside of `context!()` macro
-/// - `#[context(tokens)]` -  same as `#[context(display)] #[context(.to_token_stream())]`
-/// - `#[context(tokens_vec)]` - same as `#[context(display)] #[context(.iter().map(|el|el.to_token_stream()).collect::<TokenStream>())]`
-/// - `easy_sql` feature enabled - `#[context(not_sql)]` - use on `sql!` and `query!` macros if they are not a part of `easy_sql`
-/// - `#[context(ignore)]` or `#[context(ignored)]` or `#[context(no)]` - don't include this argument value in context at all
+/// # Limitations
+///
+/// These expressions before `?` require manual `.with_context()` or `.context()`:
+/// blocks, control flow (`if`/`match`/`while`/`for`/`loop`), field access, macros.
 pub fn always_context(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut parsed = syn::parse_macro_input!(item as syn::Item);
     //Adds .with_context(context!()) before all '?' without them
