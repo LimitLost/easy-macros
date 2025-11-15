@@ -56,23 +56,17 @@ pub fn anyhow_result(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func_output = &our_func.sig.output;
     match func_output {
         syn::ReturnType::Default => {
-            panic!(
-                "Function must return a {}::Result<TokenStream>",
-                anyhow_crate
-            )
+            panic!("Function must return a {anyhow_crate}::Result<TokenStream>",)
         }
         syn::ReturnType::Type(_, ty) => {
             let ty_str = ty
                 .to_token_stream()
                 .to_string()
                 .replace(|c: char| c.is_whitespace(), "");
-            if ty_str != format!("{}::Result<TokenStream>", anyhow_crate)
-                && ty_str != format!("{}::Result<proc_macro::TokenStream>", anyhow_crate)
+            if ty_str != format!("{anyhow_crate}::Result<TokenStream>",)
+                && ty_str != format!("{anyhow_crate}::Result<proc_macro::TokenStream>",)
             {
-                panic!(
-                    "Function must return a {}::Result<TokenStream>",
-                    anyhow_crate
-                );
+                panic!("Function must return a {anyhow_crate}::Result<TokenStream>",);
             }
         }
     }
