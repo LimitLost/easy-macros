@@ -25,7 +25,7 @@ proc-macro2 = { version = "1.0.100", features = ["span-locations"] }
 replace_with = "0.1.7"
 
 all-syntax-cases = { package = "easy-macros-all-syntax-cases", path = "../all-syntax-cases" }
-helpers = { package = "easy-macros-helpers", version = "0.1.0"}
+helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["find-crate", "expr-error-wrap", "readable-token-stream"] }
 
 [features]
 # Easy SQL integration
