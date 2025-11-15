@@ -12,6 +12,7 @@ echo "========================================="
 # Track if any tests were run
 TESTS_RUN=0
 TESTS_FAILED=0
+FAILED_FOLDERS=()
 
 # Iterate through all directories in the project root
 for dir in "$PROJECT_ROOT"/*/ ; do
@@ -37,6 +38,7 @@ for dir in "$PROJECT_ROOT"/*/ ; do
             echo "✗ Tests failed in $dir_name"
             TESTS_RUN=$((TESTS_RUN + 1))
             TESTS_FAILED=$((TESTS_FAILED + 1))
+            FAILED_FOLDERS+=("$dir_name")
         fi
     fi
 done
@@ -51,6 +53,10 @@ else
         echo "✓ All tests passed!"
     else
         echo "✗ $TESTS_FAILED folder(s) had failing tests"
+        echo "Failed folders:"
+        for folder in "${FAILED_FOLDERS[@]}"; do
+            echo "  - $folder"
+        done
         exit 1
     fi
 fi
