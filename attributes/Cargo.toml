@@ -13,7 +13,7 @@ homepage = "https://github.com/LimitLost/easy-macros"
 repository = "https://github.com/LimitLost/easy-macros"
 
 [dependencies]
-syn = { version = "2.0", features = ["full"] }
+syn = { version = "2.0", features = ["full","extra-traits"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 
@@ -25,7 +25,10 @@ always-context = { package = "easy-macros-always-context", path = "../always-con
 helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["context"] }
 attributes-macros = { package = "easy-macros-attributes-macros", path = "../attributes-macros" }
 
+docify = "0.4.1"
+
 [features]
+generate-readme = []
 easy-sql = ["attributes-macros/easy-sql"]
 
 [build-dependencies]

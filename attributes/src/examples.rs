@@ -1,4 +1,4 @@
-//! Documentation examples for the attributes-macros crate
+//! Documentation examples for the attributes crate
 //!
 //! This module contains all the examples used in documentation,
 //! marked with #[docify::export_content] for embedding in docs and README.
@@ -6,14 +6,16 @@
 #![allow(unused_variables, unused_imports, dead_code)]
 
 use anyhow::Context;
-use attributes::{get_attributes, has_attributes};
+use attributes_macros::{
+    fields_get_attributes, fields_with_attributes, get_attributes, has_attributes,
+};
 
 // ============================================================================
 // Error Handling Examples
 // ============================================================================
 
 #[docify::export_content]
-#[test] 
+#[test]
 fn error_handling_no_matches_example() -> Result<(), Box<dyn std::error::Error>> {
     use syn::parse_quote;
 
@@ -21,7 +23,7 @@ fn error_handling_no_matches_example() -> Result<(), Box<dyn std::error::Error>>
         #[derive(Debug)]
         struct User;
     };
-    
+
     // No #[route(...)] attributes exist, so this returns empty
     let no_routes: Vec<proc_macro2::TokenStream> = get_attributes!(
         input,
@@ -41,7 +43,7 @@ fn error_handling_conditional_missing_example() -> Result<(), Box<dyn std::error
         #[api_version(v1)]
         struct User;
     };
-    
+
     // Without derive(Debug), this returns empty vec![]
     let no_versions: Vec<proc_macro2::TokenStream> = get_attributes!(
         input_no_debug,
@@ -293,7 +295,6 @@ fn get_attributes_exact_matching_required() -> Result<(), Box<dyn std::error::Er
 #[docify::export_content]
 #[test]
 fn fields_with_attributes_basic_filtering() {
-    use attributes::fields_with_attributes;
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
@@ -327,7 +328,6 @@ fn fields_with_attributes_basic_filtering() {
 #[docify::export_content]
 #[test]
 fn fields_with_attributes_multiple_requirements() {
-    use attributes::fields_with_attributes;
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
@@ -357,7 +357,6 @@ fn fields_with_attributes_multiple_requirements() {
 #[docify::export_content]
 #[test]
 fn fields_with_attributes_borrowing() {
-    use attributes::{fields_with_attributes, fields_with_attributes_debug};
     use syn::parse_quote;
 
     let mut input: syn::ItemStruct = parse_quote! {
@@ -398,7 +397,6 @@ fn fields_with_attributes_borrowing() {
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_route_extraction() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::{fields_get_attributes, fields_get_attributes_debug};
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
@@ -434,7 +432,6 @@ fn fields_get_attributes_route_extraction() -> Result<(), Box<dyn std::error::Er
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_database_columns() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::fields_get_attributes;
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
@@ -469,7 +466,6 @@ fn fields_get_attributes_database_columns() -> Result<(), Box<dyn std::error::Er
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_validation_rules() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::fields_get_attributes;
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
@@ -503,7 +499,6 @@ fn fields_get_attributes_validation_rules() -> Result<(), Box<dyn std::error::Er
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_multiple_matches_per_field() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::fields_get_attributes;
     use syn::parse_quote;
 
     // **KEY CONCEPT**: A single field can have MULTIPLE matching attributes!
@@ -532,7 +527,6 @@ fn fields_get_attributes_multiple_matches_per_field() -> Result<(), Box<dyn std:
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_borrowing() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::{fields_get_attributes, fields_get_attributes_debug};
     use syn::parse_quote;
 
     let mut large_struct: syn::ItemStruct = parse_quote! {
@@ -564,7 +558,6 @@ fn fields_get_attributes_borrowing() -> Result<(), Box<dyn std::error::Error>> {
 #[docify::export_content]
 #[test]
 fn fields_get_attributes_complex_pattern() -> Result<(), Box<dyn std::error::Error>> {
-    use attributes::fields_get_attributes;
     use syn::parse_quote;
 
     let input: syn::ItemStruct = parse_quote! {
