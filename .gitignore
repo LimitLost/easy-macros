@@ -1,2 +1,3 @@
 target/
 README-CRATES-IO.md
+Cargo.lock
