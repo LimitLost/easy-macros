@@ -34,6 +34,12 @@ anyhow = {version = "1.0"}
 context = ["dep:context-internal"]
 expr-error-wrap = ["dep:syn", "dep:replace_with"]
 find-crate = ["dep:proc-macro-crate", "dep:proc-macro2", "dep:quote", "dep:syn"]
+indexed-name = ["dep:quote", "dep:syn"]
+parse-macro-input = []
+readable-token-stream = []
+token-stream-consistent = ["dep:proc-macro2"]
+tokens-builder = ["dep:proc-macro2", "dep:quote", "dep:replace_with"]
+
 full = [
   "context",
   "indexed-name",
@@ -44,9 +50,5 @@ full = [
   "token-stream-consistent",
   "parse-macro-input",
 ]
+
 generate-readme = []
-indexed-name = ["dep:quote", "dep:syn"]
-parse-macro-input = []
-readable-token-stream = []
-token-stream-consistent = ["dep:proc-macro2"]
-tokens-builder = ["dep:proc-macro2", "dep:quote", "dep:replace_with"]
