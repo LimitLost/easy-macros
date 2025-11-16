@@ -34,7 +34,7 @@ regex = "1.11.1"
 
 anyhow-result = { package = "easy-macros-anyhow-result", version = "0.1.0" }
 always-context = { package = "easy-macros-always-context", version = "1.0.0" }
-helpers = { package = "easy-macros-helpers",  version = "0.1.0" }
+helpers = { package = "easy-macros-helpers",  version = "0.1.0", features = ["find-crate"] }
 
 [build-dependencies]
 always-context-build = { package = "easy-macros-always-context-build", version = "0.1.0" }

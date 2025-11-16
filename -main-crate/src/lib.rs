@@ -44,7 +44,9 @@ pub use always_context_build;
 pub use anyhow_result::anyhow_result;
 
 #[cfg(feature = "attributes")]
-pub use attributes::*;
+pub use attributes::{
+    AttrWithUnknown, fields_get_attributes, fields_with_attributes, get_attributes, has_attributes,
+};
 
 // === Helper Function Exports ===
 

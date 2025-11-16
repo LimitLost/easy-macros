@@ -18,7 +18,7 @@ fn crate_missing_panic(crate_name: &str, for_macro: &str) -> ! {
 
 fn root_macros_crate(required_by: &str) -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-macros", quote! {::macros}),
+        ("easy-macros", quote! {}),
         ("easy-macros-attributes", quote! {}),
         ("easy-macros-attributes-macros", quote! {}),
     ]) {
@@ -30,9 +30,9 @@ fn root_macros_crate(required_by: &str) -> proc_macro2::TokenStream {
 
 fn context_crate(required_by: &str) -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-macros", quote! {::helpers}),
+        ("easy-macros", quote! {}),
         ("easy-macros-helpers", quote! {}),
-        ("easy-macros-attributes-macros", quote! {::helpers}),
+        ("easy-macros-attributes", quote! {::helpers}),
     ]) {
         found
     } else {

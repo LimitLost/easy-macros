@@ -1,6 +1,11 @@
 /// Internal implementation details. Not intended for direct use.
 pub mod internal;
 
+/// Reexport of helper utilities for the procedural macros.
+pub mod helpers {
+    pub use helpers::*;
+}
+
 #[cfg(test)]
 mod examples;
 

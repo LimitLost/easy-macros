@@ -63,8 +63,8 @@ full = [
 
 # Individual crate features
 all-syntax-cases = ["dep:all-syntax-cases"]
-always-context = ["dep:always-context"]
-attributes = ["dep:attributes"]
+always-context = ["dep:always-context","context"]
+attributes = ["dep:attributes","context"]
 anyhow-result = ["dep:anyhow-result"]
 
 helpers-dont-use-directly-this-feature = ["dep:helpers"]

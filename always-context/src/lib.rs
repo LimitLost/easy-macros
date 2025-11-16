@@ -6,14 +6,20 @@ use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 use search::item_handle;
 
+fn crate_missing_panic(crate_name: &str, for_macro: &str) -> ! {
+    panic!(
+        "Using {for_macro} requires `{crate_name}` (or `easy-macros` crate) to be present in dependencies! You can add it with `{crate_name} = \"*\"` in your Cargo.toml dependencies or with `cargo add {crate_name}` command."
+    );
+}
+
 fn context_crate() -> proc_macro2::TokenStream {
     if let Some(found) = find_crate_list(&[
-        ("easy-macros", quote! {::helpers}),
+        ("easy-macros", quote! {}),
         ("easy-macros-helpers", quote! {}),
     ]) {
         found
     } else {
-        quote! {self}
+        crate_missing_panic("easy-macros-helpers", "always_context");
     }
 }
 
