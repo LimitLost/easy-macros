@@ -116,7 +116,6 @@ Filter struct fields based on their attributes:
 #### Basic Field Filtering
 
 ```rust,ignore
-use attributes::fields_with_attributes;
 use syn::parse_quote;
 
 let input: syn::ItemStruct = parse_quote! {
@@ -150,7 +149,6 @@ assert_eq!(validated_fields[1].0, 2);
 #### Multiple Attribute Requirements
 
 ```rust,ignore
-use attributes::fields_with_attributes;
 use syn::parse_quote;
 
 let input: syn::ItemStruct = parse_quote! {
@@ -187,7 +185,6 @@ Extract dynamic values from field attributes:
 #### Route Configuration Extraction
 
 ```rust,ignore
-use attributes::{fields_get_attributes, fields_get_attributes_debug};
 use syn::parse_quote;
 
 let input: syn::ItemStruct = parse_quote! {
@@ -223,7 +220,6 @@ Ok(())
 #### Database Column Configuration
 
 ```rust,ignore
-use attributes::fields_get_attributes;
 use syn::parse_quote;
 
 let input: syn::ItemStruct = parse_quote! {
@@ -283,7 +279,6 @@ assert_eq!(db_urls[0].to_string(), "\"postgres:
 #### Multiple Matching Attributes Per Field
 
 ```rust,ignore
-use attributes::fields_get_attributes;
 use syn::parse_quote;
 
 // **KEY CONCEPT**: A single field can have MULTIPLE matching attributes!
