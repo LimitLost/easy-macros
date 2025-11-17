@@ -1,6 +1,6 @@
 [package]
 name = "easy-macros-attributes-macros"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 description = "Easy Macros support library"
@@ -33,7 +33,7 @@ regex = "1.11.1"
 
 
 anyhow-result = { package = "easy-macros-anyhow-result", version = "0.1.0" }
-always-context = { package = "easy-macros-always-context", version = "1.0.0" }
+always-context = { package = "easy-macros-always-context", version = "1.0.1" }
 helpers = { package = "easy-macros-helpers",  version = "0.1.0", features = ["find-crate"] }
 
 [build-dependencies]

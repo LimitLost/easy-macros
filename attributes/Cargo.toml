@@ -21,9 +21,9 @@ anyhow = "1"
 lazy_static = "1"
 regex = "1.11.1"
 
-always-context = { package = "easy-macros-always-context", version = "1.0.0" }
+always-context = { package = "easy-macros-always-context", version = "1.0.1" }
 helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["context"] }
-attributes-macros = { package = "easy-macros-attributes-macros", version = "0.1.0" }
+attributes-macros = { package = "easy-macros-attributes-macros", version = "0.1.1" }
 
 docify = "0.4.1"
 
