@@ -26,20 +26,26 @@ for dir in "$PROJECT_ROOT"/*/ ; do
     
     # Check if test.sh exists in this directory
     if [[ -f "$dir/test.sh" ]]; then
-        echo ""
-        echo "Running tests in: $dir_name"
-        echo "-----------------------------------------"
+        # Capture output to a temporary file
+        temp_output=$(mktemp)
         
-        # Run the test script
-        if (cd "$dir" && bash test.sh); then
+        # Run the test script and capture all output
+        if (cd "$dir" && bash test.sh) > "$temp_output" 2>&1; then
             echo "✓ Tests passed in $dir_name"
             TESTS_RUN=$((TESTS_RUN + 1))
         else
+            echo ""
             echo "✗ Tests failed in $dir_name"
+            echo "-----------------------------------------"
+            cat "$temp_output"
+            echo "-----------------------------------------"
             TESTS_RUN=$((TESTS_RUN + 1))
             TESTS_FAILED=$((TESTS_FAILED + 1))
             FAILED_FOLDERS+=("$dir_name")
         fi
+        
+        # Clean up temporary file
+        rm -f "$temp_output"
     fi
 done
 
