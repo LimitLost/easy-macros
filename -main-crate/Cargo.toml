@@ -19,14 +19,16 @@ categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
 
 # Procedural macros
 all-syntax-cases = {package = "easy-macros-all-syntax-cases",version = "0.1.0", optional = true }
-always-context = { package = "easy-macros-always-context", version = "1.0.0", optional = true }
-attributes = { package = "easy-macros-attributes", version = "0.1.0", optional = true }
+always-context = { package = "easy-macros-always-context", version = "1.0.1", optional = true }
+attributes = { package = "easy-macros-attributes", version = "0.1.1", optional = true }
 anyhow-result = { package = "easy-macros-anyhow-result", version = "0.1.0", optional = true }
 
 always-context-build = { package = "easy-macros-always-context-build", version = "0.1.0", optional = true }
 
 # Helpers for creating procedural macros
 helpers = { package = "easy-macros-helpers", version = "0.1.0", optional = true }
+
+docify = "0.4.1"
 
 
 [dev-dependencies]
@@ -37,6 +39,7 @@ all-syntax-cases = { package = "easy-macros-all-syntax-cases", version = "0.1.0"
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 proc-macro2 = "1.0"
+anyhow = "1.0"
 
 
 [features]
@@ -81,3 +84,5 @@ parse-macro-input = ["helpers-dont-use-directly-this-feature", "helpers/parse-ma
 
 # Integration features
 easy-sql = ["always-context?/easy-sql", "attributes?/easy-sql"]
+
+generate-readme = []

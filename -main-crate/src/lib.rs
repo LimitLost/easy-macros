@@ -1,3 +1,7 @@
+// Compile README.docify.md to README.md
+#[cfg(feature = "generate-readme")]
+docify::compile_markdown!("README.docify.md", "README.md");
+
 #[cfg(feature = "all-syntax-cases")]
 pub use all_syntax_cases::*;
 
@@ -56,3 +60,6 @@ pub use helpers::*;
 
 #[cfg(test)]
 mod macro_tests;
+
+#[cfg(test)]
+mod examples;

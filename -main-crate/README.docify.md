@@ -37,13 +37,7 @@ easy-macros = { version = "...", features = ["full"] }
 
 Add `.with_context()` to all `?` operators automatically:
 
-```rust,ignore
-let user_id = 123u64;
-let user = find_user(user_id)?; // Auto-context with user_id
-let profile = load_profile(&user)?; // Auto-context
-let data = fetch_data(profile.id)?; // Auto-context
-Ok(())
-```
+<!-- docify::embed!("src/examples.rs", always_context_example) -->
 
 **Control attributes**: `#[no_context]`, `#[context(display)]`, `#[context(ignore)]`
 
@@ -53,47 +47,7 @@ Ok(())
 
 Extract values from attributes using `__unknown__` placeholder:
 
-```rust,ignore
-let input: syn::ItemStruct = parse_quote! {
-    #[derive(Debug)]
-    #[api_version(v2)]
-    struct ApiRoutes {
-        #[route(GET, "/users")]
-        #[deprecated]
-        list_users: String,
-
-        #[route(POST, "/users")]
-        create_user: String,
-
-        #[route(GET, "/users/{id}")]
-        get_user: String,
-
-        unrouted_field: String,
-    }
-};
-
-// 1. has_attributes! - Check if struct has required attributes
-let is_valid_api = has_attributes!(input, #[derive(Debug)] #[api_version(v2)]);
-assert!(is_valid_api);
-
-// 2. get_attributes! - Extract API version from struct
-let versions: Vec<TokenStream> = get_attributes!(input, #[api_version(__unknown__)]);
-assert_eq!(versions[0].to_string(), "v2");
-
-// 3. fields_with_attributes! - Filter only deprecated route fields
-let deprecated: Vec<(usize, &Field)> =
-    fields_with_attributes!(&input, #[route(GET, "/users")] #[deprecated]).collect();
-assert_eq!(deprecated.len(), 1);
-
-// 4. fields_get_attributes! - Extract HTTP methods from all routed fields
-let routes: Vec<(usize, &Field, Vec<TokenStream>)> =
-    fields_get_attributes!(&input, #[route(__unknown__, "/users")]);
-assert_eq!(routes.len(), 2); // list_users and create_user
-assert_eq!(routes[0].2[0].to_string(), "GET");
-assert_eq!(routes[1].2[0].to_string(), "POST");
-
-Ok(())
-```
+<!-- docify::embed!("src/examples.rs", attributes_comprehensive_example) -->
 
 ### 3. Exhaustive AST Traversal
 
@@ -101,53 +55,7 @@ Ok(())
 
 Generate recursive handlers for all syn types:
 
-```rust,ignore
-all_syntax_cases! {
-    setup => {
-        generated_fn_prefix: "process",
-        additional_input_type: &mut Context,
-    }
-    default_cases => {
-        // Called for matching types across entire AST
-        fn handle_expr(_expr: &mut syn::Expr, _ctx: &mut Context);
-
-        #[after_system]  // Run after children processed
-        fn finalize(_item: &mut syn::Item, _ctx: &mut Context);
-
-        // Handle multiple syn types together (e.g., attributes + generics)
-        fn check_attrs_and_generics(
-            _attrs: &mut Vec<syn::Attribute>,
-            _generics: &mut syn::Generics,
-            _ctx: &mut Context
-        );
-    }
-    special_cases => {
-        // Override for specific variants
-        fn handle_call(_call: &mut syn::ExprCall, _ctx: &mut Context);
-    }
-}
-
-// Function implementations for the handlers
-fn handle_expr(_expr: &mut syn::Expr, _ctx: &mut Context) {
-    // Process expressions
-}
-
-fn finalize(_item: &mut syn::Item, _ctx: &mut Context) {
-    // Finalize items after processing children
-}
-
-fn check_attrs_and_generics(
-    _attrs: &mut Vec<syn::Attribute>,
-    _generics: &mut syn::Generics,
-    _ctx: &mut Context,
-) {
-    // Check attributes and generics together
-}
-
-fn handle_call(_call: &mut syn::ExprCall, _ctx: &mut Context) {
-    // Handle function calls specially
-}
-```
+<!-- docify::embed!("src/examples.rs", ast_traversal_example) -->
 
 Smart unwrapping of `Box<T>`, `Vec<T>`, `Punctuated<T, _>`. Generates handlers for Item, Expr, Stmt, Pat, Type, and more.
 
@@ -155,36 +63,7 @@ Smart unwrapping of `Box<T>`, `Vec<T>`, `Punctuated<T, _>`. Generates handlers f
 
 **Feature flags**: Individual helpers or `full` for all
 
-```rust,ignore
-use std::fs;
-
-// Manual error context with file/line info
-// Feature: `context` (included in `general` and `full`)
-fn load_config() -> anyhow::Result<String> {
-    fs::read_to_string("file.txt").with_context(context!("Loading config"))
-}
-
-// Token stream builder
-// Feature: `tokens-builder` (included in `full`)
-let mut tokens = TokensBuilder::default();
-tokens.add(quote! { println!("Hello"); });
-tokens.braced(); // Wrap in { }
-let stream = tokens.finalize();
-assert!(!stream.is_empty());
-
-// Generate indexed names: field0, field1, field2
-// Feature: `indexed-name` (included in `full`)
-let names = indexed_name(syn::parse_quote!(field), 3);
-assert_eq!(names.len(), 3);
-
-// Find crates (handles renames)
-// Feature: `find-crate` (included in `full`)
-if let Some(path) = find_crate("quote", quote!()) {
-    assert!(!path.to_string().is_empty());
-}
-// Returns first found crate or None
-let async_rt = find_crate_list(&[("tokio", quote!()), ("async-std", quote!())]);
-```
+<!-- docify::embed!("src/examples.rs", helper_utilities_comprehensive_example) -->
 
 ```rust,ignore
 // Parse that returns Ok(...) with compile_error! on failure
