@@ -1,6 +1,6 @@
 [package]
 name = "easy-macros-always-context-build"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 description = "Easy Macros support library"
@@ -19,5 +19,5 @@ regex = "1.11.1"
 quote = "1.0"
 proc-macro2 = { version = "1.0", features = ["span-locations"] }
 
-always-context = { package = "easy-macros-always-context", version = "1.0.0" }
+always-context = { package = "easy-macros-always-context", version = "1.1.0" }
 helpers = { package = "easy-macros-helpers", version = "0.1.0", features = ["full"] }
