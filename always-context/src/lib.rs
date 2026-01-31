@@ -69,3 +69,19 @@ pub fn always_context(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     parsed.into_token_stream().into()
 }
+#[proc_macro_attribute]
+/// Debug version of `always_context` that panics with the result.
+#[doc(hidden)]
+pub fn always_context_debug(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut parsed = syn::parse_macro_input!(item as syn::Item);
+
+    let settings = syn::parse_macro_input!(attr as Settings);
+
+    item_handle(&mut parsed, settings);
+
+    let debug_tokens = parsed.into_token_stream().to_string();
+    let error_tokens = quote! {
+        compile_error!(#debug_tokens);
+    };
+    error_tokens.into()
+}
