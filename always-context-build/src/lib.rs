@@ -7,6 +7,9 @@ use proc_macro2::{LineColumn, TokenStream};
 use quote::ToTokens;
 use syn::{Meta, PathArguments, Type, spanned::Spanned};
 
+mod options;
+pub use options::*;
+
 #[derive(Debug, Default)]
 struct FileUpdates {
     ///Where to add `#[always_context]`
@@ -66,14 +69,17 @@ fn supported_result_check_test() {
 
 fn has_always_context(attrs: &[syn::Attribute]) -> bool {
     for attr in attrs {
-        if let Meta::Path(path) = &attr.meta {
-            let path_str = path
-                .to_token_stream()
-                .to_string()
-                .replace(|c: char| c.is_whitespace(), "");
-            if let "always_context" | "always_context::always_context" = path_str.as_str() {
-                return true;
-            }
+        let path = match &attr.meta {
+            Meta::Path(path) => path,
+            Meta::List(meta_list) => &meta_list.path,
+            _ => continue,
+        };
+        let path_str = path
+            .to_token_stream()
+            .to_string()
+            .replace(|c: char| c.is_whitespace(), "");
+        if let "always_context" | "always_context::always_context" = path_str.as_str() {
+            return true;
         }
     }
     false
@@ -220,7 +226,7 @@ fn line_pos(haystack: &str, line: usize) -> anyhow::Result<usize> {
 /// Calls handle_item on each item.
 /// if any file need annotation `#[always_context]` it will be added to the file.
 #[always_context]
-fn handle_file(file_path: impl AsRef<Path>) -> anyhow::Result<()> {
+fn handle_file(file_path: impl AsRef<Path>, options: &BuildOptions) -> anyhow::Result<()> {
     let file_path = file_path.as_ref();
     // Check if the file is a rust file
     match file_path.extension() {
@@ -255,6 +261,33 @@ fn handle_file(file_path: impl AsRef<Path>) -> anyhow::Result<()> {
         updates.sort_by(|a, b| a.line.cmp(&b.line));
         updates.reverse();
 
+        // Detect the line ending style from the file contents
+        let line_ending = if contents.contains("\r\n") {
+            "\r\n"
+        } else if contents.contains('\n') {
+            "\n"
+        } else if contents.contains('\r') {
+            "\r"
+        } else {
+            // Default to system line ending if none found
+            #[cfg(target_os = "windows")]
+            {
+                "\r\n"
+            }
+            #[cfg(not(target_os = "windows"))]
+            {
+                "\n"
+            }
+        };
+
+        // Generate the attribute string with options
+        let attribute_options = options.generate_attribute_options();
+        let attribute_str = if attribute_options.is_empty() {
+            format!("#[always_context]{}", line_ending)
+        } else {
+            format!("#[always_context({attribute_options})]{}", line_ending)
+        };
+
         //Uses span position info to add #[always_context] to every item on the list
         for start_pos in updates.into_iter() {
             //1 indexed
@@ -262,7 +295,7 @@ fn handle_file(file_path: impl AsRef<Path>) -> anyhow::Result<()> {
             //Find position based on line
             let line_bytes_end = line_pos(&contents, line - 1)?;
 
-            contents.insert_str(line_bytes_end, "#[always_context]\r\n");
+            contents.insert_str(line_bytes_end, &attribute_str);
         }
 
         let mut file = std::fs::File::create(file_path).unwrap();
@@ -277,6 +310,7 @@ fn handle_dir(
     dir: impl AsRef<Path>,
     ignore_list: &[regex::Regex],
     base_path_len_bytes: usize,
+    options: &BuildOptions,
 ) -> anyhow::Result<()> {
     // Get all files in the src directory
     let files = std::fs::read_dir(dir.as_ref())?;
@@ -300,10 +334,10 @@ fn handle_dir(
 
         let file_type = entry.file_type()?;
         if file_type.is_file() {
-            handle_file(&entry_path)?;
+            handle_file(&entry_path, options)?;
         } else if file_type.is_dir() {
             // If the file is a directory, call this function recursively
-            handle_dir(&entry_path, ignore_list, base_path_len_bytes)?;
+            handle_dir(&entry_path, ignore_list, base_path_len_bytes, options)?;
         }
     }
 
@@ -320,16 +354,7 @@ fn handle_dir(
 /// `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
 ///
 pub fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
-    // Get the current directory
-    let current_dir = std::env::current_dir()?;
-
-    let base_path_len_bytes = current_dir.display().to_string().len();
-    // Get the src directory
-    let src_dir = current_dir.join("src");
-
-    handle_dir(&src_dir, ignore_list, base_path_len_bytes)?;
-
-    Ok(())
+    build_with_options_result(ignore_list, BuildOptions::default())
 }
 
 #[always_context]
@@ -344,18 +369,7 @@ pub fn build_result(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
 /// `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
 ///
 pub fn build_result_tauri(ignore_list: &[regex::Regex]) -> anyhow::Result<()> {
-    // Get the current directory
-    let mut current_dir = std::env::current_dir()?;
-    //For some reason build script (in tauri projects) is called inside of non existing folder "tauri-src"
-    current_dir.pop();
-
-    let base_path_len_bytes = current_dir.display().to_string().len();
-    // Get the src directory
-    let src_dir = current_dir.join("src-tauri/src");
-
-    handle_dir(&src_dir, ignore_list, base_path_len_bytes)?;
-
-    Ok(())
+    build_with_options_tauri_result(ignore_list, BuildOptions::default())
 }
 
 /// Build function that adds `#[always_context]` attribute to every function with `anyhow::Result` return type and every `trait` and `impl` block.
@@ -388,6 +402,97 @@ pub fn build(ignore_list: &[regex::Regex]) {
 ///
 pub fn build_tauri(ignore_list: &[regex::Regex]) {
     if let Err(err) = build_result_tauri(ignore_list) {
+        panic!("Always Context Build Error: {err:?}");
+    }
+}
+
+/// Build function that adds `#[always_context]` attribute to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// # Arguments
+///
+/// * `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+/// * `options` - Build options that configure the generated `#[always_context]` attributes
+///
+pub fn build_with_options_result(
+    ignore_list: &[regex::Regex],
+    options: BuildOptions,
+) -> anyhow::Result<()> {
+    // Get the current directory
+    let current_dir = std::env::current_dir()?;
+
+    let base_path_len_bytes = current_dir.display().to_string().len();
+    // Get the src directory
+    let src_dir = current_dir.join("src");
+
+    handle_dir(&src_dir, ignore_list, base_path_len_bytes, &options)?;
+
+    Ok(())
+}
+
+#[always_context]
+/// Build function that adds `#[always_context]` attribute with custom options to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// Use this function inside of Tauri projects.
+///
+/// # Arguments
+///
+/// * `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+/// * `options` - Build options that configure the generated `#[always_context]` attributes
+///
+pub fn build_with_options_tauri_result(
+    ignore_list: &[regex::Regex],
+    options: BuildOptions,
+) -> anyhow::Result<()> {
+    // Get the current directory
+    let mut current_dir = std::env::current_dir()?;
+    //For some reason build script (in tauri projects) is called inside of non existing folder "tauri-src"
+    current_dir.pop();
+
+    let base_path_len_bytes = current_dir.display().to_string().len();
+    // Get the src directory
+    let src_dir = current_dir.join("src-tauri/src");
+
+    handle_dir(&src_dir, ignore_list, base_path_len_bytes, &options)?;
+
+    Ok(())
+}
+
+/// Build function that adds `#[always_context]` attribute with custom options to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// Panics on error. Use `build_with_options_result()` for error handling.
+///
+/// # Arguments
+///
+/// * `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+/// * `options` - Build options that configure the generated `#[always_context]` attributes
+///
+pub fn build_with_options(ignore_list: &[regex::Regex], options: BuildOptions) {
+    if let Err(err) = build_with_options_result(ignore_list, options) {
+        panic!("Always Context Build Error: {err:?}");
+    }
+}
+
+/// Build function that adds `#[always_context]` attribute with custom options to every function with `anyhow::Result` return type and every `trait` and `impl` block.
+///
+/// To every rust file in `src` directory.
+///
+/// Panics on error. Use `build_with_options_tauri_result()` for error handling.
+///
+/// Use this function inside of Tauri projects.
+///
+/// # Arguments
+///
+/// * `ignore_list` - A list of regex patterns to ignore. The patterns are used on the file path. Path is ignored if match found.
+/// * `options` - Build options that configure the generated `#[always_context]` attributes
+///
+pub fn build_with_options_tauri(ignore_list: &[regex::Regex], options: BuildOptions) {
+    if let Err(err) = build_with_options_tauri_result(ignore_list, options) {
         panic!("Always Context Build Error: {err:?}");
     }
 }

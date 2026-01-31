@@ -1,5 +1,7 @@
 mod context_gen;
 mod search;
+mod settings;
+use settings::Settings;
 
 use helpers::find_crate_list;
 use proc_macro::TokenStream;
@@ -35,6 +37,13 @@ fn context_crate() -> proc_macro2::TokenStream {
 ///
 /// # Control Attributes
 ///
+/// ## Macro-level
+/// - Skip
+///     - `easy_sql` or `es` - Skips requiring context for query! macros
+///     - `skip_macros` or `!` - Skips requiring context for macros entirely
+///      
+/// Examples: `#[always_context(skip(!))]`, `#[always_context(skip(macros, easy_sql))]`, `#[always_context(skip(!, es))]`
+///
 /// ## Function-level
 /// - `#[no_context]` - Disable context generation entirely
 /// - `#[no_context_inputs]` - Add context but exclude function arguments  
@@ -45,19 +54,18 @@ fn context_crate() -> proc_macro2::TokenStream {
 /// - `#[context(.method())]` - Call method on argument before displaying
 /// - `#[context(tokens)]` - Format as token stream (equivalent to `display` + `.to_token_stream()`)
 /// - `#[context(tokens_vec)]` - Format as token stream collection
-/// - `#[context(not_sql)]` - Use on `sql!` and `query!` macros if not part of `easy_sql` (requires `easy-sql` feature)
 /// - `#[context(ignore)]` or `#[context(ignored)]` or `#[context(no)]` - Exclude this argument from context
 ///
 /// # Limitations
 ///
 /// These expressions before `?` require manual `.with_context()` or `.context()`:
 /// blocks, control flow (`if`/`match`/`while`/`for`/`loop`), field access, macros.
-pub fn always_context(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn always_context(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut parsed = syn::parse_macro_input!(item as syn::Item);
-    //Adds .with_context(context!()) before all '?' without them
-    //Maybe add also function inputs with names into context?
 
-    item_handle(&mut parsed, None);
+    let settings = syn::parse_macro_input!(attr as Settings);
+
+    item_handle(&mut parsed, settings);
 
     parsed.into_token_stream().into()
 }

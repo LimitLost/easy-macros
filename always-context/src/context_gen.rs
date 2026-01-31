@@ -7,7 +7,7 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{Expr, Macro, punctuated::Punctuated, spanned::Spanned};
 
-use crate::context_crate;
+use crate::{Settings, context_crate};
 
 fn context_base(
     expr: Box<syn::Expr>,
@@ -70,6 +70,8 @@ struct FoundContextInfo {
 
     //Is any context provided? (either `.with_context` or `.context` or `.for_user` or `.with_for_user` function used)
     with_context: bool,
+
+    settings: Settings,
     // func_str: Option<String>,
 }
 
@@ -265,6 +267,23 @@ fn context_macro_handle(_macro: &mut syn::ExprMacro, context_info: &mut FoundCon
         //Context was provided by hand by the user :)
         return;
     }
+
+    #[cfg(feature = "easy-sql")]
+    if context_info.settings.easy_sql
+        && _macro
+            .mac
+            .path
+            .segments
+            .last()
+            .is_some_and(|s| s.ident == "query")
+    {
+        //Skip easy_sql query! macro
+        return;
+    }
+    if context_info.settings.skip_macros {
+        //Skip all macros
+        return;
+    }
     context_info
         .current_errors
         .push("Always Context Macro: ExprMacro right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
@@ -283,12 +302,17 @@ fn context_path_handle(_path: &mut syn::ExprPath, context_info: &mut FoundContex
         .push("Always Context Macro: ExprPath right before '?' is not supported, use `.context` or `.with_context` or `.for_user` or `.with_for_user`\r\n(If you have already used #[no_context] or #[no_context_inputs] ignore this error, this is a little bit buggy but will compile successfully)".to_string());
 }
 
-pub fn context(mut expr: Box<syn::Expr>, question_span: proc_macro2::Span) -> Box<syn::Expr> {
+pub fn context(
+    mut expr: Box<syn::Expr>,
+    question_span: proc_macro2::Span,
+    settings: Settings,
+) -> Box<syn::Expr> {
     let mut found_context_info = FoundContextInfo {
         call_found: None,
         current_errors: vec![],
         inputs_found: vec![],
         with_context: false,
+        settings,
         // func_str: None,
     };
 

@@ -2,7 +2,10 @@ use all_syntax_cases::all_syntax_cases;
 use quote::ToTokens;
 use syn::{ItemImpl, ItemTrait, PathArguments, TraitItem, Type, spanned::Spanned};
 
-use crate::context_gen::{context, context_no_func_input};
+use crate::{
+    Settings,
+    context_gen::{context, context_no_func_input},
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum NoContext {
@@ -14,6 +17,11 @@ pub enum NoContext {
     NoFuncInput,
     ///#[enable_context] attribute
     EnableBack,
+}
+#[derive(Debug, Clone, Copy)]
+struct SyntaxCasesData {
+    settings: Settings,
+    no_context: Option<NoContext>,
 }
 
 fn always_context_attr_check(attrs: &mut Vec<syn::Attribute>) -> Option<NoContext> {
@@ -37,26 +45,32 @@ fn always_context_attr_check(attrs: &mut Vec<syn::Attribute>) -> Option<NoContex
 all_syntax_cases! {
     setup => {
         generated_fn_prefix: "always_context",
-        additional_input_type: Option<NoContext>
+        additional_input_type: SyntaxCasesData,
     }
     default_cases => {
-        fn handle_attributes(attrs: &mut Vec<syn::Attribute>, no_context: &mut Option<NoContext>);
+        fn handle_attributes(attrs: &mut Vec<syn::Attribute>, data: &mut SyntaxCasesData);
     }
     special_cases => {
-        fn always_context_try(expr_try: &mut syn::ExprTry, no_context: Option<NoContext>);
-        fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>);
-        fn always_context_item_trait(item_trait: &mut ItemTrait, no_context: Option<NoContext>);
-        fn always_context_item_impl(item_impl: &mut ItemImpl, no_context: Option<NoContext>);
+        fn always_context_try(expr_try: &mut syn::ExprTry, data: SyntaxCasesData);
+        fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>, data: &mut SyntaxCasesData);
+        fn always_context_item_trait(item_trait: &mut ItemTrait, data: SyntaxCasesData);
+        fn always_context_item_impl(item_impl: &mut ItemImpl, data: SyntaxCasesData);
     }
 }
 
-fn handle_attributes(attrs: &mut Vec<syn::Attribute>, no_context: &mut Option<NoContext>) {
+fn handle_attributes(attrs: &mut Vec<syn::Attribute>, data: &mut SyntaxCasesData) {
     if let Some(no_c) = always_context_attr_check(attrs) {
-        *no_context = Some(no_c);
+        data.no_context = Some(no_c);
     }
 }
 
-fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>) {
+/// Note: `data` is taken as `&SyntaxCasesData` (immutable reference) because this function only reads from it
+/// and creates a new `SyntaxCasesData` for recursive calls, unlike other handlers that may mutate the input.
+fn always_context_macro(
+    macro_: &mut syn::Macro,
+    attrs: &mut Vec<syn::Attribute>,
+    data: &SyntaxCasesData,
+) {
     //Enable only if we have #[enable_context], support only for stmts (statements)
     let mut no_context = NoContext::All;
     if let Some(no_c) = always_context_attr_check(attrs) {
@@ -78,15 +92,20 @@ fn always_context_macro(macro_: &mut syn::Macro, attrs: &mut Vec<syn::Attribute>
         }
     };
 
-    always_context_stmt_handle(&mut parsed, Some(no_context));
+    let new_data = SyntaxCasesData {
+        settings: data.settings,
+        no_context: Some(no_context),
+    };
+
+    always_context_stmt_handle(&mut parsed, new_data);
 
     macro_.tokens = parsed.into_token_stream();
 }
 
-fn always_context_try(expr: &mut syn::ExprTry, mut no_context: Option<NoContext>) {
-    handle_attributes(&mut expr.attrs, &mut no_context);
+fn always_context_try(expr: &mut syn::ExprTry, mut data: SyntaxCasesData) {
+    handle_attributes(&mut expr.attrs, &mut data);
 
-    match no_context {
+    match data.no_context {
         Some(NoContext::All) => {
             //No context, don't do anything
         }
@@ -101,7 +120,7 @@ fn always_context_try(expr: &mut syn::ExprTry, mut no_context: Option<NoContext>
             //Put all info available into context
 
             replace_with::replace_with_or_abort(&mut expr.expr, |ex| {
-                context(ex, expr.question_token.span())
+                context(ex, expr.question_token.span(), data.settings)
             });
         }
     }
@@ -135,7 +154,7 @@ fn supported_result_check(ty: &Type) -> bool {
     false
 }
 
-fn always_context_item_trait(item_trait: &mut ItemTrait, mut no_context: Option<NoContext>) {
+fn always_context_item_trait(item_trait: &mut ItemTrait, mut data: SyntaxCasesData) {
     let ItemTrait {
         attrs,
         vis: _,
@@ -151,7 +170,7 @@ fn always_context_item_trait(item_trait: &mut ItemTrait, mut no_context: Option<
         items,
     } = item_trait;
 
-    handle_attributes(attrs, &mut no_context);
+    handle_attributes(attrs, &mut data);
 
     for item in items.iter_mut() {
         if let TraitItem::Fn(f) = item
@@ -167,18 +186,18 @@ fn always_context_item_trait(item_trait: &mut ItemTrait, mut no_context: Option<
                         continue;
                     }
                     //Attr check
-                    let mut no_context = no_context;
-                    handle_attributes(&mut f.attrs, &mut no_context);
+                    let mut data = data;
+                    handle_attributes(&mut f.attrs, &mut data);
 
                     //Add context to block
-                    always_context_block_handle(block, no_context);
+                    always_context_block_handle(block, data);
                 }
             }
         }
     }
 }
 
-fn always_context_item_impl(item_impl: &mut ItemImpl, mut no_context: Option<NoContext>) {
+fn always_context_item_impl(item_impl: &mut ItemImpl, mut data: SyntaxCasesData) {
     let ItemImpl {
         attrs,
         defaultness: _,
@@ -191,7 +210,7 @@ fn always_context_item_impl(item_impl: &mut ItemImpl, mut no_context: Option<NoC
         items,
     } = item_impl;
 
-    handle_attributes(attrs, &mut no_context);
+    handle_attributes(attrs, &mut data);
 
     for item in items.iter_mut() {
         if let syn::ImplItem::Fn(m) = item {
@@ -205,17 +224,23 @@ fn always_context_item_impl(item_impl: &mut ItemImpl, mut no_context: Option<NoC
                         continue;
                     }
                     //Attr check
-                    let mut no_context = no_context;
-                    handle_attributes(&mut m.attrs, &mut no_context);
+                    let mut data = data;
+                    handle_attributes(&mut m.attrs, &mut data);
 
                     //Add context to block
-                    always_context_block_handle(&mut m.block, no_context);
+                    always_context_block_handle(&mut m.block, data);
                 }
             }
         }
     }
 }
 
-pub fn item_handle(item: &mut syn::Item, no_context: Option<NoContext>) {
-    always_context_item_handle(item, no_context);
+pub fn item_handle(item: &mut syn::Item, settings: Settings) {
+    always_context_item_handle(
+        item,
+        SyntaxCasesData {
+            settings,
+            no_context: None,
+        },
+    );
 }
