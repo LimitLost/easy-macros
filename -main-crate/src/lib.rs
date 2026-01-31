@@ -8,6 +8,9 @@ pub use all_syntax_cases::*;
 #[cfg(feature = "always-context")]
 pub use always_context::*;
 
+#[cfg(feature = "add-code")]
+pub use add_code::*;
+
 #[cfg(feature = "build")]
 pub use always_context_build;
 

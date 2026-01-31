@@ -54,6 +54,7 @@ run_test "readable-token-stream"
 run_test "find-crate"
 run_test "token-stream-consistent"
 run_test "parse-macro-input"
+run_test "add-code"
 
 run_test "general"
 run_test "build"

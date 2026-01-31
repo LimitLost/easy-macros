@@ -11,6 +11,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Define all crates with their directories and package names
 declare -A CRATES
 CRATES["-main-crate"]="easy-macros"
+CRATES["add-code"]="easy-macros-add-code"
 CRATES["all-syntax-cases"]="easy-macros-all-syntax-cases"
 CRATES["all-syntax-cases-helpers"]="easy-macros-all-syntax-cases-helpers"
 CRATES["always-context"]="easy-macros-always-context"

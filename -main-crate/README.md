@@ -15,6 +15,7 @@ Automatic error context for any Rust project + powerful procedural macro utiliti
   - [3. Exhaustive AST Traversal](#3-exhaustive-ast-traversal)
   - [4. Helper Utilities](#4-helper-utilities)
   - [5. Result Type for Proc Macros](#5-result-type-for-proc-macros)
+  - [6. Add Code - Make (Docify) Examples minimal](#6-add-code---make-docify-examples-minimal)
 - [Feature Flags](#feature-flags)
 
 ## Quick Start
@@ -211,18 +212,47 @@ fn derive_my_trait(input: TokenStream) -> anyhow::Result<TokenStream> {
 // Errors convert to compile_error! automatically
 ```
 
+### 6. Add Code - Make (Docify) Examples minimal
+
+**Feature flag**: `add-code` (included in `full`)
+
+Use `#[add_code]` to inject setup/teardown or assertions around a function while keeping
+[docify](https://crates.io/crates/docify)-generated examples clean and minimal.
+
+```rust
+use easy_macros::add_code;
+
+#[add_code(before = { let _guard = setup(); })]
+fn example() {
+  // This stays minimal for docify examples.
+  do_work();
+}
+
+// The code inside the braces is inserted without the braces.
+#[add_code(after = {
+  assert!(is_valid());
+  Ok(())
+})]
+fn with_return() -> Result<(), Error> {
+  do_more_work();
+}
+
+#[add_code(before = { let _guard = setup(); }, after = { teardown(); })]
+fn both() {
+  do_another_work();
+}
+```
+
 ## Feature Flags
 
 ### Feature Groups
 
 - **`general`** - Automatic error context for any project
-
   - Includes: `always-context`, `context`
   - Use when you only need automatic error context, not proc-macro development tools
 
 - **`full`** - Complete toolkit for proc-macro development
-
-  - Includes: `all-syntax-cases`, `always-context`, `attributes`, `anyhow-result`, and all helpers
+  - Includes: `all-syntax-cases`, `always-context`, `attributes`, `anyhow-result`, `add-code`, and all helpers
   - Use when building procedural macros or need the full feature set
 
 - **`build`** - Build-time macro that auto-adds `#[always_context]` to all functions returning `anyhow::Result`
@@ -237,6 +267,7 @@ fn derive_my_trait(input: TokenStream) -> anyhow::Result<TokenStream> {
 - **`always-context`** - `#[always_context]` attribute for automatic error context
 - **`attributes`** - Attribute pattern matching macros (`has_attributes!`, `get_attributes!`, etc.)
 - **`anyhow-result`** - `#[anyhow_result]` for using `anyhow::Result<TokenStream>` in proc-macros
+- **`add-code`** - `#[add_code]` for injecting code before/after function bodies
 
 **Helper Utilities** (granular control):
 
