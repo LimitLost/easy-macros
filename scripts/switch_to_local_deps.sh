@@ -65,6 +65,7 @@ replace_versions_with_paths() {
         ["easy-macros-context-internal"]="context-internal"
         ["easy-macros-helpers"]="helpers"
         ["easy-macros-proc-macro-tests"]="proc_macro_tests"
+        ["easy-macros-add-code"]="add-code"
     )
     
     local changes_made=0
