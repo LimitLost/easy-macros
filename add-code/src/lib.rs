@@ -1,7 +1,10 @@
 use anyhow::bail;
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse::Parse, parse::ParseStream, parse_quote, Block, Ident, Token};
+use quote::ToTokens;
+use syn::{
+    Block, Ident, Token,
+    parse::{Parse, ParseStream},
+};
 
 #[derive(Default)]
 struct AddCodeArgs {
@@ -51,30 +54,27 @@ impl Parse for AddCodeArgs {
     }
 }
 
-fn inject_into_block(block: &mut Block, args: &AddCodeArgs) {
-    if let Some(before) = &args.before {
-        let mut before_stmts = before.clone();
-        block.stmts.splice(0..0, before_stmts.drain(..));
+fn inject_into_block(block: &mut Block, args: AddCodeArgs) {
+    if let Some(before) = args.before {
+        block.stmts.splice(0..0, before);
     }
 
-    if let Some(after) = &args.after {
-        let tail_expr = match block.stmts.last() {
-            Some(syn::Stmt::Expr(expr, None)) => Some(expr.clone()),
-            _ => None,
-        };
-
-        if let Some(expr) = tail_expr {
-            block.stmts.pop();
-            block
-                .stmts
-                .push(parse_quote! { let __add_code_result = { #expr }; });
-            block.stmts.extend(after.clone());
-            let tail_expr: syn::Expr = parse_quote! { __add_code_result };
-            block.stmts.push(syn::Stmt::Expr(tail_expr, None));
-        } else {
-            block.stmts.extend(after.clone());
-        }
+    if let Some(after) = args.after {
+        block.stmts.extend(after);
     }
+}
+
+fn add_code_base(attr: TokenStream, item: TokenStream) -> anyhow::Result<TokenStream> {
+    let args = helpers::parse_macro_input!(attr as AddCodeArgs);
+
+    let item_ts: proc_macro2::TokenStream = item.clone().into();
+
+    if let Ok(mut item_fn) = syn::parse2::<syn::ImplItemFn>(item_ts) {
+        inject_into_block(&mut item_fn.block, args);
+        return Ok(item_fn.to_token_stream().into());
+    }
+
+    bail!("#[add_code] can only be used on functions or impl methods");
 }
 
 #[proc_macro_attribute]
@@ -94,19 +94,11 @@ fn inject_into_block(block: &mut Block, args: &AddCodeArgs) {
 ///
 /// The statements inside the braces are inserted without the outer `{}`.
 pub fn add_code(attr: TokenStream, item: TokenStream) -> anyhow::Result<TokenStream> {
-    let args = helpers::parse_macro_input!(attr as AddCodeArgs);
-
-    let item_ts: proc_macro2::TokenStream = item.clone().into();
-
-    if let Ok(mut item_fn) = syn::parse2::<syn::ItemFn>(item_ts.clone()) {
-        inject_into_block(&mut item_fn.block, &args);
-        return Ok(quote! { #item_fn }.into());
-    }
-
-    if let Ok(mut impl_fn) = syn::parse2::<syn::ImplItemFn>(item_ts) {
-        inject_into_block(&mut impl_fn.block, &args);
-        return Ok(quote! { #impl_fn }.into());
-    }
-
-    bail!("#[add_code] can only be used on functions or impl methods");
+    add_code_base(attr, item)
+}
+#[proc_macro_attribute]
+#[anyhow_result::anyhow_result]
+#[doc(hidden)]
+pub fn add_code_debug(attr: TokenStream, item: TokenStream) -> anyhow::Result<TokenStream> {
+    panic!("{}", add_code_base(attr, item)?)
 }

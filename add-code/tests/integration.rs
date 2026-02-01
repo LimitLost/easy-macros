@@ -1,4 +1,4 @@
-use easy_macros_add_code::add_code;
+use easy_macros_add_code::{add_code};
 
 #[add_code(before = { events.push("setup"); })]
 fn example_body_only(events: &mut Vec<&'static str>) {
@@ -6,10 +6,12 @@ fn example_body_only(events: &mut Vec<&'static str>) {
     events.push("example");
 }
 
-#[add_code(after = { events.push("teardown"); })]
+#[add_code(after = { 
+    events.push("teardown"); 
+    42
+})]
 fn after_with_return(events: &mut Vec<&'static str>) -> usize {
     events.push("example");
-    42
 }
 
 #[add_code(
@@ -48,4 +50,25 @@ fn injects_ok_end_for_docify_style() -> Result<(), ()> {
     let mut events = Vec::new();
     example_body_only(&mut events);
     assert_eq!(events, vec!["setup", "example"]);
+}
+#[add_code(after = { Ok(()) })]
+fn injects_after_loop_block(events: &mut Vec<&'static str>) -> Result<(), ()> {
+    for _ in 0..1 {
+        events.push("Block");
+    }
+}
+
+#[add_code(before = { let i = 5; })]
+fn injects_before_block(events: &mut Vec<&'static str>) {
+    for _ in i..6 {
+        events.push("Will happen once");
+    }
+}
+#[test]
+fn injects_block_tests() {
+    let mut events = Vec::new();
+    injects_after_loop_block(&mut events).unwrap();
+    assert_eq!(events, vec!["Block"]);
+    injects_before_block(&mut events);
+    assert_eq!(events.len(), 2);
 }
