@@ -72,23 +72,30 @@ attributes = ["dep:attributes","context"]
 anyhow-result = ["dep:anyhow-result"]
 add-code = ["dep:add-code"]
 
-helpers-dont-use-directly-this-feature = ["dep:helpers"]
+_helpers = ["dep:helpers"]
 
 # Helpers features (granular)
-context = ["helpers-dont-use-directly-this-feature", "helpers/context"]
-indexed-name = ["helpers-dont-use-directly-this-feature", "helpers/indexed-name"]
-tokens-builder = ["helpers-dont-use-directly-this-feature", "helpers/tokens-builder"]
-expr-error-wrap = ["helpers-dont-use-directly-this-feature", "helpers/expr-error-wrap"]
-readable-token-stream = ["helpers-dont-use-directly-this-feature", "helpers/readable-token-stream"]
-find-crate = ["helpers-dont-use-directly-this-feature", "helpers/find-crate"]
-token-stream-consistent = ["helpers-dont-use-directly-this-feature", "helpers/token-stream-consistent"]
-parse-macro-input = ["helpers-dont-use-directly-this-feature", "helpers/parse-macro-input"]
+context = ["_helpers", "helpers/context"]
+indexed-name = ["_helpers", "helpers/indexed-name"]
+tokens-builder = ["_helpers", "helpers/tokens-builder"]
+expr-error-wrap = ["_helpers", "helpers/expr-error-wrap"]
+readable-token-stream = ["_helpers", "helpers/readable-token-stream"]
+find-crate = ["_helpers", "helpers/find-crate"]
+token-stream-consistent = ["_helpers", "helpers/token-stream-consistent"]
+parse-macro-input = ["_helpers", "helpers/parse-macro-input"]
 
 # Integration features
 easy-sql = ["always-context?/easy-sql", "attributes?/easy-sql"]
 
-generate-readme = []
+_generate-readme = []
+
+# Render documentation that wouldn't otherwise be shown
+_unstable-docs = [
+    "full",
+    "build",
+]
 
 # Note: written so that it may be copy-pasted to other crates
 [package.metadata.docs.rs]
+features = ["_unstable-docs"]
 rustdoc-args = ["--cfg", "docsrs"]

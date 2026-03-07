@@ -51,8 +51,12 @@ full = [
   "parse-macro-input",
 ]
 
-generate-readme = []
+_generate-readme = []
+
+# Render documentation that wouldn't otherwise be shown
+_unstable-docs = ["full"]
 
 # Note: written so that it may be copy-pasted to other crates
 [package.metadata.docs.rs]
+features = ["_unstable-docs"]
 rustdoc-args = ["--cfg", "docsrs"]

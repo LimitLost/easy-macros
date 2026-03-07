@@ -1,7 +1,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 // Compile README.docify.md to README.md
-#[cfg(feature = "generate-readme")]
+#[cfg(feature = "_generate-readme")]
 docify::compile_markdown!("README.docify.md", "README.md");
 
 #[cfg(feature = "all-syntax-cases")]
@@ -54,13 +54,13 @@ pub use anyhow_result::anyhow_result;
 
 #[cfg(feature = "attributes")]
 pub use attributes::{
-    fields_get_attributes, fields_with_attributes, get_attributes, has_attributes, AttrWithUnknown,
+    AttrWithUnknown, fields_get_attributes, fields_with_attributes, get_attributes, has_attributes,
 };
 
 // === Helper Function Exports ===
 
 /// Helper utilities for building procedural macros
-#[cfg(feature = "helpers-dont-use-directly-this-feature")]
+#[cfg(feature = "_helpers")]
 pub use helpers::*;
 
 #[cfg(test)]
