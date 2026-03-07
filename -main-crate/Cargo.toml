@@ -89,3 +89,7 @@ parse-macro-input = ["helpers-dont-use-directly-this-feature", "helpers/parse-ma
 easy-sql = ["always-context?/easy-sql", "attributes?/easy-sql"]
 
 generate-readme = []
+
+# Note: written so that it may be copy-pasted to other crates
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]

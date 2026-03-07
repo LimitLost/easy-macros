@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! Use `full` feature to enable all available functionality.
 //!
 //! ### General Use (not only for macros)

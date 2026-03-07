@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 // Compile README.docify.md to README.md
 #[cfg(feature = "generate-readme")]
 docify::compile_markdown!("README.docify.md", "README.md");
@@ -52,7 +54,7 @@ pub use anyhow_result::anyhow_result;
 
 #[cfg(feature = "attributes")]
 pub use attributes::{
-    AttrWithUnknown, fields_get_attributes, fields_with_attributes, get_attributes, has_attributes,
+    fields_get_attributes, fields_with_attributes, get_attributes, has_attributes, AttrWithUnknown,
 };
 
 // === Helper Function Exports ===
