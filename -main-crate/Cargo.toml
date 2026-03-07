@@ -1,6 +1,6 @@
 [package]
 name = "easy-macros"
-version = "1.1.1"
+version = "1.1.2"
 edition = "2024"
 license = "Apache-2.0"
 
@@ -15,7 +15,6 @@ keywords = ["procedural-macros", "proc-macro", "macros", "utilities", "helpers"]
 categories = ["development-tools::procedural-macro-helpers", "rust-patterns"]
 
 [dependencies]
-# Hover and click on the version number to see their documentation
 
 # Procedural macros
 all-syntax-cases = {package = "easy-macros-all-syntax-cases",version = "0.1.0", optional = true }
@@ -27,7 +26,7 @@ add-code = { package = "easy-macros-add-code", version = "1.0.1", optional = tru
 always-context-build = { package = "easy-macros-always-context-build", version = "0.2.0", optional = true }
 
 # Helpers for creating procedural macros
-helpers = { package = "easy-macros-helpers", version = "0.1.0", optional = true }
+helpers = { package = "easy-macros-helpers", version = "0.1.1", optional = true }
 
 docify = "0.4.1"
 
